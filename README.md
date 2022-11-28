@@ -1,5 +1,5 @@
 这个项目使用golang开发，用于执行andflow的流程设计结果json文件。
-
+<img src="./doc/arch.png"/>
 ## 执行步骤如下：
 ```
     //1. 注册一个通用的节点执行器
