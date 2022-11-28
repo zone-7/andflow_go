@@ -1,0 +1,185 @@
+{
+	"code": "",
+	"name": "",
+	"show_action_body": "true",
+	"show_action_content": "true",
+	"theme": "flow_theme_default",
+	"link_type": "Flowchart",
+	"params": [],
+	"actions": [
+		{
+			"id": "f7a6ec0031784f5a80d8633a6418fd52",
+			"left": "20px",
+			"top": "60px",
+			"name": "begin",
+			"theme": "action_theme_icon",
+			"params": {},
+			"title": "开始",
+			"icon": "begin.png",
+			"width": "111px",
+			"height": "78px",
+			"content": {
+				"content_type": "msg",
+				"content": "yes"
+			}
+		},
+		{
+			"id": "793a2a11cf8b40e9afd8bd8f04405e64",
+			"left": "200px",
+			"top": "60px",
+			"name": "script",
+			"theme": "action_theme_zone",
+			"params": {},
+			"title": "节点1",
+			"icon": "script.png",
+			"width": "120px",
+			"height": "80px"
+		},
+		{
+			"id": "f558687ca5f34a6c89732eb50749a15a",
+			"left": "1010px",
+			"top": "430px",
+			"name": "end",
+			"theme": "action_theme_icon",
+			"params": {},
+			"title": "结束",
+			"icon": "end.png",
+			"width": "120px",
+			"height": "80px"
+		},
+		{
+			"id": "b2ef076160624d36be7b9788bc3a4ee0",
+			"left": "450px",
+			"top": "60px",
+			"name": "script",
+			"params": {},
+			"title": "节点2",
+			"icon": "script.png",
+			"width": "120px",
+			"height": "80px"
+		},
+		{
+			"id": "f473ded0bbc44b248e67fc13ea56b442",
+			"left": "640px",
+			"top": "60px",
+			"name": "script",
+			"params": {},
+			"title": "节点3",
+			"icon": "script.png",
+			"width": "120px",
+			"height": "80px"
+		},
+		{
+			"id": "3fb77e0de75f4216aaa115eee518b38b",
+			"left": "200px",
+			"top": "430px",
+			"name": "script",
+			"params": {},
+			"title": "节点4",
+			"icon": "script.png",
+			"width": "120px",
+			"height": "80px",
+			"content": {
+				"content_type": "",
+				"content": ""
+			}
+		},
+		{
+			"id": "01f344aed1f243b09690027520d5b355",
+			"left": "640px",
+			"top": "430px",
+			"name": "fireware",
+			"params": {},
+			"title": "节点5",
+			"icon": "fireware.png",
+			"width": "120px",
+			"height": "80px"
+		},
+		{
+			"id": "1995b7f1a6c8482b9f4009aaad493b57",
+			"left": "1000px",
+			"top": "50px",
+			"name": "script",
+			"params": {},
+			"title": "节点6",
+			"icon": "script.png",
+			"width": "120px",
+			"height": "80px"
+		},
+		{
+			"id": "2cd3acd5374d4abd9d008567dbcb5a37",
+			"left": "780px",
+			"top": "240px",
+			"name": "script",
+			"params": {},
+			"title": "节点7",
+			"icon": "script.png",
+			"width": "120px",
+			"height": "80px"
+		},
+		{
+			"id": "eae12560e3db435abe580f451dd0ba11",
+			"left": "1000px",
+			"top": "240px",
+			"name": "script",
+			"params": {},
+			"title": "节点8",
+			"icon": "script.png",
+			"width": "120px",
+			"height": "80px"
+		}
+	],
+	"links": [
+		{
+			"source_id": "f7a6ec0031784f5a80d8633a6418fd52",
+			"target_id": "793a2a11cf8b40e9afd8bd8f04405e64"
+		},
+		{
+			"source_id": "01f344aed1f243b09690027520d5b355",
+			"target_id": "f558687ca5f34a6c89732eb50749a15a"
+		},
+		{
+			"source_id": "793a2a11cf8b40e9afd8bd8f04405e64",
+			"target_id": "b2ef076160624d36be7b9788bc3a4ee0"
+		},
+		{
+			"source_id": "793a2a11cf8b40e9afd8bd8f04405e64",
+			"target_id": "3fb77e0de75f4216aaa115eee518b38b"
+		},
+		{
+			"source_id": "b2ef076160624d36be7b9788bc3a4ee0",
+			"target_id": "f473ded0bbc44b248e67fc13ea56b442"
+		},
+		{
+			"source_id": "f473ded0bbc44b248e67fc13ea56b442",
+			"target_id": "01f344aed1f243b09690027520d5b355"
+		},
+		{
+			"source_id": "3fb77e0de75f4216aaa115eee518b38b",
+			"target_id": "01f344aed1f243b09690027520d5b355"
+		},
+		{
+			"source_id": "f473ded0bbc44b248e67fc13ea56b442",
+			"target_id": "1995b7f1a6c8482b9f4009aaad493b57"
+		},
+		{
+			"source_id": "f473ded0bbc44b248e67fc13ea56b442",
+			"target_id": "2cd3acd5374d4abd9d008567dbcb5a37"
+		},
+		{
+			"source_id": "1995b7f1a6c8482b9f4009aaad493b57",
+			"target_id": "eae12560e3db435abe580f451dd0ba11"
+		},
+		{
+			"source_id": "2cd3acd5374d4abd9d008567dbcb5a37",
+			"target_id": "eae12560e3db435abe580f451dd0ba11"
+		},
+		{
+			"source_id": "eae12560e3db435abe580f451dd0ba11",
+			"target_id": "f558687ca5f34a6c89732eb50749a15a"
+		}
+	],
+	"groups": [],
+	"lists": [],
+	"tips": []
+}

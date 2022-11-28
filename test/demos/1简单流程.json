@@ -1,0 +1,77 @@
+{
+	"code": "",
+	"name": "",
+	"show_action_body": "true",
+	"show_action_content": "true",
+	"theme": "flow_theme_default",
+	"link_type": "Flowchart",
+	"params": [],
+	"actions": [
+		{
+			"id": "f7a6ec0031784f5a80d8633a6418fd52",
+			"left": "77px",
+			"top": "101px",
+			"name": "begin",
+			"theme": "action_theme_icon",
+			"params": {},
+			"title": "开始",
+			"icon": "begin.png",
+			"width": "120px",
+			"height": "80px",
+			"content": {
+				"content_type": "msg",
+				"content": "yes"
+			}
+		},
+		{
+			"id": "793a2a11cf8b40e9afd8bd8f04405e64",
+			"left": "380px",
+			"top": "220px",
+			"name": "script",
+			"theme": "action_theme_zone",
+			"params": {},
+			"title": "执行脚本",
+			"icon": "script.png",
+			"width": "120px",
+			"height": "80px"
+		},
+		{
+			"id": "f558687ca5f34a6c89732eb50749a15a",
+			"left": "455px",
+			"top": "360px",
+			"name": "end",
+			"theme": "action_theme_icon",
+			"params": {},
+			"title": "结束",
+			"icon": "end.png",
+			"width": "120px",
+			"height": "80px"
+		}
+	],
+	"links": [
+		{
+			"source_id": "f7a6ec0031784f5a80d8633a6418fd52",
+			"target_id": "793a2a11cf8b40e9afd8bd8f04405e64"
+		},
+		{
+			"source_id": "793a2a11cf8b40e9afd8bd8f04405e64",
+			"target_id": "f558687ca5f34a6c89732eb50749a15a"
+		}
+	],
+	"groups": [
+		{
+			"id": "group1",
+			"title": "组",
+			"members": [
+				"793a2a11cf8b40e9afd8bd8f04405e64",
+				"f558687ca5f34a6c89732eb50749a15a"
+			],
+			"left": "370px",
+			"top": "190px",
+			"width": "217px",
+			"height": "307px"
+		}
+	],
+	"lists": [],
+	"tips": []
+}
