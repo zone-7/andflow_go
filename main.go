@@ -12,18 +12,13 @@ import (
 func main() {
 	file := flag.String("f", "", "流程json文件")
 	timeout := flag.Int64("t", 30000, "超时设置默认30s")
-	
 	//解析
 	flag.Parse()
-
 	if file == nil || len(*file) == 0 {
 		flag.Usage()
 		return
 	}
-	
-	flag.Parse()
-
-
+	//注册执行器
 	engine.RegistActionRunner("common", &actions.CommonActionRunner{})
 
 	param := make(map[string]interface{})
