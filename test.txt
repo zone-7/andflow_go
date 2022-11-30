@@ -1,0 +1,154 @@
+01
+
+andflow引擎
+
+
+
+      andflow_js可以实现在Html端设计流程，并将设计结果保存为json模型，andflow可以用于设计业务流程、数据处理流程、工作流、控制流等一切可流程化的过程。
+
+       由于golang具备高效、跨平台、并且还能够直接编译成可执行文件，这些优势让我们在第一个andflow引擎开发中优先选择golang。
+
+
+   
+02
+
+设计思路
+
+  andflow执行引擎的设计，主要考虑了以下几点思路：
+实现流程的异步执行并兼顾同步控制：更多采纳了golang chan 的特性，为所有节点和连接线创建执行队列，提高并行执行效率。
+支持开发人员自定义节点执行器：针对不同的节点类型，通过实现节点执行接口、注册自定义节点执行器。
+支持中断与继续执行：在非异常中断后只需要保留运行时信息，可以在下次继续从中断处继续执行。
+自带javaScript脚本引擎的通用节点执行器：基于js脚本引擎，实现在流程设计的节点中配置执行脚本。脚本可以在执行流程过程中被执行。
+
+
+
+第一个例子，很简单
+
+
+
+03
+
+一个例子
+
+
+
+例子主要执行流程，并在节点中实现
+json文件《4执行脚本.json》
+{
+  "code": "",
+  "name": "",
+  "show_action_body": "true",
+  "show_action_content": "true",
+  "theme": "flow_theme_default",
+  "link_type": "Flowchart",
+  "params": [],
+  "actions": [
+    {
+      "id": "f7a6ec0031784f5a80d8633a6418fd52",
+      "left": "30px",
+      "top": "90px",
+      "name": "begin",
+      "theme": "action_theme_icon",
+      "params": {},
+      "title": "开始",
+      "icon": "begin.png",
+      "width": "120px",
+      "height": "80px",
+      "content": {
+        "content_type": "msg",
+        "content": "yes"
+      }
+    },
+    {
+      "id": "f558687ca5f34a6c89732eb50749a15a",
+      "left": "700px",
+      "top": "170px",
+      "name": "end",
+      "theme": "action_theme_icon",
+      "params": {},
+      "title": "结束",
+      "icon": "end.png",
+      "width": "120px",
+      "height": "80px"
+    },
+    {
+      "id": "1c53b069bfd34d4da0ac0d74d8e539d5",
+      "left": "310px",
+      "top": "120px",
+      "name": "script",
+      "params": {},
+      "title": "执行脚本",
+      "icon": "script.png",
+      "width": "120px",
+      "height": "80px",
+      "content": {
+        "content": "如果name=='zgq'就继续，否则不继续"
+      },
+      "theme": "action_theme_default",
+      "once": "false",
+      "collect": "false",
+      "script": "var name = getParam(\"name\");print(\"hello \"+name);\n\nif(name==\"zgq\"){\nreturn 1;\n}else{\nreturn 0;\n}"
+    }
+  ],
+  "links": [
+    {
+      "source_id": "1c53b069bfd34d4da0ac0d74d8e539d5",
+      "target_id": "f558687ca5f34a6c89732eb50749a15a"
+    },
+    {
+      "source_id": "f7a6ec0031784f5a80d8633a6418fd52",
+      "target_id": "1c53b069bfd34d4da0ac0d74d8e539d5"
+    }
+  ],
+  "groups": [],
+  "lists": [],
+  "tips": []
+}
+ 
+
+golang代码
+
+ 
+
+import (
+"fmt"
+"io/ioutil"
+​
+​
+"github.com/zone-7/andflow_go/actions"
+"github.com/zone-7/andflow_go/engine"
+)
+​
+​
+func main() {
+file := "4执行脚本.json"
+​
+​
+engine.RegistActionRunner("common", &actions.CommonActionRunner{})
+​
+​
+param := make(map[string]interface{})
+​
+​
+data, _ := ioutil.ReadFile(file)
+​
+​
+flow, err := engine.ParseFlow(string(data))
+if err != nil {
+fmt.Println(err)
+return
+}
+​
+​
+runtime := engine.CreateRuntime(flow, param)
+​
+​
+runner := engine.CommonFlowRunner{}
+engine.Execute(runtime, &runner, 10000)
+​
+​
+fmt.Println("time used(ms):", runtime.Timeused)
+​
+​
+}
+​
