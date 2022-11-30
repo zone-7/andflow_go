@@ -12,7 +12,7 @@ import (
 func main() {
 	file := flag.String("f", "", "流程json文件")
 	timeout := flag.Int64("t", 30000, "超时设置默认30s")
-
+	
 	//解析
 	flag.Parse()
 
@@ -20,6 +20,9 @@ func main() {
 		flag.Usage()
 		return
 	}
+	
+	flag.Parse()
+
 
 	engine.RegistActionRunner("common", &actions.CommonActionRunner{})
 
@@ -33,10 +36,7 @@ func main() {
 		return
 	}
 
-	runtime := engine.CreateRuntime(flow, param)
-
-	runner := engine.CommonFlowRunner{}
-	engine.Execute(runtime, &runner, *timeout)
+	runtime := engine.ExecuteFlow(flow, param, *timeout)
 
 	fmt.Println("time used(ms):", runtime.Timeused)
 

@@ -13,7 +13,7 @@ type CommonActionRunner struct {
 
 func (a *CommonActionRunner) Execute(s *engine.Session, param *models.ActionParam) (int, error) {
 
-	action := s.Runtime.Flow.GetAction(param.ActionId)
+	action := s.GetFlow().GetAction(param.ActionId)
 
 	sc := action.Script
 	if len(strings.Trim(sc, " ")) == 0 {
@@ -21,7 +21,7 @@ func (a *CommonActionRunner) Execute(s *engine.Session, param *models.ActionPara
 	}
 
 	rts := goja.New()
-	rts.Set("flow", s.Runtime.Flow)
+	rts.Set("flow", s.GetFlow())
 	rts.Set("action", action)
 
 	engine.SetScriptFun(rts, s, param.PreActionId, param.ActionId, false)

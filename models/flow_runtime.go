@@ -163,33 +163,6 @@ func (a *ActionStateModel) GetDataMap() map[string]interface{} {
 	return res
 }
 
-func (a *RuntimeModel) CreateActionState(actionId string, preActionId string) *ActionStateModel {
-	if a.ActionStates == nil {
-		a.ActionStates = make([]*ActionStateModel, 0)
-	}
-	action := a.Flow.GetAction(actionId)
-
-	state := &ActionStateModel{}
-	state.ActionId = actionId
-	state.ActionDes = action.Des
-	state.ActionName = action.Name
-	state.ActionTitle = action.Title
-	state.ActionIcon = action.Icon
-	state.PreActionId = preActionId
-	content := &ActionContentModel{}
-
-	if action.Content != nil {
-		content_str := action.Content["content"]
-		content_type := action.Content["content_type"]
-		content.ContentType = content_type
-		content.Content = content_str
-	}
-	state.Content = content
-
-	state.BeginTime = time.Now()
-
-	return state
-}
 func (a *RuntimeModel) AddActionState(state *ActionStateModel) {
 	a.ActionStates = append(a.ActionStates, state)
 }
@@ -222,20 +195,6 @@ func (a *RuntimeModel) GetLastActionState(actionId string) *ActionStateModel {
 	return nil
 }
 
-func (a *RuntimeModel) CreateLinkState(sourceId string, targetId string) *LinkStateModel {
-	if a.LinkStates == nil {
-		a.LinkStates = make([]*LinkStateModel, 0)
-	}
-	link := a.Flow.GetLinkBySourceIdAndTargetId(sourceId, targetId)
-
-	state := &LinkStateModel{}
-	state.SourceActionId = link.SourceId
-	state.TargetActionId = link.TargetId
-
-	state.BeginTime = time.Now()
-
-	return state
-}
 func (a *RuntimeModel) AddLinkState(state *LinkStateModel) {
 	a.LinkStates = append(a.LinkStates, state)
 
@@ -389,7 +348,7 @@ func (a *RuntimeModel) GetActionData(actionId string, name string) interface{} {
 	}
 	return actionState.GetData(name)
 }
-func (a *RuntimeModel) GetActionDataMap(actionId string) interface{} {
+func (a *RuntimeModel) GetActionDataMap(actionId string) map[string]interface{} {
 	actionState := a.GetLastActionState(actionId)
 	if actionState == nil {
 		return nil
@@ -462,5 +421,4 @@ func (r *RuntimeModel) DelRunningAction(param *ActionParam) {
 			return
 		}
 	}
-
 }

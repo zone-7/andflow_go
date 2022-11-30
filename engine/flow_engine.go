@@ -15,11 +15,12 @@ import (
 var chan_len = 100
 
 type Session struct {
-	Id            string
-	Wg            sync.WaitGroup //同步控制
-	Cmd           int            //指令 1:停止,2.3.4..
-	Ctx           context.Context
-	Runtime       *models.RuntimeModel
+	Id  string
+	Wg  sync.WaitGroup //同步控制
+	Cmd int            //指令 1:停止,2.3.4..
+	Ctx context.Context
+	// Runtime       *models.RuntimeModel
+	Store         RuntimeStore
 	Runner        FlowRunner
 	ActionChanMap sync.Map //[string]chan *models.ActionParam
 	LinkChanMap   sync.Map //map[string]chan *models.LinkParam
@@ -72,15 +73,62 @@ func (s *Session) delLinkChan(sourceId string, targetId string) {
 
 }
 
+func (s *Session) GetFlow() *models.FlowModel {
+	flow := s.Store.GetFlow()
+	return flow
+}
+
+func (s *Session) createActionState(actionId string, preActionId string) *models.ActionStateModel {
+	flow := s.GetFlow()
+
+	action := flow.GetAction(actionId)
+
+	state := &models.ActionStateModel{}
+	state.ActionId = actionId
+	state.ActionDes = action.Des
+	state.ActionName = action.Name
+	state.ActionTitle = action.Title
+	state.ActionIcon = action.Icon
+	state.PreActionId = preActionId
+	content := &models.ActionContentModel{}
+
+	if action.Content != nil {
+		content_str := action.Content["content"]
+		content_type := action.Content["content_type"]
+		content.ContentType = content_type
+		content.Content = content_str
+	}
+	state.Content = content
+
+	state.BeginTime = time.Now()
+
+	return state
+}
+
+func (s *Session) createLinkState(sourceId string, targetId string) *models.LinkStateModel {
+	flow := s.GetFlow()
+	link := flow.GetLinkBySourceIdAndTargetId(sourceId, targetId)
+
+	state := &models.LinkStateModel{}
+	state.SourceActionId = link.SourceId
+	state.TargetActionId = link.TargetId
+
+	state.BeginTime = time.Now()
+
+	return state
+}
+
 func (s *Session) changeState() {
 
-	//如果没有什么待办事项就表示执行完了
-	if (s.Runtime.RunningActions == nil || len(s.Runtime.RunningActions) == 0) &&
-		(s.Runtime.RunningLinks == nil || len(s.Runtime.RunningLinks) == 0) {
-		s.Runtime.FlowState = 1
-		s.Runtime.EndTime = time.Now()
-		s.Runtime.Timeused = s.Runtime.EndTime.Sub(s.Runtime.BeginTime).Milliseconds()
-	}
+	// //如果没有什么待办事项就表示执行完了
+	// if (s.Runtime.RunningActions == nil || len(s.Runtime.RunningActions) == 0) &&
+	// 	(s.Runtime.RunningLinks == nil || len(s.Runtime.RunningLinks) == 0) {
+	// 	s.Runtime.FlowState = 1
+	// 	s.Runtime.EndTime = time.Now()
+	// 	s.Runtime.Timeused = s.Runtime.EndTime.Sub(s.Runtime.BeginTime).Milliseconds()
+	// }
+
+	s.Store.RefreshState()
 
 }
 
@@ -91,7 +139,8 @@ func (s *Session) watch() {
 		select {
 		case <-s.Ctx.Done():
 			s.Stop()
-			s.Runtime.AddLog("flow", "stop", "中断", "执行中断")
+			// s.Runtime.AddLog("flow", "stop", "中断", "执行中断")
+			s.Store.AddLog("flow", "stop", "中断", "执行中断")
 			fmt.Println("执行中断")
 			return
 		default:
@@ -103,7 +152,7 @@ func (s *Session) watch() {
 	}
 }
 
-func CreateSession(context context.Context, runtime *models.RuntimeModel, runner FlowRunner) *Session {
+func CreateSession(context context.Context, store RuntimeStore, runner FlowRunner) *Session {
 	session := &Session{}
 	uid, _ := uuid.NewV4()
 	id := strings.ReplaceAll(uid.String(), "-", "")
@@ -112,7 +161,7 @@ func CreateSession(context context.Context, runtime *models.RuntimeModel, runner
 	session.Ctx = context
 	session.Runner = runner
 
-	session.Runtime = runtime
+	session.Store = store
 	//actionid: RuntimeActionParam
 	session.ActionChanMap = sync.Map{}
 	//make(map[string]chan *models.ActionParam, 0)
@@ -121,7 +170,7 @@ func CreateSession(context context.Context, runtime *models.RuntimeModel, runner
 	session.LinkChanMap = sync.Map{}
 	//make(map[string]chan *models.LinkParam, 0)
 
-	flow := runtime.Flow
+	flow := session.GetFlow()
 
 	w_action := &sync.WaitGroup{}
 	for _, a := range flow.Actions {
@@ -147,25 +196,28 @@ func (s *Session) Execute() {
 
 	//是否全新执行
 	firstRun := true
+	runningActions := s.Store.GetRunningActions()
 
-	if s.Runtime.RunningActions != nil && len(s.Runtime.RunningActions) > 0 {
+	if runningActions != nil && len(runningActions) > 0 {
 		firstRun = false
-		for _, param := range s.Runtime.RunningActions {
+		for _, param := range runningActions {
 			s.toAction(param)
 		}
 	}
 
-	if s.Runtime.RunningLinks != nil && len(s.Runtime.RunningLinks) > 0 {
+	runningLinks := s.Store.GetRunningLinks()
+	if runningLinks != nil && len(runningLinks) > 0 {
 		firstRun = false
-		for _, param := range s.Runtime.RunningLinks {
+		for _, param := range runningLinks {
 			s.toLink(param)
 		}
 	}
 
 	if firstRun {
-		s.Runtime.BeginTime = time.Now()
 
-		startIds := s.Runtime.Flow.GetStartActionIds()
+		s.Store.SetBegin()
+
+		startIds := s.GetFlow().GetStartActionIds()
 		for _, actionId := range startIds {
 			param := &models.ActionParam{ActionId: actionId, PreActionId: ""}
 			s.toAction(param)
@@ -177,11 +229,12 @@ func (s *Session) Execute() {
 
 func (s *Session) Stop() {
 	s.Cmd = 1
+	flow := s.GetFlow()
 
-	for _, a := range s.Runtime.Flow.Actions {
+	for _, a := range flow.Actions {
 		s.stopProcessAction(a.Id)
 	}
-	for _, l := range s.Runtime.Flow.Links {
+	for _, l := range flow.Links {
 		s.stopProcessLink(l.SourceId, l.TargetId)
 	}
 
@@ -195,8 +248,9 @@ func (s *Session) WaitComplete() {
 func (s *Session) Release() {
 
 	s.Stop()
+	flow := s.GetFlow()
 
-	for _, a := range s.Runtime.Flow.Actions {
+	for _, a := range flow.Actions {
 		c := s.getActionChan(a.Id)
 		if c != nil {
 			close(c)
@@ -204,7 +258,7 @@ func (s *Session) Release() {
 		s.delActionChan(a.Id)
 
 	}
-	for _, l := range s.Runtime.Flow.Links {
+	for _, l := range flow.Links {
 		c := s.getLinkChan(l.SourceId, l.TargetId)
 		if c != nil {
 			close(c)
@@ -250,7 +304,7 @@ func (s *Session) stopProcessAction(actionId string) {
 	c <- param
 }
 func (s *Session) toAction(param *models.ActionParam) {
-	s.Runtime.AddRunningAction(param)
+	s.Store.AddRunningAction(param)
 
 	c := s.getActionChan(param.ActionId)
 	if c == nil {
@@ -268,7 +322,7 @@ func (s *Session) exeAction(param *models.ActionParam) {
 	defer s.Wg.Done()     //确认节点执行完成
 	defer s.changeState() //改变状态
 
-	actionState := s.Runtime.CreateActionState(param.ActionId, param.PreActionId)
+	actionState := s.createActionState(param.ActionId, param.PreActionId)
 
 	complete := true
 	canNext := true
@@ -284,7 +338,9 @@ func (s *Session) exeAction(param *models.ActionParam) {
 
 	if canNext {
 		actionState.State = 1
-		nextLinks := s.Runtime.Flow.GetLinkBySourceId(param.ActionId)
+		flow := s.GetFlow()
+
+		nextLinks := flow.GetLinkBySourceId(param.ActionId)
 		if nextLinks != nil && len(nextLinks) > 0 {
 			for _, link := range nextLinks {
 				if link.Active == "false" {
@@ -299,11 +355,11 @@ func (s *Session) exeAction(param *models.ActionParam) {
 		actionState.State = -1
 	}
 	if complete {
-		s.Runtime.DelRunningAction(param) //删除待执行节点中已经执行完成的节点
+		s.Store.DelRunningAction(param) //删除待执行节点中已经执行完成的节点
 
 		actionState.EndTime = time.Now()
 		actionState.Timeused = actionState.EndTime.Sub(actionState.BeginTime).Milliseconds()
-		s.Runtime.AddActionState(actionState)
+		s.Store.AddActionState(actionState)
 	}
 
 }
@@ -345,7 +401,7 @@ func (s *Session) stopProcessLink(sourceId, targetId string) {
 
 func (s *Session) toLink(param *models.LinkParam) {
 	//准备执行的路径
-	s.Runtime.AddRunningLink(param)
+	s.Store.AddRunningLink(param)
 
 	c := s.getLinkChan(param.SourceId, param.TargetId)
 	if c == nil {
@@ -365,7 +421,7 @@ func (s *Session) exeLink(param *models.LinkParam) {
 	defer s.Wg.Done()
 	defer s.changeState() //改变状态
 
-	linkState := s.Runtime.CreateLinkState(param.SourceId, param.TargetId)
+	linkState := s.createLinkState(param.SourceId, param.TargetId)
 
 	complete := true
 	toNext := true
@@ -384,15 +440,18 @@ func (s *Session) exeLink(param *models.LinkParam) {
 		linkState.State = 1
 
 		canNext := true
-
-		nextAction := s.Runtime.Flow.GetAction(param.TargetId)
+		flow := s.GetFlow()
+		nextAction := flow.GetAction(param.TargetId)
 
 		//如果是汇聚模式，需要等待所有连线都执行通过
 		if strings.ToLower(nextAction.Collect) == "true" {
-			fromLinks := s.Runtime.Flow.GetLinkByTargetId(param.TargetId)
+			fromLinks := flow.GetLinkByTargetId(param.TargetId)
+
 			if fromLinks != nil && len(fromLinks) > 1 {
 				for _, link := range fromLinks {
-					st := s.Runtime.GetLastLinkState(link.SourceId, link.TargetId)
+
+					st := s.Store.GetLastLinkState(link.SourceId, link.TargetId)
+
 					if st == nil || st.State != 1 {
 						canNext = false
 					}
@@ -410,10 +469,11 @@ func (s *Session) exeLink(param *models.LinkParam) {
 	}
 
 	if complete {
-		s.Runtime.DelRunningLink(param) //移除待办路径中已经执行的路径
+		s.Store.DelRunningLink(param) //移除待办路径中已经执行的路径
 		linkState.EndTime = time.Now()
 		linkState.Timeused = linkState.EndTime.Sub(linkState.BeginTime).Milliseconds()
-		s.Runtime.AddLinkState(linkState)
+
+		s.Store.AddLinkState(linkState)
 	}
 
 }
@@ -470,13 +530,30 @@ func CreateRuntime(flow *models.FlowModel, param map[string]interface{}) *models
 	return &runtime
 }
 
-func Execute(runtime *models.RuntimeModel, runner FlowRunner, timeout int64) {
+func Run(store RuntimeStore, runner FlowRunner, timeout int64) {
 	context, _ := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(timeout))
 
-	session := CreateSession(context, runtime, runner)
+	session := CreateSession(context, store, runner)
 
 	session.Execute()
 	session.WaitComplete()
 	session.Release()
+}
+
+func Execute(runtime *models.RuntimeModel, runner FlowRunner, timeout int64) {
+
+	store := &CommonRuntimeStore{}
+	store.Init(runtime)
+
+	Run(store, runner, timeout)
+
+}
+func ExecuteFlow(flow *models.FlowModel, param map[string]interface{}, timeout int64) *models.RuntimeModel {
+	runtime := CreateRuntime(flow, param)
+	runner := &CommonFlowRunner{}
+
+	Execute(runtime, runner, timeout)
+
+	return runtime
 
 }

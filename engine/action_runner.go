@@ -117,12 +117,12 @@ func SetScriptFun(rts *goja.Runtime, session *Session, preActionId string, actio
 	if islink {
 		tp = "link"
 		tag = preActionId + "->" + actionId
-		link := session.Runtime.Flow.GetLinkBySourceIdAndTargetId(preActionId, actionId)
+		link := session.GetFlow().GetLinkBySourceIdAndTargetId(preActionId, actionId)
 		title = link.Title
 	} else {
 		tp = "action"
 		tag = actionId
-		action := session.Runtime.Flow.GetAction(actionId)
+		action := session.GetFlow().GetAction(actionId)
 		title = action.Title
 	}
 
@@ -152,7 +152,7 @@ func SetScriptFun(rts *goja.Runtime, session *Session, preActionId string, actio
 			}
 
 		}
-		session.Runtime.AddLog(tp, tag, title, val)
+		session.Store.AddLog(tp, tag, title, val)
 
 		return value
 	})
@@ -229,9 +229,9 @@ func SetScriptFun(rts *goja.Runtime, session *Session, preActionId string, actio
 
 		if !val.Equals(goja.Undefined()) && !val.Equals(goja.Null()) {
 			obj := val.Export()
-			session.Runtime.SetParam(keyStr, obj)
+			session.Store.SetParam(keyStr, obj)
 		} else {
-			session.Runtime.SetParam(keyStr, nil)
+			session.Store.SetParam(keyStr, nil)
 
 		}
 
@@ -245,7 +245,7 @@ func SetScriptFun(rts *goja.Runtime, session *Session, preActionId string, actio
 		var keyStr string
 		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
 			keyStr = key.String()
-			value = session.Runtime.GetParam(keyStr)
+			value = session.Store.GetParam(keyStr)
 
 		}
 		if value == nil {
@@ -268,9 +268,9 @@ func SetScriptFun(rts *goja.Runtime, session *Session, preActionId string, actio
 
 		if !val.Equals(goja.Undefined()) && !val.Equals(goja.Null()) {
 			obj := val.Export()
-			session.Runtime.SetData(keyStr, obj)
+			session.Store.SetData(keyStr, obj)
 		} else {
-			session.Runtime.SetData(keyStr, nil)
+			session.Store.SetData(keyStr, nil)
 
 		}
 
@@ -284,7 +284,7 @@ func SetScriptFun(rts *goja.Runtime, session *Session, preActionId string, actio
 		var keyStr string
 		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
 			keyStr = key.String()
-			value = session.Runtime.GetData(keyStr)
+			value = session.Store.GetData(keyStr)
 
 		}
 		if value == nil {
@@ -297,7 +297,7 @@ func SetScriptFun(rts *goja.Runtime, session *Session, preActionId string, actio
 
 	rts.Set("getDatas", func(call goja.FunctionCall) goja.Value {
 
-		value := session.Runtime.GetDataMap()
+		value := session.Store.GetDataMap()
 		if value == nil {
 			return goja.Null()
 		}
@@ -313,30 +313,30 @@ func SetScriptFun(rts *goja.Runtime, session *Session, preActionId string, actio
 			case map[string]string:
 				for k, v := range obj.(map[string]string) {
 
-					session.Runtime.SetData(k, v)
+					session.Store.SetData(k, v)
 				}
 			case map[string]interface{}:
 				for k, v := range obj.(map[string]interface{}) {
 
-					session.Runtime.SetData(k, v)
+					session.Store.SetData(k, v)
 				}
 			case map[string]map[string]interface{}:
 				for k, v := range obj.(map[string]map[string]interface{}) {
 
-					session.Runtime.SetData(k, v)
+					session.Store.SetData(k, v)
 				}
 			case map[string][]map[string]interface{}:
 				for k, v := range obj.(map[string][]map[string]interface{}) {
 
-					session.Runtime.SetData(k, v)
+					session.Store.SetData(k, v)
 				}
 			case map[string][]interface{}:
 				for k, v := range obj.(map[string][]interface{}) {
 
-					session.Runtime.SetData(k, v)
+					session.Store.SetData(k, v)
 				}
 			default:
-				session.Runtime.AddLog(tp, tag, title, "SetDatas参数非Map类型")
+				session.Store.AddLog(tp, tag, title, "SetDatas参数非Map类型")
 
 			}
 
@@ -361,10 +361,10 @@ func SetScriptFun(rts *goja.Runtime, session *Session, preActionId string, actio
 
 		if !val.Equals(goja.Undefined()) && !val.Equals(goja.Null()) {
 			obj := val.Export()
-			session.Runtime.SetActionData(actionId, keyStr, obj)
+			session.Store.SetActionData(actionId, keyStr, obj)
 
 		} else {
-			session.Runtime.SetActionData(actionId, keyStr, nil)
+			session.Store.SetActionData(actionId, keyStr, nil)
 
 		}
 
@@ -382,7 +382,7 @@ func SetScriptFun(rts *goja.Runtime, session *Session, preActionId string, actio
 		var keyStr string
 		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
 			keyStr = key.String()
-			value = session.Runtime.GetActionData(actionId, keyStr)
+			value = session.Store.GetActionData(actionId, keyStr)
 
 		}
 
@@ -405,7 +405,7 @@ func SetScriptFun(rts *goja.Runtime, session *Session, preActionId string, actio
 		var keyStr string
 		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
 			keyStr = key.String()
-			value = session.Runtime.GetActionData(preActionId, keyStr)
+			value = session.Store.GetActionData(preActionId, keyStr)
 
 		}
 
@@ -422,7 +422,7 @@ func SetScriptFun(rts *goja.Runtime, session *Session, preActionId string, actio
 			return goja.Null()
 		}
 
-		value := session.Runtime.GetActionDataMap(actionId)
+		value := session.Store.GetActionDataMap(actionId)
 
 		if value == nil {
 			return goja.Null()
@@ -436,7 +436,7 @@ func SetScriptFun(rts *goja.Runtime, session *Session, preActionId string, actio
 			return goja.Null()
 		}
 
-		value := session.Runtime.GetActionDataMap(preActionId)
+		value := session.Store.GetActionDataMap(preActionId)
 
 		if value == nil {
 			return goja.Null()

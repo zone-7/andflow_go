@@ -21,7 +21,7 @@ type MyRunner2 struct {
 }
 
 func (r *MyRunner1) ExecuteLink(s *engine.Session, param *models.LinkParam) int {
-	link := s.Runtime.Flow.GetLinkBySourceIdAndTargetId(param.SourceId, param.TargetId)
+	link := s.GetFlow().GetLinkBySourceIdAndTargetId(param.SourceId, param.TargetId)
 
 	fmt.Println("执行link:", link.SourceId, "->", link.TargetId)
 	return 1
@@ -29,7 +29,7 @@ func (r *MyRunner1) ExecuteLink(s *engine.Session, param *models.LinkParam) int 
 
 func (r *MyRunner1) ExecuteAction(s *engine.Session, param *models.ActionParam) int {
 
-	action := s.Runtime.Flow.GetAction(param.ActionId)
+	action := s.GetFlow().GetAction(param.ActionId)
 	// time.Sleep(time.Millisecond * 100)
 	fmt.Println("执行action:", action.Id, " ", action.Title)
 
@@ -37,8 +37,8 @@ func (r *MyRunner1) ExecuteAction(s *engine.Session, param *models.ActionParam) 
 }
 
 func (r *MyRunner2) ExecuteLink(s *engine.Session, param *models.LinkParam) int {
-	link := s.Runtime.Flow.GetLinkBySourceIdAndTargetId(param.SourceId, param.TargetId)
-	n := s.Runtime.GetParam("name")
+	link := s.GetFlow().GetLinkBySourceIdAndTargetId(param.SourceId, param.TargetId)
+	n := s.Store.GetParam("name")
 	if n == nil {
 		return 0
 	}
@@ -49,7 +49,7 @@ func (r *MyRunner2) ExecuteLink(s *engine.Session, param *models.LinkParam) int 
 
 func (r *MyRunner2) ExecuteAction(s *engine.Session, param *models.ActionParam) int {
 
-	action := s.Runtime.Flow.GetAction(param.ActionId)
+	action := s.GetFlow().GetAction(param.ActionId)
 	time.Sleep(time.Millisecond * 2000)
 	fmt.Println("执行action:", action.Id, " ", action.Title)
 

@@ -17,14 +17,14 @@ type CommonFlowRunner struct {
 }
 
 func (r *CommonFlowRunner) ExecuteLink(s *Session, param *models.LinkParam) int {
-	link := s.Runtime.Flow.GetLinkBySourceIdAndTargetId(param.SourceId, param.TargetId)
+	link := s.GetFlow().GetLinkBySourceIdAndTargetId(param.SourceId, param.TargetId)
 	sc := link.Filter
 	if len(strings.Trim(sc, " ")) == 0 {
 		return 1
 	}
 
 	rts := goja.New()
-	rts.Set("flow", s.Runtime.Flow)
+	rts.Set("flow", s.GetFlow())
 	rts.Set("link", link)
 
 	SetScriptFun(rts, s, param.SourceId, param.TargetId, true)
@@ -33,7 +33,7 @@ func (r *CommonFlowRunner) ExecuteLink(s *Session, param *models.LinkParam) int 
 	val, err := rts.RunString(script)
 	if err != nil {
 
-		linkState := s.Runtime.GetLastLinkState(param.SourceId, param.TargetId)
+		linkState := s.Store.GetLastLinkState(param.SourceId, param.TargetId)
 		if linkState != nil {
 			linkState.IsError = 1
 		}
@@ -48,7 +48,7 @@ func (r *CommonFlowRunner) ExecuteLink(s *Session, param *models.LinkParam) int 
 
 func (r *CommonFlowRunner) ExecuteAction(s *Session, param *models.ActionParam) int {
 
-	action := s.Runtime.Flow.GetAction(param.ActionId)
+	action := s.GetFlow().GetAction(param.ActionId)
 	name := action.Name
 
 	fmt.Println("开始执行节点：" + action.Name + " " + action.Title)
@@ -62,7 +62,7 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *models.ActionParam) 
 	res, err := runner.Execute(s, param)
 
 	if err != nil {
-		actionState := s.Runtime.GetLastActionState(param.ActionId)
+		actionState := s.Store.GetLastActionState(param.ActionId)
 		if actionState != nil {
 			actionState.IsError = 1
 		}
