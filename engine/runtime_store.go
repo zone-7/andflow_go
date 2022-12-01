@@ -8,7 +8,7 @@ import (
 
 type RuntimeStore interface {
 	Init(runtime *models.RuntimeModel)
-
+	GetRuntime() *models.RuntimeModel
 	GetFlow() *models.FlowModel
 
 	AddLog(tp, tag, title, content string)
@@ -63,6 +63,9 @@ func (s *CommonRuntimeStore) AddLog(tp, tag, title, content string) {
 	s.Runtime.AddLog("flow", "stop", "中断", "执行中断")
 }
 
+func (s *CommonRuntimeStore) GetRuntime() *models.RuntimeModel {
+	return s.Runtime
+}
 func (s *CommonRuntimeStore) GetFlow() *models.FlowModel {
 	return s.Runtime.Flow
 }
