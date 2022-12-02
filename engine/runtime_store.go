@@ -8,7 +8,8 @@ import (
 )
 
 type RuntimeStore interface {
-	Init(runtime *models.RuntimeModel)
+	Init(runtimeId string)
+	SetRuntime(runtime *models.RuntimeModel)
 	GetRuntime() *models.RuntimeModel
 	GetFlow() *models.FlowModel
 
@@ -48,13 +49,17 @@ type RuntimeStore interface {
 }
 
 type CommonRuntimeStore struct {
-	Wg      sync.WaitGroup //同步控制
-	Runtime *models.RuntimeModel
+	RuntimeId string
+	Wg        sync.WaitGroup //同步控制
+	Runtime   *models.RuntimeModel
 }
 
-func (s *CommonRuntimeStore) Init(runtime *models.RuntimeModel) {
-	s.Runtime = runtime
+func (s *CommonRuntimeStore) Init(runtimeId string) {
+	s.RuntimeId = runtimeId
 	s.Wg = sync.WaitGroup{}
+}
+func (s *CommonRuntimeStore) SetRuntime(runtime *models.RuntimeModel) {
+	s.Runtime = runtime
 }
 
 func (s *CommonRuntimeStore) RefreshState() {

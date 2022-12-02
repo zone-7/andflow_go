@@ -15,11 +15,9 @@ import (
 var chan_len = 100
 
 type Session struct {
-	Id string
-
-	Cmd int //指令 1:停止,2.3.4..
-	Ctx context.Context
-	// Runtime       *models.RuntimeModel
+	Id            string
+	Cmd           int //指令 1:停止,2.3.4..
+	Ctx           context.Context
 	Store         RuntimeStore
 	Router        FlowRouter
 	Runner        FlowRunner
@@ -210,10 +208,11 @@ func (s *Session) Execute() {
 	if firstRun {
 
 		s.Store.SetBegin()
+		runtimeId := s.Store.GetRuntime().Id
 
 		startIds := s.GetFlow().GetStartActionIds()
 		for _, actionId := range startIds {
-			param := &models.ActionParam{ActionId: actionId, PreActionId: ""}
+			param := &models.ActionParam{RuntimeId: runtimeId, ActionId: actionId, PreActionId: ""}
 			s.ToAction(param)
 		}
 
@@ -279,7 +278,7 @@ EVENT_LOOP:
 		select {
 		// 消息通道中有消息则执行，否则堵塞
 		case param := <-c:
-			if param.Stop {
+			if param.Cmd == 1 {
 				break EVENT_LOOP
 			}
 
@@ -295,7 +294,7 @@ func (s *Session) stopProcessAction(actionId string) {
 		return
 	}
 
-	param := &models.ActionParam{Stop: true}
+	param := &models.ActionParam{Cmd: 1}
 
 	c <- param
 }
@@ -349,7 +348,7 @@ func (s *Session) exeAction(param *models.ActionParam) {
 					continue
 				}
 
-				linkParam := &models.LinkParam{SourceId: link.SourceId, TargetId: link.TargetId}
+				linkParam := &models.LinkParam{RuntimeId: param.RuntimeId, SourceId: link.SourceId, TargetId: link.TargetId}
 				s.ToLink(linkParam)
 			}
 		}
@@ -380,7 +379,7 @@ EVENT_LOOP:
 		select {
 		// 消息通道中有消息则执行，否则堵塞
 		case param := <-c:
-			if param.Stop {
+			if param.Cmd == 1 {
 				break EVENT_LOOP
 			}
 
@@ -396,7 +395,7 @@ func (s *Session) stopProcessLink(sourceId, targetId string) {
 		return
 	}
 
-	param := &models.LinkParam{Stop: true}
+	param := &models.LinkParam{Cmd: 1}
 
 	c <- param
 }
@@ -468,7 +467,7 @@ func (s *Session) exeLink(param *models.LinkParam) {
 		}
 
 		if canNext {
-			actionParam := &models.ActionParam{ActionId: param.TargetId, PreActionId: param.SourceId}
+			actionParam := &models.ActionParam{RuntimeId: param.RuntimeId, ActionId: param.TargetId, PreActionId: param.SourceId}
 			s.ToAction(actionParam)
 		}
 
@@ -553,7 +552,8 @@ func ExecuteRuntime(runtime *models.RuntimeModel, timeout int64) *models.Runtime
 	runner := &CommonFlowRunner{}
 	router := &CommonFlowRouter{}
 	store := &CommonRuntimeStore{}
-	store.Init(runtime)
+	store.Init(runtime.Id)
+	store.SetRuntime(runtime)
 
 	Execute(store, router, runner, timeout)
 
@@ -566,8 +566,8 @@ func ExecuteFlow(flow *models.FlowModel, param map[string]interface{}, timeout i
 	runner := &CommonFlowRunner{}
 	router := &CommonFlowRouter{}
 	store := &CommonRuntimeStore{}
-	store.Init(runtime)
-
+	store.Init(runtime.Id)
+	store.SetRuntime(runtime)
 	Execute(store, router, runner, timeout)
 
 	return runtime
