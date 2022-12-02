@@ -163,24 +163,27 @@ func CreateSession(context context.Context, store RuntimeStore, router FlowRoute
 	session.LinkChanMap = sync.Map{}
 	//make(map[string]chan *models.LinkParam, 0)
 
-	flow := session.GetFlow()
+	return session
+}
+
+func (s *Session) Init() {
+	flow := s.GetFlow()
 
 	w_action := &sync.WaitGroup{}
 	for _, a := range flow.Actions {
 		w_action.Add(1)
-		go session.startProcessAction(a.Id, w_action)
+		go s.startProcessAction(a.Id, w_action)
 	}
 
 	w_link := &sync.WaitGroup{}
 	for _, l := range flow.Links {
 		w_link.Add(1)
-		go session.startProcessLink(l.SourceId, l.TargetId, w_link)
+		go s.startProcessLink(l.SourceId, l.TargetId, w_link)
 	}
 
 	w_action.Wait()
 	w_link.Wait()
 
-	return session
 }
 
 func (s *Session) Execute() {
@@ -539,6 +542,7 @@ func Execute(store RuntimeStore, router FlowRouter, runner FlowRunner, timeout i
 	context, _ := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(timeout))
 
 	session := CreateSession(context, store, router, runner)
+	session.Init()
 	session.Execute()
 	session.WaitComplete()
 	session.Release()
