@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"sync"
 	"time"
 
 	"github.com/zone-7/andflow_go/models"
@@ -10,6 +11,10 @@ type RuntimeStore interface {
 	Init(runtime *models.RuntimeModel)
 	GetRuntime() *models.RuntimeModel
 	GetFlow() *models.FlowModel
+
+	WaitAdd(int)
+	WaitDone()
+	Wait()
 
 	AddLog(tp, tag, title, content string)
 
@@ -43,11 +48,13 @@ type RuntimeStore interface {
 }
 
 type CommonRuntimeStore struct {
+	Wg      sync.WaitGroup //同步控制
 	Runtime *models.RuntimeModel
 }
 
 func (s *CommonRuntimeStore) Init(runtime *models.RuntimeModel) {
 	s.Runtime = runtime
+	s.Wg = sync.WaitGroup{}
 }
 
 func (s *CommonRuntimeStore) RefreshState() {
@@ -59,6 +66,18 @@ func (s *CommonRuntimeStore) RefreshState() {
 		s.Runtime.Timeused = s.Runtime.EndTime.Sub(s.Runtime.BeginTime).Milliseconds()
 	}
 }
+
+func (s *CommonRuntimeStore) WaitAdd(d int) {
+	s.Wg.Add(d)
+}
+
+func (s *CommonRuntimeStore) WaitDone() {
+	s.Wg.Done()
+}
+func (s *CommonRuntimeStore) Wait() {
+	s.Wg.Wait()
+}
+
 func (s *CommonRuntimeStore) AddLog(tp, tag, title, content string) {
 	s.Runtime.AddLog("flow", "stop", "中断", "执行中断")
 }
