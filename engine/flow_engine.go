@@ -41,11 +41,7 @@ func (s *Session) setActionChan(actionId string, c chan *models.ActionParam) {
 
 func (s *Session) delActionChan(actionId string) {
 
-	// c := s.getActionChan(actionId)
 	s.ActionChanMap.Delete(actionId)
-	// if c != nil {
-	// 	close(c)
-	// }
 
 }
 
@@ -64,11 +60,7 @@ func (s *Session) setLinkChan(sourceId string, targetId string, c chan *models.L
 }
 func (s *Session) delLinkChan(sourceId string, targetId string) {
 
-	// c := s.getLinkChan(sourceId, targetId)
 	s.LinkChanMap.Delete(sourceId + "_" + targetId)
-	// if c != nil {
-	// 	close(c)
-	// }
 
 }
 
@@ -185,7 +177,7 @@ func (s *Session) Init() {
 }
 
 func (s *Session) Execute() {
-
+	s.Cmd = 0
 	//是否全新执行
 	firstRun := true
 	runningActions := s.Store.GetRunningActions()
@@ -224,14 +216,6 @@ func (s *Session) Execute() {
 
 func (s *Session) Stop() {
 	s.Cmd = 1
-	flow := s.GetFlow()
-
-	for _, a := range flow.Actions {
-		s.stopProcessAction(a.Id)
-	}
-	for _, l := range flow.Links {
-		s.stopProcessLink(l.SourceId, l.TargetId)
-	}
 
 	fmt.Println("stop...............................")
 }
@@ -244,6 +228,13 @@ func (s *Session) Release() {
 
 	s.Stop()
 	flow := s.GetFlow()
+
+	for _, a := range flow.Actions {
+		s.stopProcessAction(a.Id)
+	}
+	for _, l := range flow.Links {
+		s.stopProcessLink(l.SourceId, l.TargetId)
+	}
 
 	for _, a := range flow.Actions {
 		c := s.getActionChan(a.Id)
@@ -300,21 +291,23 @@ func (s *Session) stopProcessAction(actionId string) {
 }
 func (s *Session) ToAction(param *models.ActionParam) {
 	if s.Router != nil {
+		s.Store.AddRunningAction(param)
+
+		if s.Cmd == 1 {
+			return
+		}
+		s.Store.WaitAdd(1)
 		s.Router.RouteAction(s, param)
 	}
 }
 
 func (s *Session) PushAction(param *models.ActionParam) {
-	s.Store.AddRunningAction(param)
 
 	c := s.getActionChan(param.ActionId)
 	if c == nil {
+		s.Store.WaitDone()
 		return
 	}
-	if s.Cmd == 1 {
-		return
-	}
-	s.Store.WaitAdd(1)
 
 	c <- param
 }
@@ -402,24 +395,25 @@ func (s *Session) stopProcessLink(sourceId, targetId string) {
 
 func (s *Session) ToLink(param *models.LinkParam) {
 	if s.Router != nil {
+		//准备执行的路径
+		s.Store.AddRunningLink(param)
+		//如果停止
+		if s.Cmd == 1 {
+			return
+		}
+
+		s.Store.WaitAdd(1)
 		s.Router.RouteLink(s, param)
 	}
 }
 
 func (s *Session) PushLink(param *models.LinkParam) {
-	//准备执行的路径
-	s.Store.AddRunningLink(param)
 
 	c := s.getLinkChan(param.SourceId, param.TargetId)
 	if c == nil {
+		s.Store.WaitDone()
 		return
 	}
-
-	if s.Cmd == 1 {
-		return
-	}
-
-	s.Store.WaitAdd(1)
 
 	c <- param
 }

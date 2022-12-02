@@ -135,7 +135,7 @@ func TestScriptCmd(t *testing.T) {
 
 	runtime := engine.CreateRuntime(flow, param)
 
-	engine.ExecuteRuntime(runtime, 10000)
+	engine.ExecuteRuntime(runtime, 1000)
 
 	fmt.Println("time used(ms):", runtime.Timeused)
 	fmt.Println("--------------------------------------------")
