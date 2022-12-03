@@ -303,15 +303,16 @@ func (s *Session) ToAction(param *models.ActionParam) {
 	}
 }
 
-func (s *Session) PushAction(param *models.ActionParam) {
+func (s *Session) PushAction(param *models.ActionParam) bool {
 
 	c := s.getActionChan(param.ActionId)
 	if c == nil {
 		s.Store.WaitDone()
-		return
+		return false
 	}
 
 	c <- param
+	return true
 }
 
 func (s *Session) ExecuteAction(param *models.ActionParam) {
@@ -409,15 +410,16 @@ func (s *Session) ToLink(param *models.LinkParam) {
 	}
 }
 
-func (s *Session) PushLink(param *models.LinkParam) {
+func (s *Session) PushLink(param *models.LinkParam) bool {
 
 	c := s.getLinkChan(param.SourceId, param.TargetId)
 	if c == nil {
 		s.Store.WaitDone()
-		return
+		return false
 	}
 
 	c <- param
+	return true
 }
 
 func (s *Session) ExecuteLink(param *models.LinkParam) {
