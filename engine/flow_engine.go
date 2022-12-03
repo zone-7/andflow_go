@@ -156,19 +156,19 @@ func CreateSession(context context.Context, store RuntimeStore, router FlowRoute
 	return session
 }
 
-func (s *Session) Init() {
+func (s *Session) StartChannel() {
 	flow := s.GetFlow()
 
 	w_action := &sync.WaitGroup{}
 	for _, a := range flow.Actions {
 		w_action.Add(1)
-		go s.startProcessAction(a.Id, w_action)
+		go s.runProcessAction(a.Id, w_action)
 	}
 
 	w_link := &sync.WaitGroup{}
 	for _, l := range flow.Links {
 		w_link.Add(1)
-		go s.startProcessLink(l.SourceId, l.TargetId, w_link)
+		go s.runProcessLink(l.SourceId, l.TargetId, w_link)
 	}
 
 	w_action.Wait()
@@ -224,7 +224,7 @@ func (s *Session) WaitComplete() {
 	s.Store.Wait()
 }
 
-func (s *Session) Release() {
+func (s *Session) StopChannel() {
 
 	s.Stop()
 	flow := s.GetFlow()
@@ -255,7 +255,7 @@ func (s *Session) Release() {
 }
 
 //节点处理
-func (s *Session) startProcessAction(actionId string, w *sync.WaitGroup) {
+func (s *Session) runProcessAction(actionId string, w *sync.WaitGroup) {
 
 	c := s.getActionChan(actionId)
 	if c == nil {
@@ -359,7 +359,7 @@ func (s *Session) ExeAction(param *models.ActionParam) {
 }
 
 //连接线处理
-func (s *Session) startProcessLink(sourceId, targetId string, w *sync.WaitGroup) {
+func (s *Session) runProcessLink(sourceId, targetId string, w *sync.WaitGroup) {
 	c := s.getLinkChan(sourceId, targetId)
 	if c == nil {
 		c = make(chan *models.LinkParam, chan_len)
@@ -535,10 +535,10 @@ func Execute(store RuntimeStore, router FlowRouter, runner FlowRunner, timeout i
 	context, _ := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(timeout))
 
 	session := CreateSession(context, store, router, runner)
-	session.Init()
+	session.StartChannel()
 	session.Execute()
 	session.WaitComplete()
-	session.Release()
+	session.StopChannel()
 }
 
 func ExecuteRuntime(runtime *models.RuntimeModel, timeout int64) *models.RuntimeModel {
