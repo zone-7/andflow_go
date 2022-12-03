@@ -8,7 +8,7 @@ import (
 )
 
 type RuntimeStore interface {
-	Init(runtimeId string)
+	Init(runtimeId string, timeout int64)
 	SetRuntime(runtime *models.RuntimeModel)
 	GetRuntime() *models.RuntimeModel
 	GetFlow() *models.FlowModel
@@ -49,12 +49,14 @@ type RuntimeStore interface {
 }
 
 type CommonRuntimeStore struct {
+	Timeout   int64
 	RuntimeId string
 	Wg        sync.WaitGroup //同步控制
 	Runtime   *models.RuntimeModel
 }
 
-func (s *CommonRuntimeStore) Init(runtimeId string) {
+func (s *CommonRuntimeStore) Init(runtimeId string, timeout int64) {
+	s.Timeout = timeout
 	s.RuntimeId = runtimeId
 	s.Wg = sync.WaitGroup{}
 }
