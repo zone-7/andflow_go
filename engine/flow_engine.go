@@ -109,11 +109,6 @@ func (s *Session) createLinkState(sourceId string, targetId string) *models.Link
 	return state
 }
 
-func (s *Session) changeState() {
-	s.Store.RefreshState()
-
-}
-
 // 监控协程
 func (s *Session) watch() {
 
@@ -273,7 +268,7 @@ EVENT_LOOP:
 				break EVENT_LOOP
 			}
 
-			s.ExeAction(param)
+			s.ExecuteAction(param)
 
 		}
 	}
@@ -312,9 +307,9 @@ func (s *Session) PushAction(param *models.ActionParam) {
 	c <- param
 }
 
-func (s *Session) ExeAction(param *models.ActionParam) {
-	defer s.Store.WaitDone() //确认节点执行完成
-	defer s.changeState()    //改变状态
+func (s *Session) ExecuteAction(param *models.ActionParam) {
+	defer s.Store.WaitDone()     //确认节点执行完成
+	defer s.Store.RefreshState() //改变状态
 
 	actionState := s.createActionState(param.ActionId, param.PreActionId)
 
@@ -376,7 +371,7 @@ EVENT_LOOP:
 				break EVENT_LOOP
 			}
 
-			s.ExeLink(param)
+			s.ExecuteLink(param)
 		}
 	}
 
@@ -418,9 +413,9 @@ func (s *Session) PushLink(param *models.LinkParam) {
 	c <- param
 }
 
-func (s *Session) ExeLink(param *models.LinkParam) {
+func (s *Session) ExecuteLink(param *models.LinkParam) {
 	defer s.Store.WaitDone()
-	defer s.changeState() //改变状态
+	defer s.Store.RefreshState() //改变状态
 
 	linkState := s.createLinkState(param.SourceId, param.TargetId)
 
