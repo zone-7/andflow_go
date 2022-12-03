@@ -273,7 +273,7 @@ EVENT_LOOP:
 				break EVENT_LOOP
 			}
 
-			s.exeAction(param)
+			s.ExeAction(param)
 
 		}
 	}
@@ -312,7 +312,7 @@ func (s *Session) PushAction(param *models.ActionParam) {
 	c <- param
 }
 
-func (s *Session) exeAction(param *models.ActionParam) {
+func (s *Session) ExeAction(param *models.ActionParam) {
 	defer s.Store.WaitDone() //确认节点执行完成
 	defer s.changeState()    //改变状态
 
@@ -376,7 +376,7 @@ EVENT_LOOP:
 				break EVENT_LOOP
 			}
 
-			s.exeLink(param)
+			s.ExeLink(param)
 		}
 	}
 
@@ -418,7 +418,7 @@ func (s *Session) PushLink(param *models.LinkParam) {
 	c <- param
 }
 
-func (s *Session) exeLink(param *models.LinkParam) {
+func (s *Session) ExeLink(param *models.LinkParam) {
 	defer s.Store.WaitDone()
 	defer s.changeState() //改变状态
 
