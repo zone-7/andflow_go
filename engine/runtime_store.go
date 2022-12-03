@@ -62,11 +62,10 @@ func (s *CommonRuntimeStore) Init(runtimeId string, timeout int64) {
 	s.RuntimeId = runtimeId
 	s.Wg = sync.WaitGroup{}
 }
-func (s *CommonRuntimeStore) SetRuntime(runtime *models.RuntimeModel) {
-	s.Runtime = runtime
-}
-
 func (s *CommonRuntimeStore) RefreshState() {
+	if s.Runtime == nil {
+		return
+	}
 	//如果没有什么待办事项就表示执行完了
 	if (s.Runtime.RunningActions == nil || len(s.Runtime.RunningActions) == 0) &&
 		(s.Runtime.RunningLinks == nil || len(s.Runtime.RunningLinks) == 0) {
@@ -94,84 +93,151 @@ func (s *CommonRuntimeStore) GetTimeout() int64 {
 }
 
 func (s *CommonRuntimeStore) AddLog(tp, tag, title, content string) {
+	if s.Runtime == nil {
+		return
+	}
 	s.Runtime.AddLog("flow", "stop", "中断", "执行中断")
+}
+
+func (s *CommonRuntimeStore) SetRuntime(runtime *models.RuntimeModel) {
+	s.Runtime = runtime
 }
 
 func (s *CommonRuntimeStore) GetRuntime() *models.RuntimeModel {
 	return s.Runtime
 }
 func (s *CommonRuntimeStore) GetFlow() *models.FlowModel {
+	if s.Runtime == nil {
+		return nil
+	}
 	return s.Runtime.Flow
 }
 
 func (s *CommonRuntimeStore) SetBegin() {
+	if s.Runtime == nil {
+		return
+	}
 	s.Runtime.BeginTime = time.Now()
 }
 
 func (s *CommonRuntimeStore) GetRunningActions() []*models.ActionParam {
+	if s.Runtime == nil {
+		return nil
+	}
 	return s.Runtime.RunningActions
 }
 
 func (s *CommonRuntimeStore) GetRunningLinks() []*models.LinkParam {
+	if s.Runtime == nil {
+		return nil
+	}
 	return s.Runtime.RunningLinks
 }
 
 func (s *CommonRuntimeStore) AddRunningAction(param *models.ActionParam) {
+	if s.Runtime == nil {
+		return
+	}
 	s.Runtime.AddRunningAction(param)
 }
 
 func (s *CommonRuntimeStore) DelRunningAction(param *models.ActionParam) {
+	if s.Runtime == nil {
+		return
+	}
 	s.Runtime.DelRunningAction(param)
 }
 
 func (s *CommonRuntimeStore) AddRunningLink(param *models.LinkParam) {
+	if s.Runtime == nil {
+		return
+	}
 	s.Runtime.AddRunningLink(param)
 }
 func (s *CommonRuntimeStore) DelRunningLink(param *models.LinkParam) {
+	if s.Runtime == nil {
+		return
+	}
 	s.Runtime.DelRunningLink(param)
 }
 
 func (s *CommonRuntimeStore) AddActionState(state *models.ActionStateModel) {
+	if s.Runtime == nil {
+		return
+	}
 	s.Runtime.AddActionState(state)
 }
 func (s *CommonRuntimeStore) AddLinkState(state *models.LinkStateModel) {
+	if s.Runtime == nil {
+		return
+	}
 	s.Runtime.AddLinkState(state)
 }
 
 func (s *CommonRuntimeStore) GetLastActionState(actionId string) *models.ActionStateModel {
+	if s.Runtime == nil {
+		return nil
+	}
 	return s.Runtime.GetLastActionState(actionId)
 }
 
 func (s *CommonRuntimeStore) GetLastLinkState(sourceId string, targetId string) *models.LinkStateModel {
+	if s.Runtime == nil {
+		return nil
+	}
 	return s.Runtime.GetLastLinkState(sourceId, targetId)
 }
 
 func (s *CommonRuntimeStore) SetParam(key string, val interface{}) {
+	if s.Runtime == nil {
+		return
+	}
 	s.Runtime.SetParam(key, val)
 }
 func (s *CommonRuntimeStore) GetParam(key string) interface{} {
 	return s.Runtime.GetParam(key)
 }
 func (s *CommonRuntimeStore) GetParamMap() map[string]interface{} {
+	if s.Runtime == nil {
+		return nil
+	}
 	return s.Runtime.GetParamMap()
 }
 func (s *CommonRuntimeStore) SetData(key string, val interface{}) {
+	if s.Runtime == nil {
+		return
+	}
 	s.Runtime.SetData(key, val)
 }
 func (s *CommonRuntimeStore) GetData(key string) interface{} {
+	if s.Runtime == nil {
+		return nil
+	}
 	return s.Runtime.GetData(key)
 }
 func (s *CommonRuntimeStore) GetDataMap() map[string]interface{} {
+	if s.Runtime == nil {
+		return nil
+	}
 	return s.Runtime.GetDataMap()
 }
 
 func (s *CommonRuntimeStore) SetActionData(actionId string, name string, val interface{}) {
+	if s.Runtime == nil {
+		return
+	}
 	s.Runtime.SetActionData(actionId, name, val)
 }
 func (s *CommonRuntimeStore) GetActionData(actionId string, name string) interface{} {
+	if s.Runtime == nil {
+		return nil
+	}
 	return s.Runtime.GetActionData(actionId, name)
 }
 
 func (s *CommonRuntimeStore) GetActionDataMap(actionId string) map[string]interface{} {
+	if s.Runtime == nil {
+		return nil
+	}
 	return s.Runtime.GetActionDataMap(actionId)
 }
