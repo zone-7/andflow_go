@@ -15,8 +15,8 @@ import (
 var chan_len = 100
 
 type Session struct {
-	Id            string
-	Cmd           int //指令 1:停止,2.3.4..
+	Id string
+
 	Ctx           context.Context
 	Store         RuntimeStore
 	Router        FlowRouter
@@ -122,7 +122,7 @@ func (s *Session) watch() {
 			fmt.Println("执行中断")
 			return
 		default:
-			if s.Cmd == 1 {
+			if s.Store.GetCmd() == 1 {
 				return
 			}
 			time.Sleep(10 * time.Millisecond)
@@ -175,7 +175,8 @@ func (s *Session) startChannel() {
 }
 
 func (s *Session) Execute() {
-	s.Cmd = 0
+
+	s.Store.SetCmd(0)
 
 	s.startChannel()
 	defer s.stopChannel()
@@ -217,8 +218,8 @@ func (s *Session) Execute() {
 }
 
 func (s *Session) Stop() {
-	s.Cmd = 1
 
+	s.Store.SetCmd(1)
 	fmt.Println("stop...............................")
 }
 
@@ -295,7 +296,7 @@ func (s *Session) ToAction(param *models.ActionParam) {
 	if s.Router != nil {
 		s.Store.AddRunningAction(param)
 
-		if s.Cmd == 1 {
+		if s.Store.GetCmd() == 1 {
 			return
 		}
 		s.Store.WaitAdd(1)
@@ -401,7 +402,7 @@ func (s *Session) ToLink(param *models.LinkParam) {
 		//准备执行的路径
 		s.Store.AddRunningLink(param)
 		//如果停止
-		if s.Cmd == 1 {
+		if s.Store.GetCmd() == 1 {
 			return
 		}
 

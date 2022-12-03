@@ -14,7 +14,8 @@ type RuntimeStore interface {
 	GetFlow() *models.FlowModel
 	SetTimeout(timeout int64)
 	GetTimeout() int64
-
+	SetCmd(c int)
+	GetCmd() int
 	WaitAdd(int)
 	WaitDone()
 	Wait()
@@ -52,6 +53,7 @@ type RuntimeStore interface {
 
 type CommonRuntimeStore struct {
 	Timeout   int64
+	Cmd       int
 	RuntimeId string
 	Wg        sync.WaitGroup //同步控制
 	Runtime   *models.RuntimeModel
@@ -84,6 +86,12 @@ func (s *CommonRuntimeStore) WaitDone() {
 }
 func (s *CommonRuntimeStore) Wait() {
 	s.Wg.Wait()
+}
+func (s *CommonRuntimeStore) SetCmd(c int) {
+	s.Cmd = c
+}
+func (s *CommonRuntimeStore) GetCmd() int {
+	return s.Cmd
 }
 func (s *CommonRuntimeStore) SetTimeout(timeout int64) {
 	s.Timeout = timeout

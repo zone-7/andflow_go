@@ -16,6 +16,8 @@ var i int = 0
 
 //执行所有流程
 func TestAll(t *testing.T) {
+	engine.RegistActionRunner("common", &actions.CommonActionRunner{})
+
 	param := make(map[string]interface{})
 
 	files, _ := ioutil.ReadDir(demo_path)
@@ -43,6 +45,7 @@ func TestAll(t *testing.T) {
 //测试分步执行
 func TestDemo1ByStep(t *testing.T) {
 	param := make(map[string]interface{})
+	engine.RegistActionRunner("common", &actions.CommonActionRunner{})
 
 	data, _ := ioutil.ReadFile(demo_path + "/1简单流程.json")
 
@@ -74,6 +77,7 @@ func TestDemo1ByStep(t *testing.T) {
 //测试超时退出机制
 func TestDemo1WithTimeout(t *testing.T) {
 	param := make(map[string]interface{})
+	engine.RegistActionRunner("common", &actions.CommonActionRunner{})
 
 	data, _ := ioutil.ReadFile(demo_path + "/1简单流程.json")
 
