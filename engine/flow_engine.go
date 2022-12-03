@@ -151,7 +151,10 @@ func CreateSession(context context.Context, store RuntimeStore, router FlowRoute
 	return session
 }
 
-func (s *Session) StartChannel() {
+func (s *Session) startChannel() {
+
+	go s.watch()
+
 	flow := s.GetFlow()
 
 	w_action := &sync.WaitGroup{}
@@ -173,6 +176,10 @@ func (s *Session) StartChannel() {
 
 func (s *Session) Execute() {
 	s.Cmd = 0
+
+	s.startChannel()
+	defer s.stopChannel()
+
 	//是否全新执行
 	firstRun := true
 	runningActions := s.Store.GetRunningActions()
@@ -205,7 +212,7 @@ func (s *Session) Execute() {
 
 	}
 
-	go s.watch()
+	s.waitComplete()
 
 }
 
@@ -215,11 +222,11 @@ func (s *Session) Stop() {
 	fmt.Println("stop...............................")
 }
 
-func (s *Session) WaitComplete() {
+func (s *Session) waitComplete() {
 	s.Store.Wait()
 }
 
-func (s *Session) StopChannel() {
+func (s *Session) stopChannel() {
 
 	s.Stop()
 	flow := s.GetFlow()
@@ -530,10 +537,8 @@ func Execute(store RuntimeStore, router FlowRouter, runner FlowRunner, timeout i
 	context, _ := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(timeout))
 
 	session := CreateSession(context, store, router, runner)
-	session.StartChannel()
+
 	session.Execute()
-	session.WaitComplete()
-	session.StopChannel()
 }
 
 func ExecuteRuntime(runtime *models.RuntimeModel, timeout int64) *models.RuntimeModel {
