@@ -25,6 +25,7 @@ type RuntimeStore interface {
 	RefreshState()
 
 	SetBegin()
+	SetEnd()
 
 	GetRunningActions() []*models.ActionParam
 	GetRunningLinks() []*models.LinkParam
@@ -72,8 +73,6 @@ func (s *CommonRuntimeStore) RefreshState() {
 	if (s.Runtime.RunningActions == nil || len(s.Runtime.RunningActions) == 0) &&
 		(s.Runtime.RunningLinks == nil || len(s.Runtime.RunningLinks) == 0) {
 		s.Runtime.FlowState = 1
-		s.Runtime.EndTime = time.Now()
-		s.Runtime.Timeused = s.Runtime.EndTime.Sub(s.Runtime.BeginTime).Milliseconds()
 	}
 }
 
@@ -104,7 +103,7 @@ func (s *CommonRuntimeStore) AddLog(tp, tag, title, content string) {
 	if s.Runtime == nil {
 		return
 	}
-	s.Runtime.AddLog("flow", "stop", "中断", "执行中断")
+	s.Runtime.AddLog(tp, tag, title, content)
 }
 
 func (s *CommonRuntimeStore) SetRuntime(runtime *models.RuntimeModel) {
@@ -127,7 +126,13 @@ func (s *CommonRuntimeStore) SetBegin() {
 	}
 	s.Runtime.BeginTime = time.Now()
 }
-
+func (s *CommonRuntimeStore) SetEnd() {
+	if s.Runtime == nil {
+		return
+	}
+	s.Runtime.EndTime = time.Now()
+	s.Runtime.Timeused = s.Runtime.EndTime.Sub(s.Runtime.BeginTime).Milliseconds()
+}
 func (s *CommonRuntimeStore) GetRunningActions() []*models.ActionParam {
 	if s.Runtime == nil {
 		return nil

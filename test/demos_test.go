@@ -98,7 +98,7 @@ func TestDemo1WithTimeout(t *testing.T) {
 
 //测试通用流程处理器
 func TestFlowRunner(t *testing.T) {
-	var timeout int64 = 1000
+	var timeout int64 = 3000
 	engine.RegistActionRunner("common", &actions.CommonActionRunner{})
 
 	param := make(map[string]interface{})

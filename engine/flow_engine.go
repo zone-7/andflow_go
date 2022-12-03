@@ -176,10 +176,13 @@ func (s *Session) startChannel() {
 
 func (s *Session) Execute() {
 
-	s.Store.SetCmd(0)
-
 	s.startChannel()
 	defer s.stopChannel()
+
+	s.Store.SetBegin()
+	defer s.Store.SetEnd()
+
+	s.Store.SetCmd(0)
 
 	//是否全新执行
 	firstRun := true
@@ -202,7 +205,6 @@ func (s *Session) Execute() {
 
 	if firstRun {
 
-		s.Store.SetBegin()
 		runtimeId := s.Store.GetRuntime().Id
 
 		startIds := s.GetFlow().GetStartActionIds()
