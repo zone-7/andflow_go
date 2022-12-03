@@ -206,7 +206,7 @@ func (s *Session) Execute() {
 
 		startIds := s.GetFlow().GetStartActionIds()
 		for _, actionId := range startIds {
-			param := &models.ActionParam{RuntimeId: runtimeId, ActionId: actionId, PreActionId: ""}
+			param := &models.ActionParam{RuntimeId: runtimeId, ActionId: actionId, PreActionId: "", Timeout: s.Store.GetTimeout()}
 			s.ToAction(param)
 		}
 
@@ -344,7 +344,7 @@ func (s *Session) ExecuteAction(param *models.ActionParam) {
 					continue
 				}
 
-				linkParam := &models.LinkParam{RuntimeId: param.RuntimeId, SourceId: link.SourceId, TargetId: link.TargetId}
+				linkParam := &models.LinkParam{RuntimeId: param.RuntimeId, SourceId: link.SourceId, TargetId: link.TargetId, Timeout: param.Timeout}
 				s.ToLink(linkParam)
 			}
 		}
@@ -465,7 +465,7 @@ func (s *Session) ExecuteLink(param *models.LinkParam) {
 		}
 
 		if canNext {
-			actionParam := &models.ActionParam{RuntimeId: param.RuntimeId, ActionId: param.TargetId, PreActionId: param.SourceId}
+			actionParam := &models.ActionParam{RuntimeId: param.RuntimeId, ActionId: param.TargetId, PreActionId: param.SourceId, Timeout: param.Timeout}
 			s.ToAction(actionParam)
 		}
 
@@ -500,7 +500,6 @@ func CreateRuntime(flow *models.FlowModel, param map[string]interface{}) *models
 	id := strings.ReplaceAll(uid.String(), "-", "")
 	runtime.Id = id
 	runtime.Flow = flow
-
 	runtime.FlowState = 0
 	runtime.Des = flow.Name
 	//初始化状态
@@ -544,7 +543,6 @@ func Execute(store RuntimeStore, router FlowRouter, runner FlowRunner, timeout i
 }
 
 func ExecuteRuntime(runtime *models.RuntimeModel, timeout int64) *models.RuntimeModel {
-
 	runner := &CommonFlowRunner{}
 	router := &CommonFlowRouter{}
 	store := &CommonRuntimeStore{}
@@ -559,6 +557,7 @@ func ExecuteRuntime(runtime *models.RuntimeModel, timeout int64) *models.Runtime
 
 func ExecuteFlow(flow *models.FlowModel, param map[string]interface{}, timeout int64) *models.RuntimeModel {
 	runtime := CreateRuntime(flow, param)
+
 	runner := &CommonFlowRunner{}
 	router := &CommonFlowRouter{}
 	store := &CommonRuntimeStore{}

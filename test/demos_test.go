@@ -94,7 +94,7 @@ func TestDemo1WithTimeout(t *testing.T) {
 
 //测试通用流程处理器
 func TestFlowRunner(t *testing.T) {
-
+	var timeout int64 = 1000
 	engine.RegistActionRunner("common", &actions.CommonActionRunner{})
 
 	param := make(map[string]interface{})
@@ -108,11 +108,11 @@ func TestFlowRunner(t *testing.T) {
 
 	runtime := engine.CreateRuntime(flow, param)
 
-	engine.ExecuteRuntime(runtime, 10000)
+	engine.ExecuteRuntime(runtime, timeout)
 
 	runtime.SetParam("name", "zgq")
 
-	engine.ExecuteRuntime(runtime, 10000)
+	engine.ExecuteRuntime(runtime, timeout)
 
 	fmt.Println("time used(ms):", runtime.Timeused)
 	fmt.Println("--------------------------------------------")
@@ -121,7 +121,7 @@ func TestFlowRunner(t *testing.T) {
 
 //测试在javascript中执行 系统命令
 func TestScriptCmd(t *testing.T) {
-
+	var timeout int64 = 1000
 	engine.RegistActionRunner("common", &actions.CommonActionRunner{})
 
 	param := make(map[string]interface{})
@@ -135,7 +135,7 @@ func TestScriptCmd(t *testing.T) {
 
 	runtime := engine.CreateRuntime(flow, param)
 
-	engine.ExecuteRuntime(runtime, 1000)
+	engine.ExecuteRuntime(runtime, timeout)
 
 	fmt.Println("time used(ms):", runtime.Timeused)
 	fmt.Println("--------------------------------------------")

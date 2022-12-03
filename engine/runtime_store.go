@@ -12,6 +12,8 @@ type RuntimeStore interface {
 	SetRuntime(runtime *models.RuntimeModel)
 	GetRuntime() *models.RuntimeModel
 	GetFlow() *models.FlowModel
+	SetTimeout(timeout int64)
+	GetTimeout() int64
 
 	WaitAdd(int)
 	WaitDone()
@@ -83,6 +85,12 @@ func (s *CommonRuntimeStore) WaitDone() {
 }
 func (s *CommonRuntimeStore) Wait() {
 	s.Wg.Wait()
+}
+func (s *CommonRuntimeStore) SetTimeout(timeout int64) {
+	s.Timeout = timeout
+}
+func (s *CommonRuntimeStore) GetTimeout() int64 {
+	return s.Timeout
 }
 
 func (s *CommonRuntimeStore) AddLog(tp, tag, title, content string) {
