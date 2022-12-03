@@ -553,6 +553,7 @@ func ExecuteRuntime(runtime *models.RuntimeModel, timeout int64) *models.Runtime
 	store.SetRuntime(runtime)
 
 	Execute(store, router, runner, timeout)
+	runtime = store.GetRuntime()
 
 	return runtime
 
@@ -567,7 +568,7 @@ func ExecuteFlow(flow *models.FlowModel, param map[string]interface{}, timeout i
 	store.Init(runtime.Id, timeout)
 	store.SetRuntime(runtime)
 	Execute(store, router, runner, timeout)
-
+	runtime = store.GetRuntime()
 	return runtime
 
 }
