@@ -3,7 +3,7 @@ package engine
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"log"
 	"strings"
 	"sync"
 	"time"
@@ -117,9 +117,8 @@ func (s *Session) watch() {
 		select {
 		case <-s.Ctx.Done():
 			s.Stop()
-			// s.Runtime.AddLog("flow", "stop", "中断", "执行中断")
 			s.Store.AddLog("flow", "stop", "中断", "执行中断")
-			fmt.Println("执行中断")
+			log.Println("执行超时，中断退出")
 			return
 		default:
 			if s.Store.GetCmd() == 1 {
@@ -222,7 +221,7 @@ func (s *Session) Execute() {
 func (s *Session) Stop() {
 
 	s.Store.SetCmd(1)
-	fmt.Println("stop...............................")
+	log.Println("停止执行")
 }
 
 func (s *Session) waitComplete() {

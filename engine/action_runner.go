@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os/exec"
 	"reflect"
 	"strings"
@@ -31,6 +32,13 @@ func GetActionRunner(name string) ActionRunner {
 	if runner == nil {
 		runner = actionRunnerMap["common"]
 	}
+	if runner == nil {
+		runner = actionRunnerMap["*"]
+	}
+	if runner == nil {
+		runner = actionRunnerMap[""]
+	}
+
 	return runner
 }
 func GetScriptIntResult(val goja.Value) int {
@@ -110,7 +118,7 @@ func GetScriptIntResult(val goja.Value) int {
 }
 
 //设置脚本函数
-func SetScriptFun(rts *goja.Runtime, session *Session, preActionId string, actionId string, islink bool) {
+func SetScriptFunc(rts *goja.Runtime, session *Session, preActionId string, actionId string, islink bool) {
 	tp := ""
 	tag := ""
 	title := ""
@@ -210,11 +218,27 @@ func SetScriptFun(rts *goja.Runtime, session *Session, preActionId string, actio
 		res, err := cmd(command, timeout)
 
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return goja.Null()
 		}
 
 		return rts.ToValue(res)
+	})
+	//等待
+	rts.Set("sleep", func(call goja.FunctionCall) goja.Value {
+		arg0 := call.Argument(0)
+
+		var timeout int64
+
+		if arg0.Equals(goja.Undefined()) || arg0.Equals(goja.Null()) {
+			return goja.Null()
+		} else {
+			timeout = arg0.ToInteger()
+		}
+
+		time.Sleep(time.Duration(timeout) * time.Millisecond)
+
+		return goja.Null()
 	})
 
 	//保存参数，（缓存数据）

@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"fmt"
+	"log"
 	"strings"
 
 	"github.com/dop251/goja"
@@ -27,7 +27,7 @@ func (r *CommonFlowRunner) ExecuteLink(s *Session, param *models.LinkParam) int 
 	rts.Set("flow", s.GetFlow())
 	rts.Set("link", link)
 
-	SetScriptFun(rts, s, param.SourceId, param.TargetId, true)
+	SetScriptFunc(rts, s, param.SourceId, param.TargetId, true)
 
 	script := "function $exec(){\n" + sc + "\n}\n $exec();\n"
 	val, err := rts.RunString(script)
@@ -51,12 +51,12 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *models.ActionParam) 
 	action := s.GetFlow().GetAction(param.ActionId)
 	name := action.Name
 
-	fmt.Println("开始执行节点：" + action.Name + " " + action.Title)
-	defer fmt.Println("结束执行节点：" + action.Name + " " + action.Title)
+	log.Println("开始执行节点：" + action.Name + " " + action.Title)
+	defer log.Println("结束执行节点：" + action.Name + " " + action.Title)
 
 	runner := GetActionRunner(name)
 	if runner == nil {
-		fmt.Println("找不到节点" + name + "的执行器")
+		log.Println("找不到节点" + name + "的执行器")
 		return 1
 	}
 	res, err := runner.Execute(s, param)

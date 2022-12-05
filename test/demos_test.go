@@ -16,7 +16,7 @@ var i int = 0
 
 //执行所有流程
 func TestAll(t *testing.T) {
-	engine.RegistActionRunner("common", &actions.CommonActionRunner{})
+	engine.RegistActionRunner("common", &actions.ScriptActionRunner{})
 
 	param := make(map[string]interface{})
 
@@ -45,7 +45,7 @@ func TestAll(t *testing.T) {
 //测试分步执行
 func TestDemo1ByStep(t *testing.T) {
 	param := make(map[string]interface{})
-	engine.RegistActionRunner("common", &actions.CommonActionRunner{})
+	engine.RegistActionRunner("common", &actions.ScriptActionRunner{})
 
 	data, _ := ioutil.ReadFile(demo_path + "/1简单流程.json")
 
@@ -77,7 +77,7 @@ func TestDemo1ByStep(t *testing.T) {
 //测试超时退出机制
 func TestDemo1WithTimeout(t *testing.T) {
 	param := make(map[string]interface{})
-	engine.RegistActionRunner("common", &actions.CommonActionRunner{})
+	engine.RegistActionRunner("common", &actions.ScriptActionRunner{})
 
 	data, _ := ioutil.ReadFile(demo_path + "/1简单流程.json")
 
@@ -99,7 +99,7 @@ func TestDemo1WithTimeout(t *testing.T) {
 //测试通用流程处理器
 func TestFlowRunner(t *testing.T) {
 	var timeout int64 = 3000
-	engine.RegistActionRunner("common", &actions.CommonActionRunner{})
+	engine.RegistActionRunner("common", &actions.ScriptActionRunner{})
 
 	param := make(map[string]interface{})
 
@@ -126,7 +126,7 @@ func TestFlowRunner(t *testing.T) {
 //测试在javascript中执行 系统命令
 func TestScriptCmd(t *testing.T) {
 	var timeout int64 = 1000
-	engine.RegistActionRunner("common", &actions.CommonActionRunner{})
+	engine.RegistActionRunner("common", &actions.ScriptActionRunner{})
 
 	param := make(map[string]interface{})
 

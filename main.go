@@ -19,7 +19,7 @@ func main() {
 		return
 	}
 	//注册执行器
-	engine.RegistActionRunner("common", &actions.CommonActionRunner{})
+	engine.RegistActionRunner("common", &actions.ScriptActionRunner{})
 
 	param := make(map[string]interface{})
 
