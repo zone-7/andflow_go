@@ -53,11 +53,12 @@ type RuntimeStore interface {
 }
 
 type CommonRuntimeStore struct {
-	Timeout   int64
-	Cmd       int
-	RuntimeId string
-	Wg        sync.WaitGroup //同步控制
-	Runtime   *models.RuntimeModel
+	Timeout    int64
+	Cmd        int
+	RuntimeId  string
+	Wg         sync.WaitGroup //同步控制
+	Runtime    *models.RuntimeModel
+	ChangeFunc func(event string, runtime *models.RuntimeModel)
 }
 
 func (s *CommonRuntimeStore) Init(runtimeId string, timeout int64) {
@@ -125,6 +126,9 @@ func (s *CommonRuntimeStore) SetBegin() {
 		return
 	}
 	s.Runtime.BeginTime = time.Now()
+	if s.ChangeFunc != nil {
+		s.ChangeFunc("begin", s.Runtime)
+	}
 }
 func (s *CommonRuntimeStore) SetEnd() {
 	if s.Runtime == nil {
@@ -132,6 +136,10 @@ func (s *CommonRuntimeStore) SetEnd() {
 	}
 	s.Runtime.EndTime = time.Now()
 	s.Runtime.Timeused = s.Runtime.EndTime.Sub(s.Runtime.BeginTime).Milliseconds()
+
+	if s.ChangeFunc != nil {
+		s.ChangeFunc("end", s.Runtime)
+	}
 }
 func (s *CommonRuntimeStore) GetRunningActions() []*models.ActionParam {
 	if s.Runtime == nil {
@@ -152,6 +160,9 @@ func (s *CommonRuntimeStore) AddRunningAction(param *models.ActionParam) {
 		return
 	}
 	s.Runtime.AddRunningAction(param)
+	if s.ChangeFunc != nil {
+		s.ChangeFunc("action_running_add", s.Runtime)
+	}
 }
 
 func (s *CommonRuntimeStore) DelRunningAction(param *models.ActionParam) {
@@ -159,6 +170,9 @@ func (s *CommonRuntimeStore) DelRunningAction(param *models.ActionParam) {
 		return
 	}
 	s.Runtime.DelRunningAction(param)
+	if s.ChangeFunc != nil {
+		s.ChangeFunc("action_running_del", s.Runtime)
+	}
 }
 
 func (s *CommonRuntimeStore) AddRunningLink(param *models.LinkParam) {
@@ -166,12 +180,18 @@ func (s *CommonRuntimeStore) AddRunningLink(param *models.LinkParam) {
 		return
 	}
 	s.Runtime.AddRunningLink(param)
+	if s.ChangeFunc != nil {
+		s.ChangeFunc("link_running_add", s.Runtime)
+	}
 }
 func (s *CommonRuntimeStore) DelRunningLink(param *models.LinkParam) {
 	if s.Runtime == nil {
 		return
 	}
 	s.Runtime.DelRunningLink(param)
+	if s.ChangeFunc != nil {
+		s.ChangeFunc("link_running_del", s.Runtime)
+	}
 }
 
 func (s *CommonRuntimeStore) AddActionState(state *models.ActionStateModel) {
@@ -179,12 +199,18 @@ func (s *CommonRuntimeStore) AddActionState(state *models.ActionStateModel) {
 		return
 	}
 	s.Runtime.AddActionState(state)
+	if s.ChangeFunc != nil {
+		s.ChangeFunc("action_state_add", s.Runtime)
+	}
 }
 func (s *CommonRuntimeStore) AddLinkState(state *models.LinkStateModel) {
 	if s.Runtime == nil {
 		return
 	}
 	s.Runtime.AddLinkState(state)
+	if s.ChangeFunc != nil {
+		s.ChangeFunc("link_state_add", s.Runtime)
+	}
 }
 
 func (s *CommonRuntimeStore) GetLastActionState(actionId string) *models.ActionStateModel {
@@ -206,6 +232,9 @@ func (s *CommonRuntimeStore) SetParam(key string, val interface{}) {
 		return
 	}
 	s.Runtime.SetParam(key, val)
+	if s.ChangeFunc != nil {
+		s.ChangeFunc("param_set", s.Runtime)
+	}
 }
 func (s *CommonRuntimeStore) GetParam(key string) interface{} {
 	return s.Runtime.GetParam(key)
@@ -221,6 +250,9 @@ func (s *CommonRuntimeStore) SetData(key string, val interface{}) {
 		return
 	}
 	s.Runtime.SetData(key, val)
+	if s.ChangeFunc != nil {
+		s.ChangeFunc("data_set", s.Runtime)
+	}
 }
 func (s *CommonRuntimeStore) GetData(key string) interface{} {
 	if s.Runtime == nil {
@@ -240,6 +272,9 @@ func (s *CommonRuntimeStore) SetActionData(actionId string, name string, val int
 		return
 	}
 	s.Runtime.SetActionData(actionId, name, val)
+	if s.ChangeFunc != nil {
+		s.ChangeFunc("action_data_set", s.Runtime)
+	}
 }
 func (s *CommonRuntimeStore) GetActionData(actionId string, name string) interface{} {
 	if s.Runtime == nil {
@@ -253,4 +288,8 @@ func (s *CommonRuntimeStore) GetActionDataMap(actionId string) map[string]interf
 		return nil
 	}
 	return s.Runtime.GetActionDataMap(actionId)
+}
+
+func (s *CommonRuntimeStore) SetChangeFunc(f func(event string, runtime *models.RuntimeModel)) {
+	s.ChangeFunc = f
 }
