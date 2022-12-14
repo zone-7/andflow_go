@@ -20,6 +20,29 @@ type ActionModel struct {
 	Content    map[string]string `bson:"content" json:"content"`         //内容
 }
 
+func (m *ActionModel) GetParam(name string) string {
+	if m.Params != nil {
+		return m.Params[name]
+	}
+	return ""
+}
+func (m *ActionModel) SetParam(name string, value string) {
+	if m.Params == nil {
+		m.Params = make(map[string]string)
+	}
+
+	m.Params[name] = value
+}
+func (m *ActionModel) SetContent(content_type string, content string) {
+	m.Content = map[string]string{"content_type": content_type, "content": content}
+}
+func (m *ActionModel) GetContent() (string, string) {
+	if m.Content == nil {
+		return "", ""
+	}
+	return m.Content["content_type"], m.Content["content"]
+}
+
 type LinkModel struct {
 	Title          string `bson:"title" json:"title"`                     //标题
 	SourceId       string `bson:"source_id" json:"source_id"`             //源ID
