@@ -8,12 +8,12 @@ import (
 )
 
 type ScriptActionRunner struct {
-	funcs map[string]func(args ...interface{}) interface{}
+	funcs map[string]func(s *engine.Session, param *engine.ActionParam, args ...interface{}) interface{}
 }
 
-func (a *ScriptActionRunner) SetActionFunc(name string, act func(args ...interface{}) interface{}) {
+func (a *ScriptActionRunner) SetActionFunc(name string, act func(s *engine.Session, param *engine.ActionParam, args ...interface{}) interface{}) {
 	if a.funcs == nil {
-		a.funcs = make(map[string]func(args ...interface{}) interface{})
+		a.funcs = make(map[string]func(s *engine.Session, param *engine.ActionParam, args ...interface{}) interface{})
 	}
 	a.funcs[name] = act
 }
@@ -41,7 +41,7 @@ func (a *ScriptActionRunner) Execute(s *engine.Session, param *engine.ActionPara
 						args = append(args, value.Export())
 					}
 				}
-				res := f(args)
+				res := f(s, param, args)
 				return rts.ToValue(res)
 			})
 		}
