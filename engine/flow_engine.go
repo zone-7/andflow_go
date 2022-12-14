@@ -7,12 +7,11 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/zone-7/andflow_go/models"
 )
 
-func ParseFlow(content string) (*models.FlowModel, error) {
+func ParseFlow(content string) (*FlowModel, error) {
 
-	flowModel := models.FlowModel{}
+	flowModel := FlowModel{}
 	err := json.Unmarshal([]byte(content), &flowModel)
 	if err != nil {
 		return nil, err
@@ -21,8 +20,8 @@ func ParseFlow(content string) (*models.FlowModel, error) {
 }
 
 //创建运行时
-func CreateRuntime(flow *models.FlowModel, param map[string]interface{}) *models.RuntimeModel {
-	runtime := models.RuntimeModel{}
+func CreateRuntime(flow *FlowModel, param map[string]interface{}) *RuntimeModel {
+	runtime := RuntimeModel{}
 	uid, _ := uuid.NewV4()
 	id := strings.ReplaceAll(uid.String(), "-", "")
 	runtime.Id = id
@@ -31,24 +30,24 @@ func CreateRuntime(flow *models.FlowModel, param map[string]interface{}) *models
 	runtime.Des = flow.Name
 	//初始化状态
 	if runtime.ActionStates == nil {
-		runtime.ActionStates = make([]*models.ActionStateModel, 0)
+		runtime.ActionStates = make([]*ActionStateModel, 0)
 	}
 	//初始化下一步执行的连接线
 	if runtime.RunningLinks == nil {
-		runtime.RunningLinks = make([]*models.LinkParam, 0)
+		runtime.RunningLinks = make([]*LinkParam, 0)
 	}
 	if runtime.RunningActions == nil {
-		runtime.RunningActions = make([]*models.ActionParam, 0)
+		runtime.RunningActions = make([]*ActionParam, 0)
 	}
 
 	//初始化日志
 	if runtime.Logs == nil {
-		runtime.Logs = make([]*models.LogModel, 0)
+		runtime.Logs = make([]*LogModel, 0)
 	}
 
 	//初始化数据
 	if runtime.Data == nil {
-		runtime.Data = make([]*models.RuntimeDataModel, 0)
+		runtime.Data = make([]*RuntimeDataModel, 0)
 	}
 	//初始化参数
 	if param != nil {
@@ -69,7 +68,7 @@ func Execute(store RuntimeStore, router FlowRouter, runner FlowRunner, timeout i
 	session.Execute()
 }
 
-func ExecuteRuntime(runtime *models.RuntimeModel, timeout int64) *models.RuntimeModel {
+func ExecuteRuntime(runtime *RuntimeModel, timeout int64) *RuntimeModel {
 	runner := &CommonFlowRunner{}
 	router := &CommonFlowRouter{}
 	store := &CommonRuntimeStore{}
@@ -83,7 +82,7 @@ func ExecuteRuntime(runtime *models.RuntimeModel, timeout int64) *models.Runtime
 
 }
 
-func ExecuteFlow(flow *models.FlowModel, param map[string]interface{}, timeout int64) *models.RuntimeModel {
+func ExecuteFlow(flow *FlowModel, param map[string]interface{}, timeout int64) *RuntimeModel {
 	runtime := CreateRuntime(flow, param)
 
 	runner := &CommonFlowRunner{}

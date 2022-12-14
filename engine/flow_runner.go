@@ -5,18 +5,17 @@ import (
 	"strings"
 
 	"github.com/dop251/goja"
-	"github.com/zone-7/andflow_go/models"
 )
 
 type FlowRunner interface {
-	ExecuteLink(s *Session, param *models.LinkParam) int     //返回三个状态 -1 不通过，1通过，0还没准备好执行
-	ExecuteAction(s *Session, param *models.ActionParam) int //返回三个状态 -1 不通过，1通过，0还没准备好执行
+	ExecuteLink(s *Session, param *LinkParam) int     //返回三个状态 -1 不通过，1通过，0还没准备好执行
+	ExecuteAction(s *Session, param *ActionParam) int //返回三个状态 -1 不通过，1通过，0还没准备好执行
 }
 
 type CommonFlowRunner struct {
 }
 
-func (r *CommonFlowRunner) ExecuteLink(s *Session, param *models.LinkParam) int {
+func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam) int {
 	link := s.GetFlow().GetLinkBySourceIdAndTargetId(param.SourceId, param.TargetId)
 	sc := link.Filter
 	if len(strings.Trim(sc, " ")) == 0 {
@@ -46,7 +45,7 @@ func (r *CommonFlowRunner) ExecuteLink(s *Session, param *models.LinkParam) int 
 	return res
 }
 
-func (r *CommonFlowRunner) ExecuteAction(s *Session, param *models.ActionParam) int {
+func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam) int {
 
 	action := s.GetFlow().GetAction(param.ActionId)
 	name := action.Name

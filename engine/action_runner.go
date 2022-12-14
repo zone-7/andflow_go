@@ -15,13 +15,12 @@ import (
 	"time"
 
 	"github.com/dop251/goja"
-	"github.com/zone-7/andflow_go/models"
 )
 
 var actionRunnerMap map[string]ActionRunner = make(map[string]ActionRunner)
 
 type ActionRunner interface {
-	Execute(s *Session, param *models.ActionParam) (int, error)
+	Execute(s *Session, param *ActionParam) (int, error)
 }
 
 func RegistActionRunner(name string, runner ActionRunner) {

@@ -5,7 +5,6 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/zone-7/andflow_go/engine"
-	"github.com/zone-7/andflow_go/models"
 )
 
 type ScriptActionRunner struct {
@@ -19,7 +18,7 @@ func (a *ScriptActionRunner) SetActionFunc(name string, act func(args ...interfa
 	a.funcs[name] = act
 }
 
-func (a *ScriptActionRunner) Execute(s *engine.Session, param *models.ActionParam) (int, error) {
+func (a *ScriptActionRunner) Execute(s *engine.Session, param *engine.ActionParam) (int, error) {
 
 	action := s.GetFlow().GetAction(param.ActionId)
 

@@ -3,15 +3,14 @@ package engine
 import (
 	"sync"
 	"time"
-
-	"github.com/zone-7/andflow_go/models"
+ 
 )
 
 type RuntimeStore interface {
 	Init(runtimeId string, timeout int64)
-	SetRuntime(runtime *models.RuntimeModel)
-	GetRuntime() *models.RuntimeModel
-	GetFlow() *models.FlowModel
+	SetRuntime(runtime *RuntimeModel)
+	GetRuntime() *RuntimeModel
+	GetFlow() *FlowModel
 	SetTimeout(timeout int64)
 	GetTimeout() int64
 	SetCmd(c int)
@@ -27,18 +26,18 @@ type RuntimeStore interface {
 	SetBegin()
 	SetEnd()
 
-	GetRunningActions() []*models.ActionParam
-	GetRunningLinks() []*models.LinkParam
-	AddRunningAction(param *models.ActionParam)
-	DelRunningAction(param *models.ActionParam)
-	AddRunningLink(param *models.LinkParam)
-	DelRunningLink(param *models.LinkParam)
+	GetRunningActions() []*ActionParam
+	GetRunningLinks() []*LinkParam
+	AddRunningAction(param *ActionParam)
+	DelRunningAction(param *ActionParam)
+	AddRunningLink(param *LinkParam)
+	DelRunningLink(param *LinkParam)
 
-	AddActionState(state *models.ActionStateModel)
-	AddLinkState(state *models.LinkStateModel)
+	AddActionState(state *ActionStateModel)
+	AddLinkState(state *LinkStateModel)
 
-	GetLastActionState(actionId string) *models.ActionStateModel
-	GetLastLinkState(sourceId string, targetId string) *models.LinkStateModel
+	GetLastActionState(actionId string) *ActionStateModel
+	GetLastLinkState(sourceId string, targetId string) *LinkStateModel
 
 	SetParam(key string, val interface{})
 	GetParam(key string) interface{}
@@ -57,8 +56,8 @@ type CommonRuntimeStore struct {
 	Cmd        int
 	RuntimeId  string
 	Wg         sync.WaitGroup //同步控制
-	Runtime    *models.RuntimeModel
-	ChangeFunc func(event string, runtime *models.RuntimeModel)
+	Runtime    *RuntimeModel
+	ChangeFunc func(event string, runtime *RuntimeModel)
 }
 
 func (s *CommonRuntimeStore) Init(runtimeId string, timeout int64) {
@@ -107,14 +106,14 @@ func (s *CommonRuntimeStore) AddLog(tp, tag, title, content string) {
 	s.Runtime.AddLog(tp, tag, title, content)
 }
 
-func (s *CommonRuntimeStore) SetRuntime(runtime *models.RuntimeModel) {
+func (s *CommonRuntimeStore) SetRuntime(runtime *RuntimeModel) {
 	s.Runtime = runtime
 }
 
-func (s *CommonRuntimeStore) GetRuntime() *models.RuntimeModel {
+func (s *CommonRuntimeStore) GetRuntime() *RuntimeModel {
 	return s.Runtime
 }
-func (s *CommonRuntimeStore) GetFlow() *models.FlowModel {
+func (s *CommonRuntimeStore) GetFlow() *FlowModel {
 	if s.Runtime == nil {
 		return nil
 	}
@@ -141,21 +140,21 @@ func (s *CommonRuntimeStore) SetEnd() {
 		s.ChangeFunc("end", s.Runtime)
 	}
 }
-func (s *CommonRuntimeStore) GetRunningActions() []*models.ActionParam {
+func (s *CommonRuntimeStore) GetRunningActions() []*ActionParam {
 	if s.Runtime == nil {
 		return nil
 	}
 	return s.Runtime.RunningActions
 }
 
-func (s *CommonRuntimeStore) GetRunningLinks() []*models.LinkParam {
+func (s *CommonRuntimeStore) GetRunningLinks() []*LinkParam {
 	if s.Runtime == nil {
 		return nil
 	}
 	return s.Runtime.RunningLinks
 }
 
-func (s *CommonRuntimeStore) AddRunningAction(param *models.ActionParam) {
+func (s *CommonRuntimeStore) AddRunningAction(param *ActionParam) {
 	if s.Runtime == nil {
 		return
 	}
@@ -165,7 +164,7 @@ func (s *CommonRuntimeStore) AddRunningAction(param *models.ActionParam) {
 	}
 }
 
-func (s *CommonRuntimeStore) DelRunningAction(param *models.ActionParam) {
+func (s *CommonRuntimeStore) DelRunningAction(param *ActionParam) {
 	if s.Runtime == nil {
 		return
 	}
@@ -175,7 +174,7 @@ func (s *CommonRuntimeStore) DelRunningAction(param *models.ActionParam) {
 	}
 }
 
-func (s *CommonRuntimeStore) AddRunningLink(param *models.LinkParam) {
+func (s *CommonRuntimeStore) AddRunningLink(param *LinkParam) {
 	if s.Runtime == nil {
 		return
 	}
@@ -184,7 +183,7 @@ func (s *CommonRuntimeStore) AddRunningLink(param *models.LinkParam) {
 		s.ChangeFunc("link_running_add", s.Runtime)
 	}
 }
-func (s *CommonRuntimeStore) DelRunningLink(param *models.LinkParam) {
+func (s *CommonRuntimeStore) DelRunningLink(param *LinkParam) {
 	if s.Runtime == nil {
 		return
 	}
@@ -194,7 +193,7 @@ func (s *CommonRuntimeStore) DelRunningLink(param *models.LinkParam) {
 	}
 }
 
-func (s *CommonRuntimeStore) AddActionState(state *models.ActionStateModel) {
+func (s *CommonRuntimeStore) AddActionState(state *ActionStateModel) {
 	if s.Runtime == nil {
 		return
 	}
@@ -203,7 +202,7 @@ func (s *CommonRuntimeStore) AddActionState(state *models.ActionStateModel) {
 		s.ChangeFunc("action_state_add", s.Runtime)
 	}
 }
-func (s *CommonRuntimeStore) AddLinkState(state *models.LinkStateModel) {
+func (s *CommonRuntimeStore) AddLinkState(state *LinkStateModel) {
 	if s.Runtime == nil {
 		return
 	}
@@ -213,14 +212,14 @@ func (s *CommonRuntimeStore) AddLinkState(state *models.LinkStateModel) {
 	}
 }
 
-func (s *CommonRuntimeStore) GetLastActionState(actionId string) *models.ActionStateModel {
+func (s *CommonRuntimeStore) GetLastActionState(actionId string) *ActionStateModel {
 	if s.Runtime == nil {
 		return nil
 	}
 	return s.Runtime.GetLastActionState(actionId)
 }
 
-func (s *CommonRuntimeStore) GetLastLinkState(sourceId string, targetId string) *models.LinkStateModel {
+func (s *CommonRuntimeStore) GetLastLinkState(sourceId string, targetId string) *LinkStateModel {
 	if s.Runtime == nil {
 		return nil
 	}
@@ -290,6 +289,6 @@ func (s *CommonRuntimeStore) GetActionDataMap(actionId string) map[string]interf
 	return s.Runtime.GetActionDataMap(actionId)
 }
 
-func (s *CommonRuntimeStore) SetChangeFunc(f func(event string, runtime *models.RuntimeModel)) {
+func (s *CommonRuntimeStore) SetChangeFunc(f func(event string, runtime *RuntimeModel)) {
 	s.ChangeFunc = f
 }
