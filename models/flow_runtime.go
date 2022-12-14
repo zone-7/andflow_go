@@ -308,8 +308,15 @@ func (a *RuntimeModel) SetParam(key string, value interface{}) {
 	if !exists {
 		a.Param = append(a.Data, &RuntimeDataModel{Name: key, Value: value})
 	}
-
 }
+
+func (a *RuntimeModel) SetParamMap(param map[string]interface{}) {
+
+	for k, v := range param {
+		a.SetParam(k, v)
+	}
+}
+
 func (a *RuntimeModel) DelParam(key string) {
 	if a.Param == nil {
 		return
