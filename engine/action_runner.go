@@ -19,8 +19,16 @@ import (
 
 var actionRunnerMap map[string]ActionRunner = make(map[string]ActionRunner)
 
+type Result int
+
+const (
+	SUCCESS Result = 1  //执行通过
+	REJECT  Result = 0  //没有执行
+	FAILURE Result = -1 //执行失败
+)
+
 type ActionRunner interface {
-	Execute(s *Session, param *ActionParam) (int, error)
+	Execute(s *Session, param *ActionParam) (Result, error)
 }
 
 func RegistActionRunner(name string, runner ActionRunner) {
@@ -40,80 +48,80 @@ func GetActionRunner(name string) ActionRunner {
 
 	return runner
 }
-func GetScriptIntResult(val goja.Value) int {
+func GetScriptIntResult(val goja.Value) Result {
 	obj := val.Export()
 	switch obj.(type) {
 	case bool:
 		if obj.(bool) {
-			return 1
+			return SUCCESS //1
 		} else {
-			return -1
+			return FAILURE // -1
 		}
 	case string:
 		if obj.(string) == "true" {
-			return 1
+			return SUCCESS
 		} else if obj.(string) == "false" {
-			return -1
+			return FAILURE
 		} else if obj.(string) == "1" {
-			return 1
+			return SUCCESS
 		} else if obj.(string) == "-1" {
-			return -1
+			return FAILURE
 		} else if obj.(string) == "0" {
-			return 0
+			return FAILURE
 		}
 	case int:
 		if obj.(int) > 0 {
-			return 1
+			return SUCCESS
 		} else if obj.(int) < 0 {
 			return -1
 		} else {
-			return 0
+			return FAILURE
 		}
 	case int64:
 		if obj.(int64) > 0 {
-			return 1
+			return SUCCESS
 		} else if obj.(int64) < 0 {
-			return -1
+			return FAILURE
 		} else {
-			return 0
+			return FAILURE
 		}
 	case int32:
 		if obj.(int32) > 0 {
-			return 1
+			return SUCCESS
 		} else if obj.(int32) < 0 {
-			return -1
+			return FAILURE
 		} else {
-			return 0
+			return FAILURE
 		}
 	case int16:
 		if obj.(int16) > 0 {
-			return 1
+			return SUCCESS
 		} else if obj.(int16) < 0 {
-			return -1
+			return FAILURE
 		} else {
-			return 0
+			return FAILURE
 		}
 	case float64:
 		if obj.(float64) > 0 {
-			return 1
+			return SUCCESS
 		} else if obj.(float64) < 0 {
-			return -1
+			return FAILURE
 		} else {
-			return 0
+			return FAILURE
 		}
 	case float32:
 		if obj.(float32) > 0 {
-			return 1
+			return SUCCESS
 		} else if obj.(float32) < 0 {
-			return -1
+			return FAILURE
 		} else {
-			return 0
+			return FAILURE
 		}
 	default:
-		return 0
+		return FAILURE
 
 	}
-	return 0
+	return FAILURE
 }
 
 //设置脚本函数

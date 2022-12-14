@@ -18,7 +18,7 @@ func (a *ScriptActionRunner) SetActionFunc(name string, act func(s *engine.Sessi
 	a.funcs[name] = act
 }
 
-func (a *ScriptActionRunner) Execute(s *engine.Session, param *engine.ActionParam) (int, error) {
+func (a *ScriptActionRunner) Execute(s *engine.Session, param *engine.ActionParam) (engine.Result, error) {
 
 	action := s.GetFlow().GetAction(param.ActionId)
 

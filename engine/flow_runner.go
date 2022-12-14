@@ -8,14 +8,14 @@ import (
 )
 
 type FlowRunner interface {
-	ExecuteLink(s *Session, param *LinkParam) int     //返回三个状态 -1 不通过，1通过，0还没准备好执行
-	ExecuteAction(s *Session, param *ActionParam) int //返回三个状态 -1 不通过，1通过，0还没准备好执行
+	ExecuteLink(s *Session, param *LinkParam) Result     //返回三个状态 -1 不通过，1通过，0还没准备好执行
+	ExecuteAction(s *Session, param *ActionParam) Result //返回三个状态 -1 不通过，1通过，0还没准备好执行
 }
 
 type CommonFlowRunner struct {
 }
 
-func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam) int {
+func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam) Result {
 	link := s.GetFlow().GetLinkBySourceIdAndTargetId(param.SourceId, param.TargetId)
 	sc := link.Filter
 	if len(strings.Trim(sc, " ")) == 0 {
@@ -45,7 +45,7 @@ func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam) int {
 	return res
 }
 
-func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam) int {
+func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam) Result {
 
 	action := s.GetFlow().GetAction(param.ActionId)
 	name := action.Name
@@ -55,8 +55,8 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam) int {
 
 	runner := GetActionRunner(name)
 	if runner == nil {
-		log.Println("找不到节点" + name + "的执行器")
-		return 1
+		log.Println("找不到节点" + name + "的执行器,继续执行")
+		return SUCCESS
 	}
 	res, err := runner.Execute(s, param)
 
@@ -66,7 +66,7 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam) int {
 			actionState.IsError = 1
 		}
 
-		return 0
+		return FAILURE
 	}
 
 	return res
