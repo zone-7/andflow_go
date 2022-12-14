@@ -3,7 +3,6 @@ package engine
 import (
 	"sync"
 	"time"
- 
 )
 
 type RuntimeStore interface {
@@ -18,6 +17,8 @@ type RuntimeStore interface {
 	WaitAdd(int)
 	WaitDone()
 	Wait()
+
+	Save()
 
 	AddLog(tp, tag, title, content string)
 
@@ -52,12 +53,13 @@ type RuntimeStore interface {
 }
 
 type CommonRuntimeStore struct {
-	Timeout    int64
-	Cmd        int
-	RuntimeId  string
-	Wg         sync.WaitGroup //同步控制
-	Runtime    *RuntimeModel
-	ChangeFunc func(event string, runtime *RuntimeModel)
+	Timeout      int64
+	Cmd          int
+	RuntimeId    string
+	Wg           sync.WaitGroup //同步控制
+	Runtime      *RuntimeModel
+	OnChangeFunc func(event string, runtime *RuntimeModel)
+	OnSaveFunc   func(runtime *RuntimeModel)
 }
 
 func (s *CommonRuntimeStore) Init(runtimeId string, timeout int64) {
@@ -125,8 +127,8 @@ func (s *CommonRuntimeStore) SetBegin() {
 		return
 	}
 	s.Runtime.BeginTime = time.Now()
-	if s.ChangeFunc != nil {
-		s.ChangeFunc("begin", s.Runtime)
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("begin", s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) SetEnd() {
@@ -136,8 +138,8 @@ func (s *CommonRuntimeStore) SetEnd() {
 	s.Runtime.EndTime = time.Now()
 	s.Runtime.Timeused = s.Runtime.EndTime.Sub(s.Runtime.BeginTime).Milliseconds()
 
-	if s.ChangeFunc != nil {
-		s.ChangeFunc("end", s.Runtime)
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("end", s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) GetRunningActions() []*ActionParam {
@@ -159,8 +161,8 @@ func (s *CommonRuntimeStore) AddRunningAction(param *ActionParam) {
 		return
 	}
 	s.Runtime.AddRunningAction(param)
-	if s.ChangeFunc != nil {
-		s.ChangeFunc("action_running_add", s.Runtime)
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("action_running_add", s.Runtime)
 	}
 }
 
@@ -169,8 +171,8 @@ func (s *CommonRuntimeStore) DelRunningAction(param *ActionParam) {
 		return
 	}
 	s.Runtime.DelRunningAction(param)
-	if s.ChangeFunc != nil {
-		s.ChangeFunc("action_running_del", s.Runtime)
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("action_running_del", s.Runtime)
 	}
 }
 
@@ -179,8 +181,8 @@ func (s *CommonRuntimeStore) AddRunningLink(param *LinkParam) {
 		return
 	}
 	s.Runtime.AddRunningLink(param)
-	if s.ChangeFunc != nil {
-		s.ChangeFunc("link_running_add", s.Runtime)
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("link_running_add", s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) DelRunningLink(param *LinkParam) {
@@ -188,8 +190,8 @@ func (s *CommonRuntimeStore) DelRunningLink(param *LinkParam) {
 		return
 	}
 	s.Runtime.DelRunningLink(param)
-	if s.ChangeFunc != nil {
-		s.ChangeFunc("link_running_del", s.Runtime)
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("link_running_del", s.Runtime)
 	}
 }
 
@@ -198,8 +200,8 @@ func (s *CommonRuntimeStore) AddActionState(state *ActionStateModel) {
 		return
 	}
 	s.Runtime.AddActionState(state)
-	if s.ChangeFunc != nil {
-		s.ChangeFunc("action_state_add", s.Runtime)
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("action_state_add", s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) AddLinkState(state *LinkStateModel) {
@@ -207,8 +209,8 @@ func (s *CommonRuntimeStore) AddLinkState(state *LinkStateModel) {
 		return
 	}
 	s.Runtime.AddLinkState(state)
-	if s.ChangeFunc != nil {
-		s.ChangeFunc("link_state_add", s.Runtime)
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("link_state_add", s.Runtime)
 	}
 }
 
@@ -231,8 +233,8 @@ func (s *CommonRuntimeStore) SetParam(key string, val interface{}) {
 		return
 	}
 	s.Runtime.SetParam(key, val)
-	if s.ChangeFunc != nil {
-		s.ChangeFunc("param_set", s.Runtime)
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("param_set", s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) GetParam(key string) interface{} {
@@ -249,8 +251,8 @@ func (s *CommonRuntimeStore) SetData(key string, val interface{}) {
 		return
 	}
 	s.Runtime.SetData(key, val)
-	if s.ChangeFunc != nil {
-		s.ChangeFunc("data_set", s.Runtime)
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("data_set", s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) GetData(key string) interface{} {
@@ -271,8 +273,8 @@ func (s *CommonRuntimeStore) SetActionData(actionId string, name string, val int
 		return
 	}
 	s.Runtime.SetActionData(actionId, name, val)
-	if s.ChangeFunc != nil {
-		s.ChangeFunc("action_data_set", s.Runtime)
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("action_data_set", s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) GetActionData(actionId string, name string) interface{} {
@@ -289,6 +291,16 @@ func (s *CommonRuntimeStore) GetActionDataMap(actionId string) map[string]interf
 	return s.Runtime.GetActionDataMap(actionId)
 }
 
-func (s *CommonRuntimeStore) SetChangeFunc(f func(event string, runtime *RuntimeModel)) {
-	s.ChangeFunc = f
+func (s *CommonRuntimeStore) Save() {
+	if s.OnSaveFunc != nil {
+		s.OnSaveFunc(s.Runtime)
+	}
+}
+
+func (s *CommonRuntimeStore) SetOnChangeFunc(f func(event string, runtime *RuntimeModel)) {
+	s.OnChangeFunc = f
+}
+
+func (s *CommonRuntimeStore) SetOnSaveFunc(f func(runtime *RuntimeModel)) {
+	s.OnSaveFunc = f
 }
