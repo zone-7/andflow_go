@@ -482,14 +482,8 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 	}
 
 }
-func (s *Session) ExecuteFlow(flow *FlowModel, param map[string]interface{}, timeout int64) {
+func (s *Session) ExecuteFlow(flow *FlowModel, param map[string]interface{}, timeout int64) *RuntimeModel {
 	runtime := ExecuteFlow(flow, param, timeout)
-	if runtime != nil {
-		ds := runtime.GetDataMap()
-		if ds != nil {
-			for k, v := range ds {
-				s.Store.SetData(k, v)
-			}
-		}
-	}
+
+	return runtime
 }
