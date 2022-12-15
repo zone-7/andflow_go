@@ -67,6 +67,49 @@ func (s *Session) GetFlow() *FlowModel {
 	return flow
 }
 
+func (s *Session) GetRuntime() *RuntimeModel {
+	runtime := s.Store.GetRuntime()
+	return runtime
+}
+
+func (s *Session) GetParam(key string) interface{} {
+	return s.Store.GetParam(key)
+}
+func (s *Session) SetParam(key string, val interface{}) {
+	s.Store.SetParam(key, val)
+}
+
+func (s *Session) GetData(key string) interface{} {
+	return s.Store.GetData(key)
+}
+func (s *Session) SetData(key string, val interface{}) {
+	s.Store.SetData(key, val)
+}
+
+func (s *Session) AddLog_flow_error(title, content string) {
+	s.Store.AddLog("error", "flow", title, content)
+}
+
+func (s *Session) AddLog_flow_info(title, content string) {
+	s.Store.AddLog("info", "flow", title, content)
+}
+
+func (s *Session) AddLog_action_error(title, content string) {
+	s.Store.AddLog("error", "action", title, content)
+}
+
+func (s *Session) AddLog_action_info(title, content string) {
+	s.Store.AddLog("info", "action", title, content)
+}
+
+func (s *Session) AddLog_link_error(title, content string) {
+	s.Store.AddLog("error", "link", title, content)
+}
+
+func (s *Session) AddLog_link_info(title, content string) {
+	s.Store.AddLog("info", "link", title, content)
+}
+
 func (s *Session) createActionState(actionId string, preActionId string) *ActionStateModel {
 	flow := s.GetFlow()
 
@@ -482,6 +525,7 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 	}
 
 }
+
 func (s *Session) ExecuteFlow(flow *FlowModel, param map[string]interface{}, timeout int64) *RuntimeModel {
 	runtime := ExecuteFlow(flow, param, timeout)
 
