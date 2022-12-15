@@ -344,7 +344,13 @@ func (a *RuntimeModel) GetParam(key string) interface{} {
 	}
 	return nil
 }
-
+func (a *RuntimeModel) SetActionIcon(actionId string, icon string) {
+	actionState := a.GetLastActionState(actionId)
+	if actionState == nil {
+		return
+	}
+	actionState.ActionIcon = icon
+}
 func (a *RuntimeModel) SetActionData(actionId string, name string, value interface{}) {
 	actionState := a.GetLastActionState(actionId)
 	if actionState == nil {

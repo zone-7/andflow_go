@@ -50,6 +50,7 @@ type RuntimeStore interface {
 	SetActionData(actionId string, name string, val interface{})
 	GetActionData(actionId string, name string) interface{}
 	GetActionDataMap(actionId string) map[string]interface{}
+	SetActionIcon(actionId string, icon string)
 }
 
 type CommonRuntimeStore struct {
@@ -289,6 +290,16 @@ func (s *CommonRuntimeStore) GetActionDataMap(actionId string) map[string]interf
 		return nil
 	}
 	return s.Runtime.GetActionDataMap(actionId)
+}
+
+func (s *CommonRuntimeStore) SetActionIcon(actionId string, icon string) {
+	if s.Runtime == nil {
+		return
+	}
+	s.Runtime.SetActionIcon(actionId, icon)
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("action_data_set", s.Runtime)
+	}
 }
 
 func (s *CommonRuntimeStore) Save() {
