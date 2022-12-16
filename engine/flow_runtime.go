@@ -110,6 +110,7 @@ type RuntimeModel struct {
 	Message        string              `bson:"message" json:"message"`                 //信息
 	CreateTime     time.Time           `bson:"create_time" json:"create_time"`         //创建时间
 	UpdateTime     time.Time           `bson:"update_time" json:"update_time"`         //修改时间
+	UserId         int64               `bson:"user_id" json:"user_id"`
 }
 
 func (a *ActionStateModel) SetData(name string, value interface{}) {
