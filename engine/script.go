@@ -18,6 +18,10 @@ import (
 )
 
 func GetScriptIntResult(val goja.Value) Result {
+	if val == goja.Null() || val == goja.NaN() {
+		return SUCCESS
+	}
+
 	obj := val.Export()
 	switch obj.(type) {
 	case bool:
@@ -96,18 +100,15 @@ func GetScriptIntResult(val goja.Value) Result {
 //设置脚本函数
 func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string, actionId string, islink bool) {
 	tp := ""
-	tag := ""
 	title := ""
 	if islink {
 		tp = "link"
-		tag = preActionId + "->" + actionId
-		link := session.GetFlow().GetLinkBySourceIdAndTargetId(preActionId, actionId)
-		title = link.Title
+		title = preActionId + "->" + actionId
+
 	} else {
 		tp = "action"
-		tag = actionId
 		action := session.GetFlow().GetAction(actionId)
-		title = action.Title
+		title = action.Name
 	}
 
 	//日志
@@ -134,9 +135,12 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 					val = string(b)
 				}
 			}
-
 		}
-		session.Store.AddLog(tp, tag, title, val)
+		if tp == "link" {
+			session.AddLog_link_info(title, val)
+		} else {
+			session.AddLog_action_info(title, val)
+		}
 
 		return value
 	})
@@ -336,7 +340,7 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 					session.Store.SetData(k, v)
 				}
 			default:
-				session.Store.AddLog(tp, tag, title, "SetDatas参数非Map类型")
+				return goja.Null()
 
 			}
 

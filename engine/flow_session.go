@@ -364,20 +364,27 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 
 	actionState := s.createActionState(param.ActionId, param.PreActionId)
 
+	var res Result = SUCCESS
 	complete := true
 	canNext := true
 	if s.Runner != nil {
-		res := s.Runner.ExecuteAction(s, param)
-		if res != 1 {
+		res = s.Runner.ExecuteAction(s, param)
+		if res != SUCCESS {
 			canNext = false
 		}
-		if res == 0 {
+		if res == REJECT {
 			complete = false
 		}
 	}
 
+	actionState.State = int(res)
+
+	if res == FAILURE {
+		actionState.IsError = 1
+	}
+
 	if canNext {
-		actionState.State = 1
+
 		flow := s.GetFlow()
 
 		nextLinks := flow.GetLinkBySourceId(param.ActionId)
@@ -391,9 +398,8 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 				s.ToLink(linkParam)
 			}
 		}
-	} else {
-		actionState.State = -1
 	}
+
 	if complete {
 		s.Store.DelRunningAction(param) //删除待执行节点中已经执行完成的节点
 
@@ -471,21 +477,25 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 
 	linkState := s.createLinkState(param.SourceId, param.TargetId)
 
+	var res Result = SUCCESS
 	complete := true
 	toNext := true
 	if s.Runner != nil {
-		res := s.Runner.ExecuteLink(s, param)
-		if res != 1 {
+		res = s.Runner.ExecuteLink(s, param)
+		if res != SUCCESS {
 			toNext = false
 		}
-
-		if res == 0 {
+		if res == REJECT {
 			complete = false
 		}
 	}
 
+	linkState.State = int(res)
+	if res == FAILURE {
+		linkState.IsError = 1
+	}
+
 	if toNext {
-		linkState.State = 1
 
 		canNext := true
 		flow := s.GetFlow()
@@ -512,8 +522,6 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 			s.ToAction(actionParam)
 		}
 
-	} else {
-		linkState.State = -1
 	}
 
 	if complete {

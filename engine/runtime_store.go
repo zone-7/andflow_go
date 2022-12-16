@@ -50,6 +50,11 @@ type RuntimeStore interface {
 	GetActionData(actionId string, name string) interface{}
 	GetActionDataMap(actionId string) map[string]interface{}
 	SetActionIcon(actionId string, icon string)
+	SetActionError(actionId string, isError int)
+	SetActionState(actionId string, state int)
+
+	SetLinkError(sourceId string, targetId string, isError int)
+	SetLinkState(sourceId string, targetId string, state int)
 }
 
 type CommonRuntimeStore struct {
@@ -306,6 +311,43 @@ func (s *CommonRuntimeStore) SetActionIcon(actionId string, icon string) {
 	s.Runtime.SetActionIcon(actionId, icon)
 	if s.OnChangeFunc != nil {
 		s.OnChangeFunc("action_icon_set", s.Runtime)
+	}
+}
+func (s *CommonRuntimeStore) SetActionState(actionId string, state int) {
+	if s.Runtime == nil {
+		return
+	}
+	s.Runtime.SetActionState(actionId, state)
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("action_state_set", s.Runtime)
+	}
+}
+func (s *CommonRuntimeStore) SetActionError(actionId string, isError int) {
+	if s.Runtime == nil {
+		return
+	}
+	s.Runtime.SetActionError(actionId, isError)
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("action_error_set", s.Runtime)
+	}
+}
+
+func (s *CommonRuntimeStore) SetLinkState(sourceId, targetId string, state int) {
+	if s.Runtime == nil {
+		return
+	}
+	s.Runtime.SetLinkState(sourceId, targetId, state)
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("link_state_set", s.Runtime)
+	}
+}
+func (s *CommonRuntimeStore) SetLinkError(sourceId, targetId string, isError int) {
+	if s.Runtime == nil {
+		return
+	}
+	s.Runtime.SetLinkError(sourceId, targetId, isError)
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("link_error_set", s.Runtime)
 	}
 }
 

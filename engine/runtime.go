@@ -346,6 +346,37 @@ func (a *RuntimeModel) GetParam(key string) interface{} {
 	}
 	return nil
 }
+
+func (a *RuntimeModel) SetLinkState(sourceId, targetId string, state int) {
+	linkState := a.GetLastLinkState(sourceId, targetId)
+	if linkState == nil {
+		return
+	}
+	linkState.State = state
+}
+
+func (a *RuntimeModel) SetLinkError(sourceId, targetId string, isError int) {
+	linkState := a.GetLastLinkState(sourceId, targetId)
+	if linkState == nil {
+		return
+	}
+	linkState.IsError = isError
+}
+func (a *RuntimeModel) SetActionError(actionId string, isError int) {
+	actionState := a.GetLastActionState(actionId)
+	if actionState == nil {
+		return
+	}
+	actionState.IsError = isError
+}
+func (a *RuntimeModel) SetActionState(actionId string, state int) {
+	actionState := a.GetLastActionState(actionId)
+	if actionState == nil {
+		return
+	}
+	actionState.State = state
+}
+
 func (a *RuntimeModel) SetActionIcon(actionId string, icon string) {
 	actionState := a.GetLastActionState(actionId)
 	if actionState == nil {

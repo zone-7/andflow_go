@@ -16,6 +16,7 @@ type ActionModel struct {
 	Params     map[string]string `bson:"params" json:"params"`           //参数
 	Collect    string            `bson:"collect" json:"collect"`         //true：所有路线到达节点后才执行；false：任意一个路径到达都执行
 	Once       string            `bson:"once" json:"once"`               //是否只执行一次： true，false
+	Filter     string            `bson:"filter" json:"filter"`           //执行过滤脚本
 	Script     string            `bson:"script" json:"script"`           //执行内容脚本
 	Content    map[string]string `bson:"content" json:"content"`         //内容
 }
