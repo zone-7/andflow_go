@@ -9,6 +9,8 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+var runnings map[string]*Session = make(map[string]*Session)
+
 func ParseFlow(content string) (*FlowModel, error) {
 
 	flowModel := FlowModel{}
@@ -60,12 +62,23 @@ func CreateRuntime(flow *FlowModel, param map[string]interface{}) *RuntimeModel 
 	return &runtime
 }
 
+func GetSessions() map[string]*Session {
+	return runnings
+}
+func GetSession(runtimeId string) *Session {
+	return runnings[runtimeId]
+}
+
 func Execute(store RuntimeStore, router FlowRouter, runner FlowRunner, timeout int64) {
 	context, _ := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(timeout))
 
 	session := CreateSession(context, store, router, runner)
 
+	runnings[session.GetRuntime().Id] = session
+	defer delete(runnings, session.GetRuntime().Id)
+
 	session.Execute()
+
 }
 
 func ExecuteRuntime(runtime *RuntimeModel, timeout int64) *RuntimeModel {
