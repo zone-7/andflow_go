@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"encoding/json"
 	"time"
 )
 
@@ -439,4 +440,9 @@ func (r *RuntimeModel) DelRunningAction(param *ActionParam) {
 			return
 		}
 	}
+}
+
+func (r *RuntimeModel) ToJson() string {
+	data, _ := json.Marshal(r)
+	return string(data)
 }
