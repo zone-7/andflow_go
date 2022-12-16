@@ -6,12 +6,10 @@ import (
 )
 
 type RuntimeStore interface {
-	Init(runtimeId string, timeout int64)
+	Init(runtimeId string)
 	SetRuntime(runtime *RuntimeModel)
 	GetRuntime() *RuntimeModel
 	GetFlow() *FlowModel
-	SetTimeout(timeout int64)
-	GetTimeout() int64
 	SetCmd(c int)
 	GetCmd() int
 	WaitAdd(int)
@@ -55,7 +53,6 @@ type RuntimeStore interface {
 }
 
 type CommonRuntimeStore struct {
-	Timeout      int64
 	Cmd          int
 	RuntimeId    string
 	Wg           sync.WaitGroup //同步控制
@@ -64,8 +61,8 @@ type CommonRuntimeStore struct {
 	OnSaveFunc   func(runtime *RuntimeModel)
 }
 
-func (s *CommonRuntimeStore) Init(runtimeId string, timeout int64) {
-	s.Timeout = timeout
+func (s *CommonRuntimeStore) Init(runtimeId string) {
+
 	s.RuntimeId = runtimeId
 	s.Wg = sync.WaitGroup{}
 }
@@ -91,12 +88,6 @@ func (s *CommonRuntimeStore) SetCmd(c int) {
 }
 func (s *CommonRuntimeStore) GetCmd() int {
 	return s.Cmd
-}
-func (s *CommonRuntimeStore) SetTimeout(timeout int64) {
-	s.Timeout = timeout
-}
-func (s *CommonRuntimeStore) GetTimeout() int64 {
-	return s.Timeout
 }
 
 func (s *CommonRuntimeStore) AddLog(tp, tag, title, content string) {

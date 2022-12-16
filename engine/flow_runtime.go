@@ -10,7 +10,7 @@ type ActionParam struct {
 	RuntimeId   string `json:"runtime_id"`
 	ActionId    string `json:"action_id"`     //当前节点ID
 	PreActionId string `json:"pre_action_id"` //上一个节点ID
-	Timeout     int64  `json:"timeout"`
+	// Timeout     int64  `json:"timeout"`
 
 	Cmd int `json:"cmd"` //指令  1:停止,2.3.4..
 }
@@ -20,8 +20,8 @@ type LinkParam struct {
 	RuntimeId string `json:"runtime_id"`
 	SourceId  string `json:"source_id"` //源ID
 	TargetId  string `json:"target_id"` //目的ID
-	Timeout   int64  `json:"timeout"`
-	Cmd       int    `json:"stop"` //指令  1:停止,2.3.4..
+	// Timeout   int64  `json:"timeout"`
+	Cmd int `json:"stop"` //指令  1:停止,2.3.4..
 }
 
 //节点内容

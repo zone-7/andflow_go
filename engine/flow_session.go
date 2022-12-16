@@ -249,7 +249,7 @@ func (s *Session) Execute() {
 
 		startIds := s.GetFlow().GetStartActionIds()
 		for _, actionId := range startIds {
-			param := &ActionParam{RuntimeId: runtimeId, ActionId: actionId, PreActionId: "", Timeout: s.Store.GetTimeout()}
+			param := &ActionParam{RuntimeId: runtimeId, ActionId: actionId, PreActionId: ""}
 			s.ToAction(param)
 		}
 
@@ -387,7 +387,7 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 					continue
 				}
 
-				linkParam := &LinkParam{RuntimeId: param.RuntimeId, SourceId: link.SourceId, TargetId: link.TargetId, Timeout: param.Timeout}
+				linkParam := &LinkParam{RuntimeId: param.RuntimeId, SourceId: link.SourceId, TargetId: link.TargetId}
 				s.ToLink(linkParam)
 			}
 		}
@@ -508,7 +508,7 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 		}
 
 		if canNext {
-			actionParam := &ActionParam{RuntimeId: param.RuntimeId, ActionId: param.TargetId, PreActionId: param.SourceId, Timeout: param.Timeout}
+			actionParam := &ActionParam{RuntimeId: param.RuntimeId, ActionId: param.TargetId, PreActionId: param.SourceId}
 			s.ToAction(actionParam)
 		}
 

@@ -70,9 +70,13 @@ func GetSession(runtimeId string) *Session {
 }
 
 func Execute(store RuntimeStore, router FlowRouter, runner FlowRunner, timeout int64) {
-	context, _ := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(timeout))
 
-	session := CreateSession(context, store, router, runner)
+	ctx := context.Background()
+	if timeout > 0 {
+		ctx, _ = context.WithTimeout(ctx, time.Millisecond*time.Duration(timeout))
+	}
+
+	session := CreateSession(ctx, store, router, runner)
 
 	runnings[session.GetRuntime().Id] = session
 	defer delete(runnings, session.GetRuntime().Id)
@@ -85,7 +89,7 @@ func ExecuteRuntime(runtime *RuntimeModel, timeout int64) *RuntimeModel {
 	runner := &CommonFlowRunner{}
 	router := &CommonFlowRouter{}
 	store := &CommonRuntimeStore{}
-	store.Init(runtime.Id, timeout)
+	store.Init(runtime.Id)
 	store.SetRuntime(runtime)
 
 	Execute(store, router, runner, timeout)
@@ -101,7 +105,7 @@ func ExecuteFlow(flow *FlowModel, param map[string]interface{}, timeout int64) *
 	runner := &CommonFlowRunner{}
 	router := &CommonFlowRouter{}
 	store := &CommonRuntimeStore{}
-	store.Init(runtime.Id, timeout)
+	store.Init(runtime.Id)
 	store.SetRuntime(runtime)
 	Execute(store, router, runner, timeout)
 	runtime = store.GetRuntime()
