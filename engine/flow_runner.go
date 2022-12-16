@@ -13,6 +13,14 @@ type FlowRunner interface {
 }
 
 type CommonFlowRunner struct {
+	funcs map[string]func(s *Session, args ...interface{}) interface{}
+}
+
+func (r *CommonFlowRunner) SetActionFunc(name string, act func(s *Session, args ...interface{}) interface{}) {
+	if r.funcs == nil {
+		r.funcs = make(map[string]func(s *Session, args ...interface{}) interface{})
+	}
+	r.funcs[name] = act
 }
 
 func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam) Result {
@@ -26,7 +34,28 @@ func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam) Result {
 	rts.Set("flow", s.GetFlow())
 	rts.Set("link", link)
 
-	SetScriptFunc(rts, s, param.SourceId, param.TargetId, true)
+	if r.funcs != nil {
+		for name, f := range r.funcs {
+			rts.Set(name, func(call goja.FunctionCall) goja.Value {
+				values := call.Arguments
+				args := make([]interface{}, 0)
+				for _, value := range values {
+					if value.Equals(goja.Undefined()) || value.Equals(goja.Null()) {
+						args = append(args, nil)
+					} else {
+						args = append(args, value.Export())
+					}
+				}
+				res := f(s, args)
+				if res == nil {
+					return goja.Null()
+				}
+				return rts.ToValue(res)
+			})
+		}
+	}
+
+	SetCommonScriptFunc(rts, s, param.SourceId, param.TargetId, true)
 
 	script := "function $exec(){\n" + sc + "\n}\n $exec();\n"
 	val, err := rts.RunString(script)

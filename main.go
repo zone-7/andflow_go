@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/zone-7/andflow_go/actions"
 	"github.com/zone-7/andflow_go/engine"
 )
 
@@ -19,7 +18,7 @@ func main() {
 		return
 	}
 	//注册执行器
-	engine.RegistActionRunner("common", &actions.ScriptActionRunner{})
+	engine.RegistActionRunner("common", &engine.ScriptActionRunner{})
 
 	param := make(map[string]interface{})
 
