@@ -26,7 +26,8 @@ type RuntimeStore interface {
 
 	SetBegin()
 	SetEnd()
-
+	SetState(state int)
+	GetState() int
 	GetRunningActions() []*ActionParam
 	GetRunningLinks() []*LinkParam
 	AddRunningAction(param *ActionParam)
@@ -72,11 +73,7 @@ func (s *CommonRuntimeStore) RefreshState() {
 	if s.Runtime == nil {
 		return
 	}
-	//如果没有什么待办事项就表示执行完了
-	if (s.Runtime.RunningActions == nil || len(s.Runtime.RunningActions) == 0) &&
-		(s.Runtime.RunningLinks == nil || len(s.Runtime.RunningLinks) == 0) {
-		s.Runtime.FlowState = 1
-	}
+
 }
 
 func (s *CommonRuntimeStore) WaitAdd(d int) {
@@ -127,6 +124,7 @@ func (s *CommonRuntimeStore) SetBegin() {
 	if s.Runtime == nil {
 		return
 	}
+	s.Runtime.IsRunning = 1
 	s.Runtime.BeginTime = time.Now()
 	if s.OnChangeFunc != nil {
 		s.OnChangeFunc("begin", s.Runtime)
@@ -136,12 +134,30 @@ func (s *CommonRuntimeStore) SetEnd() {
 	if s.Runtime == nil {
 		return
 	}
+	s.Runtime.IsRunning = 0
 	s.Runtime.EndTime = time.Now()
 	s.Runtime.Timeused = s.Runtime.EndTime.Sub(s.Runtime.BeginTime).Milliseconds()
 
 	if s.OnChangeFunc != nil {
 		s.OnChangeFunc("end", s.Runtime)
 	}
+}
+
+func (s *CommonRuntimeStore) SetState(state int) {
+	if s.Runtime == nil {
+		return
+	}
+	s.Runtime.FlowState = state
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("state", s.Runtime)
+	}
+}
+
+func (s *CommonRuntimeStore) GetState() int {
+	if s.Runtime == nil {
+		return 0
+	}
+	return s.Runtime.FlowState
 }
 func (s *CommonRuntimeStore) GetRunningActions() []*ActionParam {
 	if s.Runtime == nil {
@@ -298,7 +314,7 @@ func (s *CommonRuntimeStore) SetActionIcon(actionId string, icon string) {
 	}
 	s.Runtime.SetActionIcon(actionId, icon)
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("action_data_set", s.Runtime)
+		s.OnChangeFunc("action_icon_set", s.Runtime)
 	}
 }
 
