@@ -53,7 +53,7 @@
 			"once": "false",
 			"collect": "false",
 			"filter":"return 1",
-			"script": "var res = cmd(\"ping 127.0.0.1\");\nprint(res);\n\nsetData(\"cmd\",res);\n\nreturn 1;"
+			"script": "var res = cmd(\"ping 127.0.0.1\");\nprint(res);\n\nsetData(\"cmd\",res);"
 		}
 	],
 	"links": [

@@ -18,11 +18,14 @@ import (
 )
 
 func GetScriptIntResult(val goja.Value) Result {
-	if val == goja.Null() || val == goja.NaN() {
+	if val == nil || val.Equals(goja.Undefined()) || val.Equals(goja.NaN()) || val.Equals(goja.Null()) {
 		return SUCCESS
 	}
 
 	obj := val.Export()
+	if obj == nil {
+		return SUCCESS
+	}
 	switch obj.(type) {
 	case bool:
 		if obj.(bool) {
