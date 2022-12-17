@@ -194,7 +194,7 @@ func (a *RuntimeModel) GetLastActionState(actionId string) *ActionStateModel {
 	i := len(a.ActionStates) - 1
 	for i >= 0 {
 		state := a.ActionStates[i]
-		if  state.ActionId == actionId {
+		if state.ActionId == actionId {
 			return state
 		}
 		i--
