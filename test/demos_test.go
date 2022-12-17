@@ -124,8 +124,8 @@ func TestFlowRunner(t *testing.T) {
 
 //测试在javascript中执行 系统命令
 func TestScriptCmd(t *testing.T) {
-	var timeout int64 = 1000
-	engine.RegistActionRunner("common", &engine.ScriptActionRunner{})
+	var timeout int64 = 10000
+	// engine.RegistActionRunner("common", &engine.ScriptActionRunner{})
 
 	param := make(map[string]interface{})
 

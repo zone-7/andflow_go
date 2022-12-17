@@ -79,7 +79,7 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam) Result 
 	log.Println("开始执行节点：" + action.Name + " " + action.Title)
 	defer log.Println("结束执行节点：" + action.Name + " " + action.Title)
 
-	//准备脚本执行环境
+	//0.准备脚本执行环境
 	rts := goja.New()
 	rts.Set("flow", s.GetFlow())
 	rts.Set("action", action)
@@ -107,7 +107,7 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam) Result 
 
 	SetCommonScriptFunc(rts, s, param.PreActionId, param.ActionId, false)
 
-	//执行过滤脚本
+	//1.执行过滤脚本
 	if len(strings.Trim(action.Filter, " ")) > 0 {
 
 		script_filter := "function $filter(){\n" + action.Filter + "\n}\n $filter();\n"
@@ -125,22 +125,19 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam) Result 
 
 	}
 
-	//执行节点
+	//2.执行节点执行器
 	runner := GetActionRunner(name)
-	if runner == nil {
-		log.Println("找不到节点" + name + "的执行器,继续执行")
-		return SUCCESS
-	}
-	res, err = runner.Execute(s, param)
-
-	if err != nil {
-		return FAILURE
-	}
-	if res != SUCCESS {
-		return res
+	if runner != nil {
+		res, err = runner.Execute(s, param)
+		if err != nil {
+			return FAILURE
+		}
+		if res != SUCCESS {
+			return res
+		}
 	}
 
-	//执行事后脚本
+	//3.执行事后脚本
 	if len(strings.Trim(action.Script, " ")) > 0 {
 
 		script_filter := "function $exec(){\n" + action.Script + "\n}\n $exec();\n"

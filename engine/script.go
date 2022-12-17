@@ -177,22 +177,22 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 	})
 	//执行命令行
 	rts.Set("cmd", func(call goja.FunctionCall) goja.Value {
-		arg0 := call.Argument(0)
-		arg1 := call.Argument(1)
+		arg0_cmd := call.Argument(0)
+		arg1_timeout := call.Argument(1)
 
 		var command string
 		var timeout int64
 
-		if arg0.Equals(goja.Undefined()) || arg0.Equals(goja.Null()) {
+		if arg0_cmd.Equals(goja.Undefined()) || arg0_cmd.Equals(goja.Null()) {
 			return goja.Null()
 		} else {
-			command = arg0.ToString().String()
+			command = arg0_cmd.ToString().String()
 		}
 
-		if arg1.Equals(goja.Undefined()) || arg1.Equals(goja.Null()) {
+		if arg1_timeout.Equals(goja.Undefined()) || arg1_timeout.Equals(goja.Null()) || arg1_timeout.Equals(goja.NaN()) {
 			timeout = 3000 //3秒
 		} else {
-			timeout = arg1.ToInteger()
+			timeout = arg1_timeout.ToInteger()
 		}
 
 		res, err := cmd(command, timeout)
