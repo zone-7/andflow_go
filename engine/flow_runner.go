@@ -16,7 +16,7 @@ type CommonFlowRunner struct {
 	funcs map[string]func(s *Session, args ...interface{}) interface{}
 }
 
-func (r *CommonFlowRunner) SetActionFunc(name string, act func(s *Session, args ...interface{}) interface{}) {
+func (r *CommonFlowRunner) SetScriptFunc(name string, act func(s *Session, args ...interface{}) interface{}) {
 	if r.funcs == nil {
 		r.funcs = make(map[string]func(s *Session, args ...interface{}) interface{})
 	}

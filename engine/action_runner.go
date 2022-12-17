@@ -42,7 +42,7 @@ type ScriptActionRunner struct {
 	funcs map[string]func(s *Session, param *ActionParam, args ...interface{}) interface{}
 }
 
-func (a *ScriptActionRunner) SetActionFunc(name string, act func(s *Session, param *ActionParam, args ...interface{}) interface{}) {
+func (a *ScriptActionRunner) SetScriptFunc(name string, act func(s *Session, param *ActionParam, args ...interface{}) interface{}) {
 	if a.funcs == nil {
 		a.funcs = make(map[string]func(s *Session, param *ActionParam, args ...interface{}) interface{})
 	}
