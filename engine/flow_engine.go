@@ -78,7 +78,7 @@ func Execute(store RuntimeStore, router FlowRouter, runner FlowRunner, timeout i
 
 	session := CreateSession(ctx, store, router, runner)
 
-	runnings[session.GetRuntime().Id] = session
+	runnings[session.Id] = session
 	defer delete(runnings, session.GetRuntime().Id)
 
 	session.Execute()

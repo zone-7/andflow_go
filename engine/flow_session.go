@@ -6,8 +6,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/gofrs/uuid"
 )
 
 var chan_len = 100
@@ -172,9 +170,9 @@ func (s *Session) watch() {
 
 func CreateSession(context context.Context, store RuntimeStore, router FlowRouter, runner FlowRunner) *Session {
 	session := &Session{}
-	uid, _ := uuid.NewV4()
-	id := strings.ReplaceAll(uid.String(), "-", "")
-	session.Id = id
+	// uid, _ := uuid.NewV4()
+	// id := strings.ReplaceAll(uid.String(), "-", "")
+	session.Id = store.GetRuntime().Id
 	session.Ctx = context
 	session.Router = router
 	session.Runner = runner
