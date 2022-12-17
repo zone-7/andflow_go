@@ -9,28 +9,28 @@ import (
 )
 
 type FlowRunner interface {
-	ExecuteLink(s *Session, param *LinkParam) (Result, error)     //返回三个状态 -1 不通过，1通过，0还没准备好执行
-	ExecuteAction(s *Session, param *ActionParam) (Result, error) //返回三个状态 -1 不通过，1通过，0还没准备好执行
+	ExecuteLink(s *Session, param *LinkParam, state *LinkStateModel) (Result, error)       //返回三个状态 -1 不通过，1通过，0还没准备好执行
+	ExecuteAction(s *Session, param *ActionParam, state *ActionStateModel) (Result, error) //返回三个状态 -1 不通过，1通过，0还没准备好执行
 }
 
 type CommonFlowRunner struct {
-	linkFuncs   map[string]func(s *Session, param *LinkParam, args ...interface{}) interface{}
-	actionFuncs map[string]func(s *Session, param *ActionParam, args ...interface{}) interface{}
+	linkFuncs   map[string]func(s *Session, param *LinkParam, state *LinkStateModel, args ...interface{}) interface{}
+	actionFuncs map[string]func(s *Session, param *ActionParam, state *ActionStateModel, args ...interface{}) interface{}
 }
 
-func (r *CommonFlowRunner) SetActionFunc(name string, act func(s *Session, param *ActionParam, args ...interface{}) interface{}) {
+func (r *CommonFlowRunner) SetActionFunc(name string, act func(s *Session, param *ActionParam, state *ActionStateModel, args ...interface{}) interface{}) {
 	if r.actionFuncs == nil {
-		r.actionFuncs = make(map[string]func(s *Session, param *ActionParam, args ...interface{}) interface{})
+		r.actionFuncs = make(map[string]func(s *Session, param *ActionParam, state *ActionStateModel, args ...interface{}) interface{})
 	}
 	r.actionFuncs[name] = act
 }
-func (r *CommonFlowRunner) SetLinkFunc(name string, act func(s *Session, param *LinkParam, args ...interface{}) interface{}) {
+func (r *CommonFlowRunner) SetLinkFunc(name string, act func(s *Session, param *LinkParam, state *LinkStateModel, args ...interface{}) interface{}) {
 	if r.linkFuncs == nil {
-		r.linkFuncs = make(map[string]func(s *Session, param *LinkParam, args ...interface{}) interface{})
+		r.linkFuncs = make(map[string]func(s *Session, param *LinkParam, state *LinkStateModel, args ...interface{}) interface{})
 	}
 	r.linkFuncs[name] = act
 }
-func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam) (Result, error) {
+func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam, state *LinkStateModel) (Result, error) {
 	link := s.GetFlow().GetLinkBySourceIdAndTargetId(param.SourceId, param.TargetId)
 	sc := link.Filter
 	if len(strings.Trim(sc, " ")) == 0 {
@@ -53,7 +53,7 @@ func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam) (Result, er
 						args = append(args, value.Export())
 					}
 				}
-				res := f(s, param, args)
+				res := f(s, param, state, args)
 				if res == nil {
 					return goja.Null()
 				}
@@ -76,7 +76,7 @@ func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam) (Result, er
 	return res, nil
 }
 
-func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam) (Result, error) {
+func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *ActionStateModel) (Result, error) {
 	var res Result = SUCCESS
 	var err error
 
@@ -103,7 +103,7 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam) (Result
 						args = append(args, value.Export())
 					}
 				}
-				r := f(s, param, args)
+				r := f(s, param, state, args)
 				if r == nil {
 					return goja.Null()
 				}
