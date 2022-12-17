@@ -260,7 +260,7 @@ func (s *Session) Execute() {
 func (s *Session) Stop() {
 
 	s.Store.SetCmd(1)
-	log.Println("停止执行")
+	log.Println("停止流程")
 }
 
 func (s *Session) waitComplete() {
