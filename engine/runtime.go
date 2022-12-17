@@ -191,7 +191,7 @@ func (a *RuntimeModel) GetLastActionState(actionId string) *ActionStateModel {
 	if a.ActionStates == nil {
 		return nil
 	}
-	i := len(a.ActionStates)
+	i := len(a.ActionStates) - 1
 	for i >= 0 {
 		state := a.ActionStates[i]
 		if state.ActionId == actionId {
@@ -211,7 +211,7 @@ func (a *RuntimeModel) GetLastLinkState(sourceId string, targetId string) *LinkS
 	if a.LinkStates == nil {
 		return nil
 	}
-	i := len(a.LinkStates)
+	i := len(a.LinkStates) - 1
 	for i >= 0 {
 		state := a.LinkStates[i]
 		if state.SourceActionId == sourceId && state.TargetActionId == targetId {
