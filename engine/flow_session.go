@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 	"sync"
@@ -366,7 +367,10 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 	complete := true
 	canNext := true
 	if s.Runner != nil {
-		res = s.Runner.ExecuteAction(s, param)
+		res, err := s.Runner.ExecuteAction(s, param)
+		if err != nil {
+			s.AddLog_action_error(actionState.ActionName, fmt.Sprintf("执行节点错误：%v", err))
+		}
 		if res != SUCCESS {
 			canNext = false
 		}
@@ -479,7 +483,10 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 	complete := true
 	toNext := true
 	if s.Runner != nil {
-		res = s.Runner.ExecuteLink(s, param)
+		res, err := s.Runner.ExecuteLink(s, param)
+		if err != nil {
+			s.AddLog_link_error(param.SourceId+"->"+param.TargetId, fmt.Sprintf("执行连线错误：%v", err))
+		}
 		if res != SUCCESS {
 			toNext = false
 		}

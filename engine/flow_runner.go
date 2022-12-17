@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -8,8 +9,8 @@ import (
 )
 
 type FlowRunner interface {
-	ExecuteLink(s *Session, param *LinkParam) Result     //返回三个状态 -1 不通过，1通过，0还没准备好执行
-	ExecuteAction(s *Session, param *ActionParam) Result //返回三个状态 -1 不通过，1通过，0还没准备好执行
+	ExecuteLink(s *Session, param *LinkParam) (Result, error)     //返回三个状态 -1 不通过，1通过，0还没准备好执行
+	ExecuteAction(s *Session, param *ActionParam) (Result, error) //返回三个状态 -1 不通过，1通过，0还没准备好执行
 }
 
 type CommonFlowRunner struct {
@@ -29,11 +30,11 @@ func (r *CommonFlowRunner) SetLinkFunc(name string, act func(s *Session, param *
 	}
 	r.linkFuncs[name] = act
 }
-func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam) Result {
+func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam) (Result, error) {
 	link := s.GetFlow().GetLinkBySourceIdAndTargetId(param.SourceId, param.TargetId)
 	sc := link.Filter
 	if len(strings.Trim(sc, " ")) == 0 {
-		return SUCCESS
+		return SUCCESS, nil
 	}
 
 	rts := goja.New()
@@ -67,15 +68,15 @@ func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam) Result {
 	val, err := rts.RunString(script)
 
 	if err != nil {
-		return FAILURE
+		return FAILURE, err
 	}
 
 	res := GetScriptIntResult(val)
 
-	return res
+	return res, nil
 }
 
-func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam) Result {
+func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam) (Result, error) {
 	var res Result = SUCCESS
 	var err error
 
@@ -120,13 +121,14 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam) Result 
 
 		val, err := rts.RunString(script_filter)
 		if err != nil {
-			return FAILURE
+			log.Println(fmt.Sprintf("执行脚本异常：%v", err))
+			return FAILURE, err
 		}
 
 		res := GetScriptIntResult(val)
 
 		if res != SUCCESS {
-			return res
+			return res, nil
 		}
 
 	}
@@ -136,10 +138,10 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam) Result 
 	if runner != nil {
 		res, err = runner.Execute(s, param)
 		if err != nil {
-			return FAILURE
+			return FAILURE, err
 		}
 		if res != SUCCESS {
-			return res
+			return res, nil
 		}
 	}
 
@@ -150,15 +152,17 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam) Result 
 
 		val, err := rts.RunString(script_filter)
 		if err != nil {
-			return FAILURE
+
+			log.Println(fmt.Sprintf("执行脚本异常：%v", err))
+			return FAILURE, err
 		}
 
 		res := GetScriptIntResult(val)
 
 		if res != SUCCESS {
-			return res
+			return res, nil
 		}
 	}
 
-	return res
+	return res, nil
 }
