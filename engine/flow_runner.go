@@ -14,10 +14,18 @@ type FlowRunner interface {
 }
 
 type CommonFlowRunner struct {
-	linkFuncs   map[string]func(s *Session, param *LinkParam, state *LinkStateModel, args ...interface{}) interface{}
-	actionFuncs map[string]func(s *Session, param *ActionParam, state *ActionStateModel, args ...interface{}) interface{}
+	linkFuncs        map[string]func(s *Session, param *LinkParam, state *LinkStateModel, args ...interface{}) interface{}
+	actionFuncs      map[string]func(s *Session, param *ActionParam, state *ActionStateModel, args ...interface{}) interface{}
+	actionScriptFunc func(rts *goja.Runtime, s *Session, param *ActionParam, state *ActionStateModel)
+	linkScriptFunc   func(rts *goja.Runtime, s *Session, param *LinkParam, state *LinkStateModel)
 }
 
+func (r *CommonFlowRunner) SetActionScript(act func(rts *goja.Runtime, s *Session, param *ActionParam, state *ActionStateModel)) {
+	r.actionScriptFunc = act
+}
+func (r *CommonFlowRunner) SetLinkScript(act func(rts *goja.Runtime, s *Session, param *LinkParam, state *LinkStateModel)) {
+	r.linkScriptFunc = act
+}
 func (r *CommonFlowRunner) SetActionFunc(name string, act func(s *Session, param *ActionParam, state *ActionStateModel, args ...interface{}) interface{}) {
 	if r.actionFuncs == nil {
 		r.actionFuncs = make(map[string]func(s *Session, param *ActionParam, state *ActionStateModel, args ...interface{}) interface{})
@@ -41,27 +49,28 @@ func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam, state *Link
 	rts.Set("flow", s.GetFlow())
 	rts.Set("link", link)
 
-	if r.linkFuncs != nil {
-		for name, f := range r.linkFuncs {
-			rts.Set(name, func(call goja.FunctionCall) goja.Value {
-				values := call.Arguments
-				args := make([]interface{}, 0)
-				for _, value := range values {
-					if value.Equals(goja.Undefined()) || value.Equals(goja.Null()) {
-						args = append(args, nil)
-					} else {
-						args = append(args, value.Export())
-					}
-				}
-				res := f(s, param, state, args)
-				if res == nil {
-					return goja.Null()
-				}
-				return rts.ToValue(res)
-			})
-		}
-	}
+	// if r.linkFuncs != nil {
+	// 	for name, f := range r.linkFuncs {
+	// 		rts.Set(name, func(call goja.FunctionCall) goja.Value {
+	// 			values := call.Arguments
+	// 			args := make([]interface{}, 0)
+	// 			for _, value := range values {
+	// 				if value.Equals(goja.Undefined()) || value.Equals(goja.Null()) {
+	// 					args = append(args, nil)
+	// 				} else {
+	// 					args = append(args, value.Export())
+	// 				}
+	// 			}
+	// 			res := f(s, param, state, args)
+	// 			if res == nil {
+	// 				return goja.Null()
+	// 			}
+	// 			return rts.ToValue(res)
+	// 		})
+	// 	}
+	// }
 
+	r.linkScriptFunc(rts, s, param, state)
 	SetCommonScriptFunc(rts, s, param.SourceId, param.TargetId, true)
 
 	script := "function $exec(){\n" + sc + "\n}\n $exec();\n"
@@ -91,27 +100,30 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 	rts.Set("flow", s.GetFlow())
 	rts.Set("action", action)
 
-	if r.actionFuncs != nil {
-		for name, f := range r.actionFuncs {
-			rts.Set(name, func(call goja.FunctionCall) goja.Value {
-				values := call.Arguments
-				args := make([]interface{}, 0)
-				for _, value := range values {
-					if value.Equals(goja.Undefined()) || value.Equals(goja.Null()) {
-						args = append(args, nil)
-					} else {
-						args = append(args, value.Export())
-					}
-				}
-				r := f(s, param, state, args)
-				if r == nil {
-					return goja.Null()
-				}
-				return rts.ToValue(r)
-			})
-		}
-	}
+	// if r.actionFuncs != nil {
+	// 	for name, f := range r.actionFuncs {
 
+	// 		rts.Set(name, func(call goja.FunctionCall) goja.Value {
+
+	// 			values := call.Arguments
+	// 			args := make([]interface{}, 0)
+	// 			for _, value := range values {
+	// 				if value.Equals(goja.Undefined()) || value.Equals(goja.Null()) {
+	// 					args = append(args, nil)
+	// 				} else {
+	// 					args = append(args, value.Export())
+	// 				}
+	// 			}
+	// 			r := f(s, param, state, args)
+	// 			if r == nil {
+	// 				return goja.Null()
+	// 			}
+	// 			return rts.ToValue(r)
+	// 		})
+	// 	}
+	// }
+
+	r.actionScriptFunc(rts, s, param, state)
 	SetCommonScriptFunc(rts, s, param.PreActionId, param.ActionId, false)
 
 	//1.执行过滤脚本
