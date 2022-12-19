@@ -362,12 +362,12 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 	defer s.Store.RefreshState() //改变状态
 
 	actionState := s.createActionState(param.ActionId, param.PreActionId)
-
+	var err error
 	var res Result = SUCCESS
 	complete := true
 	canNext := true
 	if s.Runner != nil {
-		res, err := s.Runner.ExecuteAction(s, param, actionState)
+		res, err = s.Runner.ExecuteAction(s, param, actionState)
 		if err != nil {
 			s.AddLog_action_error(actionState.ActionName, fmt.Sprintf("执行节点错误：%v", err))
 		}
@@ -380,7 +380,6 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 	}
 
 	actionState.State = int(res)
-
 	if res == FAILURE {
 		actionState.IsError = 1
 	}
@@ -478,12 +477,12 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 	defer s.Store.RefreshState() //改变状态
 
 	linkState := s.createLinkState(param.SourceId, param.TargetId)
-
+	var err error
 	var res Result = SUCCESS
 	complete := true
 	toNext := true
 	if s.Runner != nil {
-		res, err := s.Runner.ExecuteLink(s, param, linkState)
+		res, err = s.Runner.ExecuteLink(s, param, linkState)
 		if err != nil {
 			s.AddLog_link_error(param.SourceId+"->"+param.TargetId, fmt.Sprintf("执行连线错误：%v", err))
 		}
