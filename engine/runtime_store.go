@@ -5,6 +5,34 @@ import (
 	"time"
 )
 
+const (
+	EVENT_BEGIN     = "begin"
+	EVENT_END       = "end"
+	EVENT_MESSAGE   = "message"
+	EVENT_FLOWSTATE = "flowstate"
+	EVENT_ISERROR   = "iserror"
+
+	EVENT_ACTION_RUNNING_ADD = "action_running_add"
+	EVENT_ACTION_RUNNING_DEL = "action_running_del"
+
+	EVENT_ACTION_STATE_ADD = "action_state_add"
+	EVENT_ACTION_STATE_SET = "action_state_set"
+	EVENT_ACTION_ERROR_SET = "action_error_set"
+
+	EVENT_ACTION_DATA_SET = "action_data_set"
+	EVENT_ACTION_ICON_SET = "action_icon_set"
+
+	EVENT_LINK_RUNNING_ADD = "link_running_add"
+	EVENT_LINK_RUNNING_DEL = "link_running_del"
+
+	EVENT_LINK_STATE_ADD = "link_state_add"
+	EVENT_LINK_STATE_SET = "link_state_set"
+	EVENT_LINK_ERROR_SET = "link_error_set"
+
+	EVENT_PARAM_SET = "param_set"
+	EVENT_DATA_SET  = "data_set"
+)
+
 type RuntimeStore interface {
 	Init(runtimeId string)
 	SetRuntime(runtime *RuntimeModel)
@@ -116,7 +144,7 @@ func (s *CommonRuntimeStore) SetBegin() {
 	s.Runtime.IsRunning = 1
 	s.Runtime.BeginTime = time.Now()
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("begin", s.Runtime)
+		s.OnChangeFunc(EVENT_BEGIN, s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) SetEnd() {
@@ -141,7 +169,7 @@ func (s *CommonRuntimeStore) SetEnd() {
 	}
 
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("end", s.Runtime)
+		s.OnChangeFunc(EVENT_END, s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) SetMessage(message string) {
@@ -150,7 +178,7 @@ func (s *CommonRuntimeStore) SetMessage(message string) {
 	}
 	s.Runtime.Message = message
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("message", s.Runtime)
+		s.OnChangeFunc(EVENT_MESSAGE, s.Runtime)
 	}
 }
 
@@ -167,7 +195,7 @@ func (s *CommonRuntimeStore) SetError(iserror int) {
 	}
 	s.Runtime.IsError = iserror
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("error", s.Runtime)
+		s.OnChangeFunc(EVENT_ISERROR, s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) GetError() int {
@@ -183,7 +211,7 @@ func (s *CommonRuntimeStore) SetState(state int) {
 	}
 	s.Runtime.FlowState = state
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("state", s.Runtime)
+		s.OnChangeFunc(EVENT_FLOWSTATE, s.Runtime)
 	}
 }
 
@@ -213,7 +241,7 @@ func (s *CommonRuntimeStore) AddRunningAction(param *ActionParam) {
 	}
 	s.Runtime.AddRunningAction(param)
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("action_running_add", s.Runtime)
+		s.OnChangeFunc(EVENT_ACTION_RUNNING_ADD, s.Runtime)
 	}
 }
 
@@ -223,7 +251,7 @@ func (s *CommonRuntimeStore) DelRunningAction(param *ActionParam) {
 	}
 	s.Runtime.DelRunningAction(param)
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("action_running_del", s.Runtime)
+		s.OnChangeFunc(EVENT_ACTION_RUNNING_DEL, s.Runtime)
 	}
 }
 
@@ -233,7 +261,7 @@ func (s *CommonRuntimeStore) AddRunningLink(param *LinkParam) {
 	}
 	s.Runtime.AddRunningLink(param)
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("link_running_add", s.Runtime)
+		s.OnChangeFunc(EVENT_LINK_RUNNING_ADD, s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) DelRunningLink(param *LinkParam) {
@@ -242,7 +270,7 @@ func (s *CommonRuntimeStore) DelRunningLink(param *LinkParam) {
 	}
 	s.Runtime.DelRunningLink(param)
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("link_running_del", s.Runtime)
+		s.OnChangeFunc(EVENT_LINK_RUNNING_DEL, s.Runtime)
 	}
 }
 
@@ -252,7 +280,7 @@ func (s *CommonRuntimeStore) AddActionState(state *ActionStateModel) {
 	}
 	s.Runtime.AddActionState(state)
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("action_state_add", s.Runtime)
+		s.OnChangeFunc(EVENT_ACTION_STATE_ADD, s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) AddLinkState(state *LinkStateModel) {
@@ -261,7 +289,7 @@ func (s *CommonRuntimeStore) AddLinkState(state *LinkStateModel) {
 	}
 	s.Runtime.AddLinkState(state)
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("link_state_add", s.Runtime)
+		s.OnChangeFunc(EVENT_LINK_STATE_ADD, s.Runtime)
 	}
 }
 
@@ -285,7 +313,7 @@ func (s *CommonRuntimeStore) SetParam(key string, val interface{}) {
 	}
 	s.Runtime.SetParam(key, val)
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("param_set", s.Runtime)
+		s.OnChangeFunc(EVENT_PARAM_SET, s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) GetParam(key string) interface{} {
@@ -303,7 +331,7 @@ func (s *CommonRuntimeStore) SetData(key string, val interface{}) {
 	}
 	s.Runtime.SetData(key, val)
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("data_set", s.Runtime)
+		s.OnChangeFunc(EVENT_DATA_SET, s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) GetData(key string) interface{} {
@@ -325,7 +353,7 @@ func (s *CommonRuntimeStore) SetActionData(actionId string, name string, val int
 	}
 	s.Runtime.SetActionData(actionId, name, val)
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("action_data_set", s.Runtime)
+		s.OnChangeFunc(EVENT_ACTION_DATA_SET, s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) GetActionData(actionId string, name string) interface{} {
@@ -348,7 +376,7 @@ func (s *CommonRuntimeStore) SetActionIcon(actionId string, icon string) {
 	}
 	s.Runtime.SetActionIcon(actionId, icon)
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("action_icon_set", s.Runtime)
+		s.OnChangeFunc(EVENT_ACTION_ICON_SET, s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) SetActionState(actionId string, state int) {
@@ -357,7 +385,7 @@ func (s *CommonRuntimeStore) SetActionState(actionId string, state int) {
 	}
 	s.Runtime.SetActionState(actionId, state)
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("action_state_set", s.Runtime)
+		s.OnChangeFunc(EVENT_ACTION_STATE_SET, s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) SetActionError(actionId string, isError int) {
@@ -366,7 +394,7 @@ func (s *CommonRuntimeStore) SetActionError(actionId string, isError int) {
 	}
 	s.Runtime.SetActionError(actionId, isError)
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("action_error_set", s.Runtime)
+		s.OnChangeFunc(EVENT_ACTION_ERROR_SET, s.Runtime)
 	}
 }
 
@@ -376,7 +404,7 @@ func (s *CommonRuntimeStore) SetLinkState(sourceId, targetId string, state int) 
 	}
 	s.Runtime.SetLinkState(sourceId, targetId, state)
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("link_state_set", s.Runtime)
+		s.OnChangeFunc(EVENT_LINK_STATE_SET, s.Runtime)
 	}
 }
 func (s *CommonRuntimeStore) SetLinkError(sourceId, targetId string, isError int) {
@@ -385,7 +413,7 @@ func (s *CommonRuntimeStore) SetLinkError(sourceId, targetId string, isError int
 	}
 	s.Runtime.SetLinkError(sourceId, targetId, isError)
 	if s.OnChangeFunc != nil {
-		s.OnChangeFunc("link_error_set", s.Runtime)
+		s.OnChangeFunc(EVENT_LINK_ERROR_SET, s.Runtime)
 	}
 }
 
