@@ -507,16 +507,23 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 		//如果是汇聚模式，需要等待所有连线都执行通过
 		if strings.ToLower(nextAction.Collect) == "true" {
 			fromLinks := flow.GetLinkByTargetId(param.TargetId)
-
 			if fromLinks != nil && len(fromLinks) > 1 {
-				passCount := 0
+
+				activeLinks := make([]*LinkModel, 0)
 				for _, link := range fromLinks {
+					if link.Active != "false" {
+						activeLinks = append(activeLinks, link)
+					}
+				}
+
+				passCount := 0
+				for _, link := range activeLinks {
 					st := s.Store.GetLastLinkState(link.SourceId, link.TargetId)
 					if st.State != int(SUCCESS) {
 						passCount = passCount + 1
 					}
 				}
-				if passCount+1 < len(fromLinks) {
+				if passCount+1 < len(activeLinks) {
 					canNext = false
 				}
 			}
