@@ -256,8 +256,6 @@ func (s *Session) Execute() {
 
 	s.waitComplete()
 
-	 
-
 }
 
 func (s *Session) Stop() {
@@ -515,7 +513,7 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 
 					st := s.Store.GetLastLinkState(link.SourceId, link.TargetId)
 
-					if st == nil || st.State != 1 {
+					if st == nil || st.State != int(SUCCESS) {
 						canNext = false
 					}
 				}
