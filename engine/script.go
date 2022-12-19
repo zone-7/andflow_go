@@ -43,15 +43,15 @@ func GetScriptIntResult(val goja.Value) Result {
 		} else if obj.(string) == "-1" {
 			return FAILURE
 		} else if obj.(string) == "0" {
-			return FAILURE
+			return REJECT
 		}
 	case int:
 		if obj.(int) > 0 {
 			return SUCCESS
 		} else if obj.(int) < 0 {
-			return -1
-		} else {
 			return FAILURE
+		} else {
+			return REJECT
 		}
 	case int64:
 		if obj.(int64) > 0 {
@@ -59,7 +59,7 @@ func GetScriptIntResult(val goja.Value) Result {
 		} else if obj.(int64) < 0 {
 			return FAILURE
 		} else {
-			return FAILURE
+			return REJECT
 		}
 	case int32:
 		if obj.(int32) > 0 {
@@ -67,7 +67,7 @@ func GetScriptIntResult(val goja.Value) Result {
 		} else if obj.(int32) < 0 {
 			return FAILURE
 		} else {
-			return FAILURE
+			return REJECT
 		}
 	case int16:
 		if obj.(int16) > 0 {
@@ -75,7 +75,7 @@ func GetScriptIntResult(val goja.Value) Result {
 		} else if obj.(int16) < 0 {
 			return FAILURE
 		} else {
-			return FAILURE
+			return REJECT
 		}
 	case float64:
 		if obj.(float64) > 0 {
@@ -83,7 +83,7 @@ func GetScriptIntResult(val goja.Value) Result {
 		} else if obj.(float64) < 0 {
 			return FAILURE
 		} else {
-			return FAILURE
+			return REJECT
 		}
 	case float32:
 		if obj.(float32) > 0 {
@@ -91,13 +91,13 @@ func GetScriptIntResult(val goja.Value) Result {
 		} else if obj.(float32) < 0 {
 			return FAILURE
 		} else {
-			return FAILURE
+			return REJECT
 		}
 	default:
-		return FAILURE
+		return SUCCESS
 
 	}
-	return FAILURE
+	return SUCCESS
 }
 
 //设置脚本函数
