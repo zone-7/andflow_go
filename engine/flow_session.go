@@ -509,13 +509,15 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 			fromLinks := flow.GetLinkByTargetId(param.TargetId)
 
 			if fromLinks != nil && len(fromLinks) > 1 {
+				passCount := 0
 				for _, link := range fromLinks {
-
 					st := s.Store.GetLastLinkState(link.SourceId, link.TargetId)
-
-					if st == nil || st.State != int(SUCCESS) {
-						canNext = false
+					if st.State != int(SUCCESS) {
+						passCount = passCount + 1
 					}
+				}
+				if passCount+1 < len(fromLinks) {
+					canNext = false
 				}
 			}
 		}
