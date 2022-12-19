@@ -15,17 +15,16 @@ type RuntimeStore interface {
 	WaitAdd(int)
 	WaitDone()
 	Wait()
-
 	Save()
-
 	AddLog(tp, tag, title, content string)
-
-	RefreshState()
-
 	SetBegin()
 	SetEnd()
 	SetState(state int)
 	GetState() int
+	SetError(iserror int)
+	GetError() int
+	SetMessage(message string)
+	GetMessage() string
 	GetRunningActions() []*ActionParam
 	GetRunningLinks() []*LinkParam
 	AddRunningAction(param *ActionParam)
@@ -70,12 +69,6 @@ func (s *CommonRuntimeStore) Init(runtimeId string) {
 
 	s.RuntimeId = runtimeId
 	s.Wg = sync.WaitGroup{}
-}
-func (s *CommonRuntimeStore) RefreshState() {
-	if s.Runtime == nil {
-		return
-	}
-
 }
 
 func (s *CommonRuntimeStore) WaitAdd(d int) {
@@ -134,9 +127,54 @@ func (s *CommonRuntimeStore) SetEnd() {
 	s.Runtime.EndTime = time.Now()
 	s.Runtime.Timeused = s.Runtime.EndTime.Sub(s.Runtime.BeginTime).Milliseconds()
 
+	for _, ast := range s.Runtime.ActionStates {
+		if ast.IsError == 1 {
+			s.Runtime.IsError = 1
+			break
+		}
+	}
+	for _, lst := range s.Runtime.LinkStates {
+		if lst.IsError == 1 {
+			s.Runtime.IsError = 1
+			break
+		}
+	}
+
 	if s.OnChangeFunc != nil {
 		s.OnChangeFunc("end", s.Runtime)
 	}
+}
+func (s *CommonRuntimeStore) SetMessage(message string) {
+	if s.Runtime == nil {
+		return
+	}
+	s.Runtime.Message = message
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("message", s.Runtime)
+	}
+}
+
+func (s *CommonRuntimeStore) GetMessage() string {
+	if s.Runtime == nil {
+		return ""
+	}
+	return s.Runtime.Message
+}
+
+func (s *CommonRuntimeStore) SetError(iserror int) {
+	if s.Runtime == nil {
+		return
+	}
+	s.Runtime.IsError = iserror
+	if s.OnChangeFunc != nil {
+		s.OnChangeFunc("error", s.Runtime)
+	}
+}
+func (s *CommonRuntimeStore) GetError() int {
+	if s.Runtime == nil {
+		return 0
+	}
+	return s.Runtime.IsError
 }
 
 func (s *CommonRuntimeStore) SetState(state int) {

@@ -256,6 +256,8 @@ func (s *Session) Execute() {
 
 	s.waitComplete()
 
+	 
+
 }
 
 func (s *Session) Stop() {
@@ -358,8 +360,7 @@ func (s *Session) PushAction(param *ActionParam) bool {
 }
 
 func (s *Session) ExecuteAction(param *ActionParam) {
-	defer s.Store.WaitDone()     //确认节点执行完成
-	defer s.Store.RefreshState() //改变状态
+	defer s.Store.WaitDone() //确认节点执行完成
 
 	actionState := s.createActionState(param.ActionId, param.PreActionId)
 	var err error
@@ -474,7 +475,6 @@ func (s *Session) PushLink(param *LinkParam) bool {
 
 func (s *Session) ExecuteLink(param *LinkParam) {
 	defer s.Store.WaitDone()
-	defer s.Store.RefreshState() //改变状态
 
 	linkState := s.createLinkState(param.SourceId, param.TargetId)
 	var err error
@@ -494,6 +494,7 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 		}
 	}
 
+	//状态
 	linkState.State = int(res)
 	if res == FAILURE {
 		linkState.IsError = 1
