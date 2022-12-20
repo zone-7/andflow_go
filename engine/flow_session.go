@@ -85,28 +85,28 @@ func (s *Session) SetData(key string, val interface{}) {
 	s.Store.SetData(key, val)
 }
 
-func (s *Session) AddLog_flow_error(title, content string) {
-	s.Store.AddLog("error", "flow", title, content)
+func (s *Session) AddLog_flow_error(name, title, content string) {
+	s.Store.AddLog("error", "flow", name, title, content)
 }
 
-func (s *Session) AddLog_flow_info(title, content string) {
-	s.Store.AddLog("info", "flow", title, content)
+func (s *Session) AddLog_flow_info(name, title, content string) {
+	s.Store.AddLog("info", "flow", name, title, content)
 }
 
-func (s *Session) AddLog_action_error(title, content string) {
-	s.Store.AddLog("error", "action", title, content)
+func (s *Session) AddLog_action_error(name, title, content string) {
+	s.Store.AddLog("error", "action", name, title, content)
 }
 
-func (s *Session) AddLog_action_info(title, content string) {
-	s.Store.AddLog("info", "action", title, content)
+func (s *Session) AddLog_action_info(name, title, content string) {
+	s.Store.AddLog("info", "action", name, title, content)
 }
 
-func (s *Session) AddLog_link_error(title, content string) {
-	s.Store.AddLog("error", "link", title, content)
+func (s *Session) AddLog_link_error(name, title, content string) {
+	s.Store.AddLog("error", "link", name, title, content)
 }
 
-func (s *Session) AddLog_link_info(title, content string) {
-	s.Store.AddLog("info", "link", title, content)
+func (s *Session) AddLog_link_info(name, title, content string) {
+	s.Store.AddLog("info", "link", name, title, content)
 }
 
 func (s *Session) createActionState(actionId string, preActionId string) *ActionStateModel {
@@ -157,7 +157,7 @@ func (s *Session) watch() {
 		select {
 		case <-s.Ctx.Done():
 			s.Stop()
-			s.Store.AddLog("flow", "stop", "中断", "执行中断")
+			s.AddLog_flow_info(s.GetFlow().Name, "中断", "执行中断")
 			log.Println("执行超时，中断退出")
 			return
 		default:
@@ -368,7 +368,7 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 	if s.Runner != nil {
 		res, err = s.Runner.ExecuteAction(s, param, actionState)
 		if err != nil {
-			s.AddLog_action_error(actionState.ActionName, fmt.Sprintf("执行节点错误：%v", err))
+			s.AddLog_action_error(actionState.ActionName, actionState.ActionTitle, fmt.Sprintf("执行节点错误：%v", err))
 		}
 		if res != SUCCESS {
 			canNext = false
@@ -475,6 +475,9 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 	defer s.Store.WaitDone()
 
 	linkState := s.createLinkState(param.SourceId, param.TargetId)
+	sourceAction := s.GetFlow().GetAction(param.SourceId)
+	targetAction := s.GetFlow().GetAction(param.TargetId)
+
 	var err error
 	var res Result = SUCCESS
 	complete := true
@@ -482,7 +485,8 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 	if s.Runner != nil {
 		res, err = s.Runner.ExecuteLink(s, param, linkState)
 		if err != nil {
-			s.AddLog_link_error(param.SourceId+"->"+param.TargetId, fmt.Sprintf("执行连线错误：%v", err))
+
+			s.AddLog_link_error(param.SourceId+"->"+param.TargetId, sourceAction.Title+"->"+targetAction.Title, fmt.Sprintf("执行连线错误：%v", err))
 		}
 		if res != SUCCESS {
 			toNext = false

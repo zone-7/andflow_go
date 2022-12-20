@@ -415,8 +415,8 @@ func (a *RuntimeModel) GetActionDataMap(actionId string) map[string]interface{} 
 	}
 	return res
 }
-func (a *RuntimeModel) AddLog(tp string, tag string, title string, content string) {
-	log := &LogModel{Tp: tp, Tag: tag, Title: title, Content: content, Time: time.Now()}
+func (a *RuntimeModel) AddLog(tp string, tag string, name string, title string, content string) {
+	log := &LogModel{Tp: tp, Tag: tag, Name: name, Title: title, Content: content, Time: time.Now()}
 	a.Logs = append(a.Logs, log)
 }
 

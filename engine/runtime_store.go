@@ -44,7 +44,7 @@ type RuntimeStore interface {
 	WaitDone()
 	Wait()
 	Save()
-	AddLog(tp, tag, title, content string)
+	AddLog(tp, tag, name, title, content string)
 	SetBegin()
 	SetEnd()
 	SetState(state int)
@@ -116,11 +116,11 @@ func (s *CommonRuntimeStore) GetCmd() int {
 	return s.Cmd
 }
 
-func (s *CommonRuntimeStore) AddLog(tp, tag, title, content string) {
+func (s *CommonRuntimeStore) AddLog(tp, tag, name, title, content string) {
 	if s.Runtime == nil {
 		return
 	}
-	s.Runtime.AddLog(tp, tag, title, content)
+	s.Runtime.AddLog(tp, tag, name, title, content)
 }
 
 func (s *CommonRuntimeStore) SetRuntime(runtime *RuntimeModel) {

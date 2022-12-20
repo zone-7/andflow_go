@@ -104,14 +104,17 @@ func GetScriptIntResult(val goja.Value) Result {
 func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string, actionId string, islink bool) {
 	tp := ""
 	title := ""
+	name := ""
 	if islink {
 		tp = "link"
-		title = preActionId + "->" + actionId
+		name = preActionId + "->" + actionId
+		title = session.GetFlow().GetAction(preActionId).Title + "->" + session.GetFlow().GetAction(actionId).Title
 
 	} else {
 		tp = "action"
 		action := session.GetFlow().GetAction(actionId)
-		title = action.Name
+		name = action.Name
+		title = action.Title
 	}
 
 	//日志
@@ -140,9 +143,9 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 			}
 		}
 		if tp == "link" {
-			session.AddLog_link_info(title, val)
+			session.AddLog_link_info(name, title, val)
 		} else {
-			session.AddLog_action_info(title, val)
+			session.AddLog_action_info(name, title, val)
 		}
 
 		return value
