@@ -519,7 +519,7 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 				passCount := 0
 				for _, link := range activeLinks {
 					st := s.Store.GetLastLinkState(link.SourceId, link.TargetId)
-					if st.State != int(SUCCESS) {
+					if st != nil && st.State != int(SUCCESS) {
 						passCount = passCount + 1
 					}
 				}
