@@ -34,8 +34,10 @@ func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam, state *Link
 	rts := goja.New()
 	rts.Set("flow", s.GetFlow())
 	rts.Set("link", link)
+	if r.linkScriptFunc != nil {
+		r.linkScriptFunc(rts, s, param, state)
+	}
 
-	r.linkScriptFunc(rts, s, param, state)
 	SetCommonScriptFunc(rts, s, param.SourceId, param.TargetId, true)
 
 	script := "function $exec(){\n" + sc + "\n}\n $exec();\n"
@@ -65,7 +67,10 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 	rts.Set("flow", s.GetFlow())
 	rts.Set("action", action)
 
-	r.actionScriptFunc(rts, s, param, state)
+	if r.actionScriptFunc != nil {
+		r.actionScriptFunc(rts, s, param, state)
+	}
+
 	SetCommonScriptFunc(rts, s, param.PreActionId, param.ActionId, false)
 
 	//1.执行过滤脚本
