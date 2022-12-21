@@ -90,7 +90,7 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 	//2.执行节点执行器
 	runner := GetActionRunner(name)
 	if runner != nil {
-		res, err = runner.Execute(s, param)
+		res, err = runner.Execute(s, param, state)
 		if err != nil {
 			return FAILURE, err
 		}

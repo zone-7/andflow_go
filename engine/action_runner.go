@@ -17,7 +17,7 @@ const (
 )
 
 type ActionRunner interface {
-	Execute(s *Session, param *ActionParam) (Result, error)
+	Execute(s *Session, param *ActionParam, state *ActionStateModel) (Result, error)
 }
 
 func RegistActionRunner(name string, runner ActionRunner) {
@@ -49,7 +49,7 @@ func (a *ScriptActionRunner) SetActionFunc(name string, act func(s *Session, par
 	a.funcs[name] = act
 }
 
-func (a *ScriptActionRunner) Execute(s *Session, param *ActionParam) (Result, error) {
+func (a *ScriptActionRunner) Execute(s *Session, param *ActionParam, state *ActionStateModel) (Result, error) {
 
 	action := s.GetFlow().GetAction(param.ActionId)
 
