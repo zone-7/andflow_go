@@ -308,7 +308,7 @@ func (a *RuntimeModel) SetParam(key string, value interface{}) {
 		}
 	}
 	if !exists {
-		a.Param = append(a.Data, &RuntimeDataModel{Name: key, Value: value})
+		a.Param = append(a.Param, &RuntimeDataModel{Name: key, Value: value})
 	}
 }
 
