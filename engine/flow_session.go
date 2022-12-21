@@ -157,7 +157,7 @@ func (s *Session) watch() {
 		select {
 		case <-s.Ctx.Done():
 			s.Stop()
-			s.AddLog_flow_info(s.GetFlow().Name, "中断", "执行中断")
+			s.AddLog_flow_info(s.GetFlow().Code, s.GetFlow().Name, "执行超时，中断退出")
 			log.Println("执行超时，中断退出")
 			return
 		default:
