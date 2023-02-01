@@ -157,8 +157,8 @@ func (s *Session) watch() {
 		select {
 		case <-s.Ctx.Done():
 			s.Stop()
-			s.AddLog_flow_info(s.GetFlow().Code, s.GetFlow().Name, "执行超时，中断退出")
-			log.Println("执行超时，中断退出")
+			s.AddLog_flow_info(s.GetFlow().Code, s.GetFlow().Name, "timeout")
+			log.Println("timeout, suspend")
 			return
 		default:
 			if s.Store.GetCmd() == 1 {
@@ -259,9 +259,8 @@ func (s *Session) Execute() {
 }
 
 func (s *Session) Stop() {
-
 	s.Store.SetCmd(1)
-	log.Println("停止流程")
+	log.Println("stop")
 }
 
 func (s *Session) waitComplete() {

@@ -59,8 +59,8 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 	action := s.GetFlow().GetAction(param.ActionId)
 	name := action.Name
 
-	log.Println("开始执行节点：" + action.Name + " " + action.Title)
-	defer log.Println("结束执行节点：" + action.Name + " " + action.Title)
+	log.Println("action start: " + action.Name + " " + action.Title)
+	defer log.Println("action end: " + action.Name + " " + action.Title)
 
 	//0.准备脚本执行环境
 	rts := goja.New()
@@ -80,7 +80,7 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 
 		val, err := rts.RunString(script_filter)
 		if err != nil {
-			log.Println(fmt.Sprintf("执行脚本异常：%v", err))
+			log.Println(fmt.Sprintf("script exception：%v", err))
 			return FAILURE, err
 		}
 
@@ -112,7 +112,7 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 		val, err := rts.RunString(script_filter)
 		if err != nil {
 
-			log.Println(fmt.Sprintf("执行脚本异常：%v", err))
+			log.Println(fmt.Sprintf("script exception：%v", err))
 			return FAILURE, err
 		}
 
