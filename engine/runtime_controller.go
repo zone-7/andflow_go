@@ -6,6 +6,7 @@ import (
 )
 
 const (
+	//执行过程中的事件
 	EVENT_BEGIN     = "begin"
 	EVENT_END       = "end"
 	EVENT_MESSAGE   = "message"
@@ -31,9 +32,13 @@ const (
 
 	EVENT_PARAM_SET = "param_set"
 	EVENT_DATA_SET  = "data_set"
+
+	//controller CMD 控制指令
+	CMD_STOP  = 1 //停止
+	CMD_START = 0 //默认执行
 )
 
-type RuntimeStore interface {
+type RuntimeController interface {
 	Init(runtimeId string)
 	SetRuntime(runtime *RuntimeModel)
 	GetRuntime() *RuntimeModel
@@ -84,7 +89,7 @@ type RuntimeStore interface {
 	SetLinkState(sourceId string, targetId string, state int)
 }
 
-type CommonRuntimeStore struct {
+type CommonRuntimeController struct {
 	Cmd          int
 	RuntimeId    string
 	Wg           sync.WaitGroup //同步控制
@@ -93,51 +98,51 @@ type CommonRuntimeStore struct {
 	OnSaveFunc   func(runtime *RuntimeModel)
 }
 
-func (s *CommonRuntimeStore) Init(runtimeId string) {
+func (s *CommonRuntimeController) Init(runtimeId string) {
 
 	s.RuntimeId = runtimeId
 	s.Wg = sync.WaitGroup{}
 }
 
-func (s *CommonRuntimeStore) WaitAdd(d int) {
+func (s *CommonRuntimeController) WaitAdd(d int) {
 	s.Wg.Add(d)
 }
 
-func (s *CommonRuntimeStore) WaitDone() {
+func (s *CommonRuntimeController) WaitDone() {
 	s.Wg.Done()
 }
-func (s *CommonRuntimeStore) Wait() {
+func (s *CommonRuntimeController) Wait() {
 	s.Wg.Wait()
 }
-func (s *CommonRuntimeStore) SetCmd(c int) {
+func (s *CommonRuntimeController) SetCmd(c int) {
 	s.Cmd = c
 }
-func (s *CommonRuntimeStore) GetCmd() int {
+func (s *CommonRuntimeController) GetCmd() int {
 	return s.Cmd
 }
 
-func (s *CommonRuntimeStore) AddLog(tp, tag, name, title, content string) {
+func (s *CommonRuntimeController) AddLog(tp, tag, name, title, content string) {
 	if s.Runtime == nil {
 		return
 	}
 	s.Runtime.AddLog(tp, tag, name, title, content)
 }
 
-func (s *CommonRuntimeStore) SetRuntime(runtime *RuntimeModel) {
+func (s *CommonRuntimeController) SetRuntime(runtime *RuntimeModel) {
 	s.Runtime = runtime
 }
 
-func (s *CommonRuntimeStore) GetRuntime() *RuntimeModel {
+func (s *CommonRuntimeController) GetRuntime() *RuntimeModel {
 	return s.Runtime
 }
-func (s *CommonRuntimeStore) GetFlow() *FlowModel {
+func (s *CommonRuntimeController) GetFlow() *FlowModel {
 	if s.Runtime == nil {
 		return nil
 	}
 	return s.Runtime.Flow
 }
 
-func (s *CommonRuntimeStore) SetBegin() {
+func (s *CommonRuntimeController) SetBegin() {
 	if s.Runtime == nil {
 		return
 	}
@@ -147,7 +152,7 @@ func (s *CommonRuntimeStore) SetBegin() {
 		s.OnChangeFunc(EVENT_BEGIN, s.Runtime)
 	}
 }
-func (s *CommonRuntimeStore) SetEnd() {
+func (s *CommonRuntimeController) SetEnd() {
 	if s.Runtime == nil {
 		return
 	}
@@ -172,7 +177,7 @@ func (s *CommonRuntimeStore) SetEnd() {
 		s.OnChangeFunc(EVENT_END, s.Runtime)
 	}
 }
-func (s *CommonRuntimeStore) SetMessage(message string) {
+func (s *CommonRuntimeController) SetMessage(message string) {
 	if s.Runtime == nil {
 		return
 	}
@@ -182,14 +187,14 @@ func (s *CommonRuntimeStore) SetMessage(message string) {
 	}
 }
 
-func (s *CommonRuntimeStore) GetMessage() string {
+func (s *CommonRuntimeController) GetMessage() string {
 	if s.Runtime == nil {
 		return ""
 	}
 	return s.Runtime.Message
 }
 
-func (s *CommonRuntimeStore) SetError(iserror int) {
+func (s *CommonRuntimeController) SetError(iserror int) {
 	if s.Runtime == nil {
 		return
 	}
@@ -198,14 +203,14 @@ func (s *CommonRuntimeStore) SetError(iserror int) {
 		s.OnChangeFunc(EVENT_ISERROR, s.Runtime)
 	}
 }
-func (s *CommonRuntimeStore) GetError() int {
+func (s *CommonRuntimeController) GetError() int {
 	if s.Runtime == nil {
 		return 0
 	}
 	return s.Runtime.IsError
 }
 
-func (s *CommonRuntimeStore) SetState(state int) {
+func (s *CommonRuntimeController) SetState(state int) {
 	if s.Runtime == nil {
 		return
 	}
@@ -215,27 +220,27 @@ func (s *CommonRuntimeStore) SetState(state int) {
 	}
 }
 
-func (s *CommonRuntimeStore) GetState() int {
+func (s *CommonRuntimeController) GetState() int {
 	if s.Runtime == nil {
 		return 0
 	}
 	return s.Runtime.FlowState
 }
-func (s *CommonRuntimeStore) GetRunningActions() []*ActionParam {
+func (s *CommonRuntimeController) GetRunningActions() []*ActionParam {
 	if s.Runtime == nil {
 		return nil
 	}
 	return s.Runtime.RunningActions
 }
 
-func (s *CommonRuntimeStore) GetRunningLinks() []*LinkParam {
+func (s *CommonRuntimeController) GetRunningLinks() []*LinkParam {
 	if s.Runtime == nil {
 		return nil
 	}
 	return s.Runtime.RunningLinks
 }
 
-func (s *CommonRuntimeStore) AddRunningAction(param *ActionParam) {
+func (s *CommonRuntimeController) AddRunningAction(param *ActionParam) {
 	if s.Runtime == nil {
 		return
 	}
@@ -245,7 +250,7 @@ func (s *CommonRuntimeStore) AddRunningAction(param *ActionParam) {
 	}
 }
 
-func (s *CommonRuntimeStore) DelRunningAction(param *ActionParam) {
+func (s *CommonRuntimeController) DelRunningAction(param *ActionParam) {
 	if s.Runtime == nil {
 		return
 	}
@@ -255,7 +260,7 @@ func (s *CommonRuntimeStore) DelRunningAction(param *ActionParam) {
 	}
 }
 
-func (s *CommonRuntimeStore) AddRunningLink(param *LinkParam) {
+func (s *CommonRuntimeController) AddRunningLink(param *LinkParam) {
 	if s.Runtime == nil {
 		return
 	}
@@ -264,7 +269,7 @@ func (s *CommonRuntimeStore) AddRunningLink(param *LinkParam) {
 		s.OnChangeFunc(EVENT_LINK_RUNNING_ADD, s.Runtime)
 	}
 }
-func (s *CommonRuntimeStore) DelRunningLink(param *LinkParam) {
+func (s *CommonRuntimeController) DelRunningLink(param *LinkParam) {
 	if s.Runtime == nil {
 		return
 	}
@@ -274,7 +279,7 @@ func (s *CommonRuntimeStore) DelRunningLink(param *LinkParam) {
 	}
 }
 
-func (s *CommonRuntimeStore) AddActionState(state *ActionStateModel) {
+func (s *CommonRuntimeController) AddActionState(state *ActionStateModel) {
 	if s.Runtime == nil {
 		return
 	}
@@ -283,7 +288,7 @@ func (s *CommonRuntimeStore) AddActionState(state *ActionStateModel) {
 		s.OnChangeFunc(EVENT_ACTION_STATE_ADD, s.Runtime)
 	}
 }
-func (s *CommonRuntimeStore) AddLinkState(state *LinkStateModel) {
+func (s *CommonRuntimeController) AddLinkState(state *LinkStateModel) {
 	if s.Runtime == nil {
 		return
 	}
@@ -293,21 +298,21 @@ func (s *CommonRuntimeStore) AddLinkState(state *LinkStateModel) {
 	}
 }
 
-func (s *CommonRuntimeStore) GetLastActionState(actionId string) *ActionStateModel {
+func (s *CommonRuntimeController) GetLastActionState(actionId string) *ActionStateModel {
 	if s.Runtime == nil {
 		return nil
 	}
 	return s.Runtime.GetLastActionState(actionId)
 }
 
-func (s *CommonRuntimeStore) GetLastLinkState(sourceId string, targetId string) *LinkStateModel {
+func (s *CommonRuntimeController) GetLastLinkState(sourceId string, targetId string) *LinkStateModel {
 	if s.Runtime == nil {
 		return nil
 	}
 	return s.Runtime.GetLastLinkState(sourceId, targetId)
 }
 
-func (s *CommonRuntimeStore) SetParam(key string, val interface{}) {
+func (s *CommonRuntimeController) SetParam(key string, val interface{}) {
 	if s.Runtime == nil {
 		return
 	}
@@ -316,16 +321,16 @@ func (s *CommonRuntimeStore) SetParam(key string, val interface{}) {
 		s.OnChangeFunc(EVENT_PARAM_SET, s.Runtime)
 	}
 }
-func (s *CommonRuntimeStore) GetParam(key string) interface{} {
+func (s *CommonRuntimeController) GetParam(key string) interface{} {
 	return s.Runtime.GetParam(key)
 }
-func (s *CommonRuntimeStore) GetParamMap() map[string]interface{} {
+func (s *CommonRuntimeController) GetParamMap() map[string]interface{} {
 	if s.Runtime == nil {
 		return nil
 	}
 	return s.Runtime.GetParamMap()
 }
-func (s *CommonRuntimeStore) SetData(key string, val interface{}) {
+func (s *CommonRuntimeController) SetData(key string, val interface{}) {
 	if s.Runtime == nil {
 		return
 	}
@@ -334,20 +339,20 @@ func (s *CommonRuntimeStore) SetData(key string, val interface{}) {
 		s.OnChangeFunc(EVENT_DATA_SET, s.Runtime)
 	}
 }
-func (s *CommonRuntimeStore) GetData(key string) interface{} {
+func (s *CommonRuntimeController) GetData(key string) interface{} {
 	if s.Runtime == nil {
 		return nil
 	}
 	return s.Runtime.GetData(key)
 }
-func (s *CommonRuntimeStore) GetDataMap() map[string]interface{} {
+func (s *CommonRuntimeController) GetDataMap() map[string]interface{} {
 	if s.Runtime == nil {
 		return nil
 	}
 	return s.Runtime.GetDataMap()
 }
 
-func (s *CommonRuntimeStore) SetActionData(actionId string, name string, val interface{}) {
+func (s *CommonRuntimeController) SetActionData(actionId string, name string, val interface{}) {
 	if s.Runtime == nil {
 		return
 	}
@@ -356,21 +361,21 @@ func (s *CommonRuntimeStore) SetActionData(actionId string, name string, val int
 		s.OnChangeFunc(EVENT_ACTION_DATA_SET, s.Runtime)
 	}
 }
-func (s *CommonRuntimeStore) GetActionData(actionId string, name string) interface{} {
+func (s *CommonRuntimeController) GetActionData(actionId string, name string) interface{} {
 	if s.Runtime == nil {
 		return nil
 	}
 	return s.Runtime.GetActionData(actionId, name)
 }
 
-func (s *CommonRuntimeStore) GetActionDataMap(actionId string) map[string]interface{} {
+func (s *CommonRuntimeController) GetActionDataMap(actionId string) map[string]interface{} {
 	if s.Runtime == nil {
 		return nil
 	}
 	return s.Runtime.GetActionDataMap(actionId)
 }
 
-func (s *CommonRuntimeStore) SetActionIcon(actionId string, icon string) {
+func (s *CommonRuntimeController) SetActionIcon(actionId string, icon string) {
 	if s.Runtime == nil {
 		return
 	}
@@ -379,7 +384,7 @@ func (s *CommonRuntimeStore) SetActionIcon(actionId string, icon string) {
 		s.OnChangeFunc(EVENT_ACTION_ICON_SET, s.Runtime)
 	}
 }
-func (s *CommonRuntimeStore) SetActionState(actionId string, state int) {
+func (s *CommonRuntimeController) SetActionState(actionId string, state int) {
 	if s.Runtime == nil {
 		return
 	}
@@ -388,7 +393,7 @@ func (s *CommonRuntimeStore) SetActionState(actionId string, state int) {
 		s.OnChangeFunc(EVENT_ACTION_STATE_SET, s.Runtime)
 	}
 }
-func (s *CommonRuntimeStore) SetActionError(actionId string, isError int) {
+func (s *CommonRuntimeController) SetActionError(actionId string, isError int) {
 	if s.Runtime == nil {
 		return
 	}
@@ -398,7 +403,7 @@ func (s *CommonRuntimeStore) SetActionError(actionId string, isError int) {
 	}
 }
 
-func (s *CommonRuntimeStore) SetLinkState(sourceId, targetId string, state int) {
+func (s *CommonRuntimeController) SetLinkState(sourceId, targetId string, state int) {
 	if s.Runtime == nil {
 		return
 	}
@@ -407,7 +412,7 @@ func (s *CommonRuntimeStore) SetLinkState(sourceId, targetId string, state int) 
 		s.OnChangeFunc(EVENT_LINK_STATE_SET, s.Runtime)
 	}
 }
-func (s *CommonRuntimeStore) SetLinkError(sourceId, targetId string, isError int) {
+func (s *CommonRuntimeController) SetLinkError(sourceId, targetId string, isError int) {
 	if s.Runtime == nil {
 		return
 	}
@@ -417,16 +422,16 @@ func (s *CommonRuntimeStore) SetLinkError(sourceId, targetId string, isError int
 	}
 }
 
-func (s *CommonRuntimeStore) Save() {
+func (s *CommonRuntimeController) Save() {
 	if s.OnSaveFunc != nil {
 		s.OnSaveFunc(s.Runtime)
 	}
 }
 
-func (s *CommonRuntimeStore) SetOnChangeFunc(f func(event string, runtime *RuntimeModel)) {
+func (s *CommonRuntimeController) SetOnChangeFunc(f func(event string, runtime *RuntimeModel)) {
 	s.OnChangeFunc = f
 }
 
-func (s *CommonRuntimeStore) SetOnSaveFunc(f func(runtime *RuntimeModel)) {
+func (s *CommonRuntimeController) SetOnSaveFunc(f func(runtime *RuntimeModel)) {
 	s.OnSaveFunc = f
 }

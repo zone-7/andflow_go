@@ -239,9 +239,9 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 
 		if !val.Equals(goja.Undefined()) && !val.Equals(goja.Null()) {
 			obj := val.Export()
-			session.Store.SetParam(keyStr, obj)
+			session.Controller.SetParam(keyStr, obj)
 		} else {
-			session.Store.SetParam(keyStr, nil)
+			session.Controller.SetParam(keyStr, nil)
 
 		}
 
@@ -255,7 +255,7 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 		var keyStr string
 		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
 			keyStr = key.String()
-			value = session.Store.GetParam(keyStr)
+			value = session.Controller.GetParam(keyStr)
 
 		}
 		if value == nil {
@@ -278,9 +278,9 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 
 		if !val.Equals(goja.Undefined()) && !val.Equals(goja.Null()) {
 			obj := val.Export()
-			session.Store.SetData(keyStr, obj)
+			session.Controller.SetData(keyStr, obj)
 		} else {
-			session.Store.SetData(keyStr, nil)
+			session.Controller.SetData(keyStr, nil)
 
 		}
 
@@ -294,7 +294,7 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 		var keyStr string
 		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
 			keyStr = key.String()
-			value = session.Store.GetData(keyStr)
+			value = session.Controller.GetData(keyStr)
 
 		}
 		if value == nil {
@@ -307,7 +307,7 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 
 	rts.Set("getDatas", func(call goja.FunctionCall) goja.Value {
 
-		value := session.Store.GetDataMap()
+		value := session.Controller.GetDataMap()
 		if value == nil {
 			return goja.Null()
 		}
@@ -323,27 +323,27 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 			case map[string]string:
 				for k, v := range obj.(map[string]string) {
 
-					session.Store.SetData(k, v)
+					session.Controller.SetData(k, v)
 				}
 			case map[string]interface{}:
 				for k, v := range obj.(map[string]interface{}) {
 
-					session.Store.SetData(k, v)
+					session.Controller.SetData(k, v)
 				}
 			case map[string]map[string]interface{}:
 				for k, v := range obj.(map[string]map[string]interface{}) {
 
-					session.Store.SetData(k, v)
+					session.Controller.SetData(k, v)
 				}
 			case map[string][]map[string]interface{}:
 				for k, v := range obj.(map[string][]map[string]interface{}) {
 
-					session.Store.SetData(k, v)
+					session.Controller.SetData(k, v)
 				}
 			case map[string][]interface{}:
 				for k, v := range obj.(map[string][]interface{}) {
 
-					session.Store.SetData(k, v)
+					session.Controller.SetData(k, v)
 				}
 			default:
 				return goja.Null()
@@ -371,10 +371,10 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 
 		if !val.Equals(goja.Undefined()) && !val.Equals(goja.Null()) {
 			obj := val.Export()
-			session.Store.SetActionData(actionId, keyStr, obj)
+			session.Controller.SetActionData(actionId, keyStr, obj)
 
 		} else {
-			session.Store.SetActionData(actionId, keyStr, nil)
+			session.Controller.SetActionData(actionId, keyStr, nil)
 
 		}
 
@@ -392,7 +392,7 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 		var keyStr string
 		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
 			keyStr = key.String()
-			value = session.Store.GetActionData(actionId, keyStr)
+			value = session.Controller.GetActionData(actionId, keyStr)
 
 		}
 
@@ -415,7 +415,7 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 		var keyStr string
 		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
 			keyStr = key.String()
-			value = session.Store.GetActionData(preActionId, keyStr)
+			value = session.Controller.GetActionData(preActionId, keyStr)
 
 		}
 
@@ -432,7 +432,7 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 			return goja.Null()
 		}
 
-		value := session.Store.GetActionDataMap(actionId)
+		value := session.Controller.GetActionDataMap(actionId)
 
 		if value == nil {
 			return goja.Null()
@@ -446,7 +446,7 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 			return goja.Null()
 		}
 
-		value := session.Store.GetActionDataMap(preActionId)
+		value := session.Controller.GetActionDataMap(preActionId)
 
 		if value == nil {
 			return goja.Null()

@@ -15,7 +15,7 @@ type Session struct {
 	Id string
 
 	Ctx           context.Context
-	Store         RuntimeStore
+	Controller    RuntimeController
 	Router        FlowRouter
 	Runner        FlowRunner
 	ActionChanMap sync.Map //[string]chan *ActionParam
@@ -62,51 +62,51 @@ func (s *Session) delLinkChan(sourceId string, targetId string) {
 }
 
 func (s *Session) GetFlow() *FlowModel {
-	flow := s.Store.GetFlow()
+	flow := s.Controller.GetFlow()
 	return flow
 }
 
 func (s *Session) GetRuntime() *RuntimeModel {
-	runtime := s.Store.GetRuntime()
+	runtime := s.Controller.GetRuntime()
 	return runtime
 }
 
 func (s *Session) GetParam(key string) interface{} {
-	return s.Store.GetParam(key)
+	return s.Controller.GetParam(key)
 }
 func (s *Session) SetParam(key string, val interface{}) {
-	s.Store.SetParam(key, val)
+	s.Controller.SetParam(key, val)
 }
 
 func (s *Session) GetData(key string) interface{} {
-	return s.Store.GetData(key)
+	return s.Controller.GetData(key)
 }
 func (s *Session) SetData(key string, val interface{}) {
-	s.Store.SetData(key, val)
+	s.Controller.SetData(key, val)
 }
 
 func (s *Session) AddLog_flow_error(name, title, content string) {
-	s.Store.AddLog("error", "flow", name, title, content)
+	s.Controller.AddLog("error", "flow", name, title, content)
 }
 
 func (s *Session) AddLog_flow_info(name, title, content string) {
-	s.Store.AddLog("info", "flow", name, title, content)
+	s.Controller.AddLog("info", "flow", name, title, content)
 }
 
 func (s *Session) AddLog_action_error(name, title, content string) {
-	s.Store.AddLog("error", "action", name, title, content)
+	s.Controller.AddLog("error", "action", name, title, content)
 }
 
 func (s *Session) AddLog_action_info(name, title, content string) {
-	s.Store.AddLog("info", "action", name, title, content)
+	s.Controller.AddLog("info", "action", name, title, content)
 }
 
 func (s *Session) AddLog_link_error(name, title, content string) {
-	s.Store.AddLog("error", "link", name, title, content)
+	s.Controller.AddLog("error", "link", name, title, content)
 }
 
 func (s *Session) AddLog_link_info(name, title, content string) {
-	s.Store.AddLog("info", "link", name, title, content)
+	s.Controller.AddLog("info", "link", name, title, content)
 }
 
 func (s *Session) createActionState(actionId string, preActionId string) *ActionStateModel {
@@ -161,7 +161,7 @@ func (s *Session) watch() {
 			log.Println("timeout, suspend")
 			return
 		default:
-			if s.Store.GetCmd() == 1 {
+			if s.Controller.GetCmd() == CMD_STOP {
 				return
 			}
 			time.Sleep(10 * time.Millisecond)
@@ -169,16 +169,16 @@ func (s *Session) watch() {
 	}
 }
 
-func CreateSession(context context.Context, store RuntimeStore, router FlowRouter, runner FlowRunner) *Session {
+func CreateSession(context context.Context, controller RuntimeController, router FlowRouter, runner FlowRunner) *Session {
 	session := &Session{}
 	// uid, _ := uuid.NewV4()
 	// id := strings.ReplaceAll(uid.String(), "-", "")
-	session.Id = store.GetRuntime().Id
+	session.Id = controller.GetRuntime().Id
 	session.Ctx = context
 	session.Router = router
 	session.Runner = runner
 
-	session.Store = store
+	session.Controller = controller
 	//actionid: RuntimeActionParam
 	session.ActionChanMap = sync.Map{}
 	//make(map[string]chan *ActionParam, 0)
@@ -218,14 +218,14 @@ func (s *Session) Execute() {
 	s.startChannel()
 	defer s.stopChannel()
 
-	s.Store.SetBegin()
-	defer s.Store.SetEnd()
+	s.Controller.SetBegin()
+	defer s.Controller.SetEnd()
 
-	s.Store.SetCmd(0)
+	s.Controller.SetCmd(CMD_START)
 
 	//是否全新执行
 	firstRun := true
-	runningActions := s.Store.GetRunningActions()
+	runningActions := s.Controller.GetRunningActions()
 
 	if runningActions != nil && len(runningActions) > 0 {
 		firstRun = false
@@ -234,7 +234,7 @@ func (s *Session) Execute() {
 		}
 	}
 
-	runningLinks := s.Store.GetRunningLinks()
+	runningLinks := s.Controller.GetRunningLinks()
 	if runningLinks != nil && len(runningLinks) > 0 {
 		firstRun = false
 		for _, param := range runningLinks {
@@ -244,7 +244,7 @@ func (s *Session) Execute() {
 
 	if firstRun {
 
-		runtimeId := s.Store.GetRuntime().Id
+		runtimeId := s.Controller.GetRuntime().Id
 
 		startIds := s.GetFlow().GetStartActionIds()
 		for _, actionId := range startIds {
@@ -259,12 +259,12 @@ func (s *Session) Execute() {
 }
 
 func (s *Session) Stop() {
-	s.Store.SetCmd(1)
+	s.Controller.SetCmd(CMD_STOP)
 	log.Println("stop")
 }
 
 func (s *Session) waitComplete() {
-	s.Store.Wait()
+	s.Controller.Wait()
 }
 
 func (s *Session) stopChannel() {
@@ -334,12 +334,12 @@ func (s *Session) stopProcessAction(actionId string) {
 }
 func (s *Session) ToAction(param *ActionParam) {
 	if s.Router != nil {
-		s.Store.AddRunningAction(param)
+		s.Controller.AddRunningAction(param)
 
-		if s.Store.GetCmd() == 1 {
+		if s.Controller.GetCmd() == CMD_STOP {
 			return
 		}
-		s.Store.WaitAdd(1)
+		s.Controller.WaitAdd(1)
 		s.Router.RouteAction(s, param)
 	}
 }
@@ -348,7 +348,7 @@ func (s *Session) PushAction(param *ActionParam) bool {
 
 	c := s.getActionChan(param.ActionId)
 	if c == nil {
-		s.Store.WaitDone()
+		s.Controller.WaitDone()
 		return false
 	}
 
@@ -357,7 +357,7 @@ func (s *Session) PushAction(param *ActionParam) bool {
 }
 
 func (s *Session) ExecuteAction(param *ActionParam) {
-	defer s.Store.WaitDone() //确认节点执行完成
+	defer s.Controller.WaitDone() //确认节点执行完成
 
 	actionState := s.createActionState(param.ActionId, param.PreActionId)
 	var err error
@@ -400,11 +400,11 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 	}
 
 	if complete {
-		s.Store.DelRunningAction(param) //删除待执行节点中已经执行完成的节点
+		s.Controller.DelRunningAction(param) //删除待执行节点中已经执行完成的节点
 
 		actionState.EndTime = time.Now()
 		actionState.Timeused = actionState.EndTime.Sub(actionState.BeginTime).Milliseconds()
-		s.Store.AddActionState(actionState)
+		s.Controller.AddActionState(actionState)
 	}
 
 }
@@ -447,13 +447,13 @@ func (s *Session) stopProcessLink(sourceId, targetId string) {
 func (s *Session) ToLink(param *LinkParam) {
 	if s.Router != nil {
 		//准备执行的路径
-		s.Store.AddRunningLink(param)
+		s.Controller.AddRunningLink(param)
 		//如果停止
-		if s.Store.GetCmd() == 1 {
+		if s.Controller.GetCmd() == CMD_STOP {
 			return
 		}
 
-		s.Store.WaitAdd(1)
+		s.Controller.WaitAdd(1)
 		s.Router.RouteLink(s, param)
 	}
 }
@@ -462,7 +462,7 @@ func (s *Session) PushLink(param *LinkParam) bool {
 
 	c := s.getLinkChan(param.SourceId, param.TargetId)
 	if c == nil {
-		s.Store.WaitDone()
+		s.Controller.WaitDone()
 		return false
 	}
 
@@ -471,7 +471,7 @@ func (s *Session) PushLink(param *LinkParam) bool {
 }
 
 func (s *Session) ExecuteLink(param *LinkParam) {
-	defer s.Store.WaitDone()
+	defer s.Controller.WaitDone()
 
 	linkState := s.createLinkState(param.SourceId, param.TargetId)
 	sourceAction := s.GetFlow().GetAction(param.SourceId)
@@ -521,7 +521,7 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 
 				passCount := 0
 				for _, link := range activeLinks {
-					st := s.Store.GetLastLinkState(link.SourceId, link.TargetId)
+					st := s.Controller.GetLastLinkState(link.SourceId, link.TargetId)
 					if st != nil && st.State == int(SUCCESS) {
 						passCount = passCount + 1
 					}
@@ -540,11 +540,11 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 	}
 
 	if complete {
-		s.Store.DelRunningLink(param) //移除待办路径中已经执行的路径
+		s.Controller.DelRunningLink(param) //移除待办路径中已经执行的路径
 		linkState.EndTime = time.Now()
 		linkState.Timeused = linkState.EndTime.Sub(linkState.BeginTime).Milliseconds()
 
-		s.Store.AddLinkState(linkState)
+		s.Controller.AddLinkState(linkState)
 	}
 
 }
