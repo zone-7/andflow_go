@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/zone-7/andflow_go/engine"
+	"github.com/zone-7/andflow_go/andflow"
 )
 
 func main() {
@@ -18,19 +18,19 @@ func main() {
 		return
 	}
 	//注册执行器
-	engine.RegistActionRunner("common", &engine.ScriptActionRunner{})
+	andflow.RegistActionRunner("common", &andflow.ScriptActionRunner{})
 
 	param := make(map[string]interface{})
 
 	data, _ := ioutil.ReadFile(*file)
 
-	flow, err := engine.ParseFlow(string(data))
+	flow, err := andflow.ParseFlow(string(data))
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	runtime := engine.ExecuteFlow(flow, param, *timeout)
+	runtime := andflow.ExecuteFlow(flow, param, *timeout)
 
 	fmt.Println("time used(ms):", runtime.Timeused)
 

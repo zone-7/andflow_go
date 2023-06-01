@@ -14,28 +14,28 @@ import (
 	"io/ioutil"
 
 	"github.com/zone-7/andflow_go/actions"
-	"github.com/zone-7/andflow_go/engine"
+	"github.com/zone-7/andflow_go/andflow"
 )
 
 func main() {
 	file := "4执行脚本.json"
 
-	engine.RegistActionRunner("common", &actions.CommonActionRunner{})
+	andflow.RegistActionRunner("common", &actions.CommonActionRunner{})
 
 	param := make(map[string]interface{})
 
 	data, _ := ioutil.ReadFile(file)
 
-	flow, err := engine.ParseFlow(string(data))
+	flow, err := andflow.ParseFlow(string(data))
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	runtime := engine.CreateRuntime(flow, param)
+	runtime := andflow.CreateRuntime(flow, param)
 
-	runner := engine.CommonFlowRunner{}
-	engine.Execute(runtime, &runner, 10000)
+	runner := andflow.CommonFlowRunner{}
+	andflow.Execute(runtime, &runner, 10000)
 
 	fmt.Println("time used(ms):", runtime.Timeused)
 
@@ -52,16 +52,16 @@ func main() {
     //读取流程json文件 
 	data, _ := ioutil.ReadFile(demo_path + "/5执行命令.json")
     //2. 解析json文件
-	flow, err := engine.ParseFlow(string(data))
+	flow, err := andflow.ParseFlow(string(data))
 	if err != nil {
 		fmt.Println(err)
 	}
  
     //3. 创建一个运行时
-	runtime := engine.CreateRuntime(flow, param)
+	runtime := andflow.CreateRuntime(flow, param)
      
     //4. 执行流程，超时时间是10000毫秒
-	engine.Execute(runtime, 10000)
+	andflow.Execute(runtime, 10000)
       
 
 ```

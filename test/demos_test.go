@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/zone-7/andflow_go/engine"
+	"github.com/zone-7/andflow_go/andflow"
 )
 
 var demo_path = "./demos"
@@ -24,14 +24,14 @@ func TestAll(t *testing.T) {
 
 		data, _ := ioutil.ReadFile(path.Join(demo_path, file.Name()))
 
-		flow, err := engine.ParseFlow(string(data))
+		flow, err := andflow.ParseFlow(string(data))
 		if err != nil {
 			fmt.Println(err)
 		}
 
 		t1 := time.Now()
 
-		engine.ExecuteFlow(flow, param, 10000)
+		andflow.ExecuteFlow(flow, param, 10000)
 
 		t2 := time.Now().Sub(t1).Milliseconds()
 		fmt.Println(file.Name(), "time used(ms):", t2)
@@ -46,22 +46,22 @@ func TestDemo1ByStep(t *testing.T) {
 
 	data, _ := ioutil.ReadFile(demo_path + "/1简单流程.json")
 
-	flow, err := engine.ParseFlow(string(data))
+	flow, err := andflow.ParseFlow(string(data))
 	if err != nil {
 		fmt.Println(err)
 	}
-	runtime := engine.CreateRuntime(flow, param)
+	runtime := andflow.CreateRuntime(flow, param)
 
 	step := 0
 
-	engine.ExecuteRuntime(runtime, 10000)
+	andflow.ExecuteRuntime(runtime, 10000)
 	fmt.Println("执行步骤", step)
 	step = step + 1
 
 	runtime.SetParam("name", "zgq")
 
 	for runtime.FlowState == 0 {
-		engine.ExecuteRuntime(runtime, 10000)
+		andflow.ExecuteRuntime(runtime, 10000)
 		fmt.Println("执行步骤", step)
 		step = step + 1
 	}
@@ -77,15 +77,15 @@ func TestDemo1WithTimeout(t *testing.T) {
 
 	data, _ := ioutil.ReadFile(demo_path + "/1简单流程.json")
 
-	flow, err := engine.ParseFlow(string(data))
+	flow, err := andflow.ParseFlow(string(data))
 	if err != nil {
 		fmt.Println(err)
 	}
-	runtime := engine.CreateRuntime(flow, param)
+	runtime := andflow.CreateRuntime(flow, param)
 
 	runtime.SetParam("name", "zgq")
 
-	engine.ExecuteRuntime(runtime, 2000)
+	andflow.ExecuteRuntime(runtime, 2000)
 
 	fmt.Println("time used(ms):", runtime.Timeused)
 	fmt.Println("--------------------------------------------")
@@ -100,18 +100,18 @@ func TestFlowRunner(t *testing.T) {
 
 	data, _ := ioutil.ReadFile(demo_path + "/4执行脚本.json")
 
-	flow, err := engine.ParseFlow(string(data))
+	flow, err := andflow.ParseFlow(string(data))
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	runtime := engine.CreateRuntime(flow, param)
+	runtime := andflow.CreateRuntime(flow, param)
 
-	engine.ExecuteRuntime(runtime, timeout)
+	andflow.ExecuteRuntime(runtime, timeout)
 
 	runtime.SetParam("name", "zgq")
 
-	engine.ExecuteRuntime(runtime, timeout)
+	andflow.ExecuteRuntime(runtime, timeout)
 
 	fmt.Println("time used(ms):", runtime.Timeused)
 	fmt.Println("--------------------------------------------")
@@ -126,14 +126,14 @@ func TestScriptCmd(t *testing.T) {
 
 	data, _ := ioutil.ReadFile(demo_path + "/5执行命令.json")
 
-	flow, err := engine.ParseFlow(string(data))
+	flow, err := andflow.ParseFlow(string(data))
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	runtime := engine.CreateRuntime(flow, param)
+	runtime := andflow.CreateRuntime(flow, param)
 
-	engine.ExecuteRuntime(runtime, timeout)
+	andflow.ExecuteRuntime(runtime, timeout)
 
 	fmt.Println("time used(ms):", runtime.Timeused)
 	fmt.Println("--------------------------------------------")
