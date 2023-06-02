@@ -39,19 +39,20 @@ type ActionDataModel struct {
 
 //节点状态
 type ActionStateModel struct {
-	ActionId    string              `bson:"action_id" json:"action_id"`         //节点ID
-	ActionName  string              `bson:"action_name" json:"action_name"`     //节点名称
-	ActionTitle string              `bson:"action_title" json:"action_title"`   //节点标题
-	ActionDes   string              `bson:"action_des" json:"action_des"`       //节点描述
-	ActionIcon  string              `bson:"action_icon" json:"action_icon"`     //节点图标
-	PreActionId string              `bson:"pre_action_id" json:"pre_action_id"` //上一个节点ID
-	IsError     int                 `bson:"is_error" json:"is_error"`           //是否异常
-	State       int                 `bson:"state" json:"state"`                 //状态：1，完成并继续往下，0 未来执行， -1完成并终止
-	Data        []*ActionDataModel  `bson:"data" json:"data"`                   //执行结果
-	Content     *ActionContentModel `bson:"content" json:"content"`             //界面显示的内容
-	BeginTime   time.Time           `bson:"begin_time" json:"begin_time"`       //开始时间
-	EndTime     time.Time           `bson:"end_time" json:"end_time"`           //完成时间
-	Timeused    int64               `bson:"timeused" json:"timeused"`           //耗时
+	ActionId      string              `bson:"action_id" json:"action_id"`             //节点ID
+	ActionName    string              `bson:"action_name" json:"action_name"`         //节点名称
+	ActionTitle   string              `bson:"action_title" json:"action_title"`       //节点标题
+	ActionDes     string              `bson:"action_des" json:"action_des"`           //节点描述
+	ActionIcon    string              `bson:"action_icon" json:"action_icon"`         //节点图标
+	PreActionId   string              `bson:"pre_action_id" json:"pre_action_id"`     //上一个节点ID
+	NextActionIds []string            `bson:"next_action_ids" json:"next_action_ids"` //下一步要执行的ID列表
+	IsError       int                 `bson:"is_error" json:"is_error"`               //是否异常
+	State         int                 `bson:"state" json:"state"`                     //状态：1，完成并继续往下，0 未来执行， -1完成并终止
+	Data          []*ActionDataModel  `bson:"data" json:"data"`                       //执行结果
+	Content       *ActionContentModel `bson:"content" json:"content"`                 //界面显示的内容
+	BeginTime     time.Time           `bson:"begin_time" json:"begin_time"`           //开始时间
+	EndTime       time.Time           `bson:"end_time" json:"end_time"`               //完成时间
+	Timeused      int64               `bson:"timeused" json:"timeused"`               //耗时
 }
 
 //连接线状态

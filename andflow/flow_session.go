@@ -361,7 +361,7 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 
 	actionState := s.createActionState(param.ActionId, param.PreActionId)
 	var err error
-	var res Result = SUCCESS
+	var res Result = RESULT_SUCCESS
 	complete := true
 	canNext := true
 	if s.Runner != nil {
@@ -369,16 +369,16 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 		if err != nil {
 			s.AddLog_action_error(actionState.ActionName, actionState.ActionTitle, fmt.Sprintf("执行节点错误：%v", err))
 		}
-		if res != SUCCESS {
+		if res != RESULT_SUCCESS {
 			canNext = false
 		}
-		if res == REJECT {
+		if res == RESULT_REJECT {
 			complete = false
 		}
 	}
 
 	actionState.State = int(res)
-	if res == FAILURE {
+	if res == RESULT_FAILURE {
 		actionState.IsError = 1
 	}
 
@@ -386,11 +386,21 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 
 		flow := s.GetFlow()
 
+		//在执行过程中指定的后续可执行节点
+		nextActionIds := actionState.NextActionIds
+
+		//所有后续连线
 		nextLinks := flow.GetLinkBySourceId(param.ActionId)
 		if nextLinks != nil && len(nextLinks) > 0 {
 			for _, link := range nextLinks {
 				if link.Active == "false" {
 					continue
+				}
+				//如果有特别指定后续节点，就进行判断,如果不在指定的后续节点当中就不执行。
+				if nextActionIds != nil && len(nextActionIds) > 0 {
+					if arrayIndexOf(nextActionIds, link.TargetId) < 0 {
+						continue
+					}
 				}
 
 				linkParam := &LinkParam{RuntimeId: param.RuntimeId, SourceId: link.SourceId, TargetId: link.TargetId}
@@ -478,7 +488,7 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 	targetAction := s.GetFlow().GetAction(param.TargetId)
 
 	var err error
-	var res Result = SUCCESS
+	var res Result = RESULT_SUCCESS
 	complete := true
 	toNext := true
 	if s.Runner != nil {
@@ -487,17 +497,17 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 
 			s.AddLog_link_error(param.SourceId+"->"+param.TargetId, sourceAction.Title+"->"+targetAction.Title, fmt.Sprintf("执行连线错误：%v", err))
 		}
-		if res != SUCCESS {
+		if res != RESULT_SUCCESS {
 			toNext = false
 		}
-		if res == REJECT {
+		if res == RESULT_REJECT {
 			complete = false
 		}
 	}
 
 	//状态
 	linkState.State = int(res)
-	if res == FAILURE {
+	if res == RESULT_FAILURE {
 		linkState.IsError = 1
 	}
 
@@ -522,7 +532,7 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 				passCount := 0
 				for _, link := range activeLinks {
 					st := s.Controller.GetLastLinkState(link.SourceId, link.TargetId)
-					if st != nil && st.State == int(SUCCESS) {
+					if st != nil && st.State == int(RESULT_SUCCESS) {
 						passCount = passCount + 1
 					}
 				}
@@ -553,4 +563,14 @@ func (s *Session) ExecuteFlow(flow *FlowModel, param map[string]interface{}, tim
 	runtime := ExecuteFlow(flow, param, timeout)
 
 	return runtime
+}
+
+func arrayIndexOf(array []string, val string) (index int) {
+
+	for i := 0; i < len(array); i++ {
+		if array[i] == val {
+			return i
+		}
+	}
+	return -1
 }

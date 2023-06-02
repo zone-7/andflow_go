@@ -11,9 +11,9 @@ var actionRunnerMap map[string]ActionRunner = make(map[string]ActionRunner)
 type Result int
 
 const (
-	SUCCESS Result = 1  //执行通过
-	REJECT  Result = 0  //没有执行
-	FAILURE Result = -1 //执行失败
+	RESULT_SUCCESS Result = 1  //执行通过
+	RESULT_REJECT  Result = 0  //没有执行
+	RESULT_FAILURE Result = -1 //执行失败
 )
 
 type ActionRunner interface {

@@ -28,7 +28,7 @@ func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam, state *Link
 	link := s.GetFlow().GetLinkBySourceIdAndTargetId(param.SourceId, param.TargetId)
 	sc := link.Filter
 	if len(strings.Trim(sc, " ")) == 0 {
-		return SUCCESS, nil
+		return RESULT_SUCCESS, nil
 	}
 
 	rts := goja.New()
@@ -44,7 +44,7 @@ func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam, state *Link
 	val, err := rts.RunString(script)
 
 	if err != nil {
-		return FAILURE, err
+		return RESULT_FAILURE, err
 	}
 
 	res := GetScriptIntResult(val)
@@ -53,7 +53,7 @@ func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam, state *Link
 }
 
 func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *ActionStateModel) (Result, error) {
-	var res Result = SUCCESS
+	var res Result = RESULT_SUCCESS
 	var err error
 
 	action := s.GetFlow().GetAction(param.ActionId)
@@ -81,12 +81,12 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 		val, err := rts.RunString(script_filter)
 		if err != nil {
 			log.Println(fmt.Sprintf("script exception：%v", err))
-			return FAILURE, err
+			return RESULT_FAILURE, err
 		}
 
 		res := GetScriptIntResult(val)
 
-		if res != SUCCESS {
+		if res != RESULT_SUCCESS {
 			return res, nil
 		}
 
@@ -97,9 +97,9 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 	if runner != nil {
 		res, err = runner.Execute(s, param, state)
 		if err != nil {
-			return FAILURE, err
+			return RESULT_FAILURE, err
 		}
-		if res != SUCCESS {
+		if res != RESULT_SUCCESS {
 			return res, nil
 		}
 	}
@@ -113,12 +113,12 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 		if err != nil {
 
 			log.Println(fmt.Sprintf("script exception：%v", err))
-			return FAILURE, err
+			return RESULT_FAILURE, err
 		}
 
 		res := GetScriptIntResult(val)
 
-		if res != SUCCESS {
+		if res != RESULT_SUCCESS {
 			return res, nil
 		}
 	}

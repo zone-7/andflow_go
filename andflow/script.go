@@ -19,85 +19,85 @@ import (
 
 func GetScriptIntResult(val goja.Value) Result {
 	if val == nil || val.Equals(goja.Undefined()) || val.Equals(goja.NaN()) || val.Equals(goja.Null()) {
-		return SUCCESS
+		return RESULT_SUCCESS
 	}
 
 	obj := val.Export()
 	if obj == nil {
-		return SUCCESS
+		return RESULT_SUCCESS
 	}
 	switch obj.(type) {
 	case bool:
 		if obj.(bool) {
-			return SUCCESS //1
+			return RESULT_SUCCESS //1
 		} else {
-			return FAILURE // -1
+			return RESULT_FAILURE // -1
 		}
 	case string:
 		if obj.(string) == "true" {
-			return SUCCESS
+			return RESULT_SUCCESS
 		} else if obj.(string) == "false" {
-			return FAILURE
+			return RESULT_FAILURE
 		} else if obj.(string) == "1" {
-			return SUCCESS
+			return RESULT_SUCCESS
 		} else if obj.(string) == "-1" {
-			return FAILURE
+			return RESULT_FAILURE
 		} else if obj.(string) == "0" {
-			return REJECT
+			return RESULT_REJECT
 		}
 	case int:
 		if obj.(int) > 0 {
-			return SUCCESS
+			return RESULT_SUCCESS
 		} else if obj.(int) < 0 {
-			return FAILURE
+			return RESULT_FAILURE
 		} else {
-			return REJECT
+			return RESULT_REJECT
 		}
 	case int64:
 		if obj.(int64) > 0 {
-			return SUCCESS
+			return RESULT_SUCCESS
 		} else if obj.(int64) < 0 {
-			return FAILURE
+			return RESULT_FAILURE
 		} else {
-			return REJECT
+			return RESULT_REJECT
 		}
 	case int32:
 		if obj.(int32) > 0 {
-			return SUCCESS
+			return RESULT_SUCCESS
 		} else if obj.(int32) < 0 {
-			return FAILURE
+			return RESULT_FAILURE
 		} else {
-			return REJECT
+			return RESULT_REJECT
 		}
 	case int16:
 		if obj.(int16) > 0 {
-			return SUCCESS
+			return RESULT_SUCCESS
 		} else if obj.(int16) < 0 {
-			return FAILURE
+			return RESULT_FAILURE
 		} else {
-			return REJECT
+			return RESULT_REJECT
 		}
 	case float64:
 		if obj.(float64) > 0 {
-			return SUCCESS
+			return RESULT_SUCCESS
 		} else if obj.(float64) < 0 {
-			return FAILURE
+			return RESULT_FAILURE
 		} else {
-			return REJECT
+			return RESULT_REJECT
 		}
 	case float32:
 		if obj.(float32) > 0 {
-			return SUCCESS
+			return RESULT_SUCCESS
 		} else if obj.(float32) < 0 {
-			return FAILURE
+			return RESULT_FAILURE
 		} else {
-			return REJECT
+			return RESULT_REJECT
 		}
 	default:
-		return SUCCESS
+		return RESULT_SUCCESS
 
 	}
-	return SUCCESS
+	return RESULT_SUCCESS
 }
 
 //设置脚本函数
