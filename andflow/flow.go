@@ -6,6 +6,7 @@ type ActionModel struct {
 	Title      string            `bson:"title" json:"title"`             //标题
 	Icon       string            `bson:"icon" json:"icon"`               //图标
 	Des        string            `bson:"des" json:"des"`                 //描述
+	Keywords   string            `bson:"keywords" json:"keywords"`       //关键词
 	Left       string            `bson:"left" json:"left"`               //位置X
 	Top        string            `bson:"top" json:"top"`                 //位置Y
 	Width      string            `bson:"width" json:"width"`             //宽度
@@ -46,6 +47,7 @@ func (m *ActionModel) GetContent() (string, string) {
 
 type LinkModel struct {
 	Title          string `bson:"title" json:"title"`                     //标题
+	Keywords       string `bson:"keywords" json:"keywords"`               //关键词
 	SourceId       string `bson:"source_id" json:"source_id"`             //源ID
 	SourcePosition string `bson:"source_position" json:"source_position"` //源位置
 	TargetId       string `bson:"target_id" json:"target_id"`             //目的ID
