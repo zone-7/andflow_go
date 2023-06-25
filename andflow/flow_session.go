@@ -242,7 +242,11 @@ func (s *Session) Execute() {
 		}
 	}
 
+	//第一次执行或者从头执行。
 	if firstRun {
+		//清空状态
+		s.Controller.GetRuntime().ActionStates = make([]*ActionStateModel, 0)
+		s.Controller.GetRuntime().LinkStates = make([]*LinkStateModel, 0)
 
 		runtimeId := s.Controller.GetRuntime().Id
 
