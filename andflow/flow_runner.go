@@ -96,9 +96,25 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 	runner := GetActionRunner(name)
 	if runner != nil {
 		res, err = runner.Execute(s, param, state)
-		if err != nil {
+
+		if err != nil || res == RESULT_FAILURE {
+			errmsg := "节点" + action.Name + "," + action.Title + "执行错误"
+			if err != nil {
+				errmsg = err.Error()
+			}
+			s.AddLog_action_error(action.Name, action.Title, errmsg)
+			//执行异常处理脚本
+			if len(strings.Trim(action.Error, " ")) > 0 {
+				script_error := "function $exec(){\n" + action.Error + "\n}\n $exec();\n"
+				_, err_err := rts.RunString(script_error)
+				if err_err != nil {
+					log.Println(fmt.Sprintf("script exception：%v", err_err))
+				}
+			}
+
 			return RESULT_FAILURE, err
 		}
+
 		if res != RESULT_SUCCESS {
 			return res, nil
 		}

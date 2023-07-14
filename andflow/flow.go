@@ -19,6 +19,7 @@ type ActionModel struct {
 	Once       string            `bson:"once" json:"once"`               //是否只执行一次： true，false
 	Filter     string            `bson:"filter" json:"filter"`           //执行过滤脚本
 	Script     string            `bson:"script" json:"script"`           //执行内容脚本
+	Error      string            `bson:"error" json:"error"`             //执行异常处理脚本
 	Content    map[string]string `bson:"content" json:"content"`         //内容
 }
 
