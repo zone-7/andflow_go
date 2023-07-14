@@ -117,6 +117,36 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 		title = action.Title
 	}
 
+	if !islink {
+		action := session.GetFlow().GetAction(actionId)
+		rts.Set("setContent", func(call goja.FunctionCall) goja.Value {
+			tp := call.Argument(0)
+			value := call.Argument(1)
+
+			action.SetContent(tp.String(), value.String())
+
+			return goja.Null()
+		})
+		rts.Set("setTitle", func(call goja.FunctionCall) goja.Value {
+			value := call.Argument(0)
+			action.Title = value.String()
+
+			return goja.Null()
+		})
+	} else {
+		rts.Set("setTitle", func(call goja.FunctionCall) goja.Value {
+			tp := call.Argument(0)
+			value := call.Argument(1)
+			link:=session.GetFlow().GetLinkBySourceIdAndTargetId(preActionId,actionId)
+			if link!=nil{
+				link.Title = 
+			}
+			 
+			return goja.Null()
+		})
+
+	}
+
 	//日志
 	rts.Set("log", func(call goja.FunctionCall) goja.Value {
 		value := call.Argument(0)
@@ -471,7 +501,12 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 	})
 	jsonObj.Set("stringfy", func(call goja.FunctionCall) goja.Value {
 		jsonParam := call.Argument(0)
-		return rts.ToValue(jsonParam.String())
+
+		j, err := json.Marshal(jsonParam)
+		if err != nil {
+			return goja.Null()
+		}
+		return rts.ToValue(string(j))
 
 	})
 	rts.Set("json", jsonObj)

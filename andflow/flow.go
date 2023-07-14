@@ -55,6 +55,10 @@ type LinkModel struct {
 	TargetPosition string `bson:"target_position" json:"target_position"` //目的位置
 	Filter         string `bson:"filter" json:"filter"`                   //过滤脚本
 	Active         string `bson:"active" json:"active"`                   //是否是一个可通的路径，true,false
+	LabelSource    string `bson:"label_source" json:"label_source"`       //头标签
+	LabelTarget    string `bson:"label_target" json:"label_target"`       //尾标签
+	Animation      bool   `bson:"animation" json:"animation"`             //是否动画
+	Arrows         []bool `bson:"arrows" json:"arrows"`                   //是否显示头中间和尾箭头
 }
 
 type GroupModel struct {
