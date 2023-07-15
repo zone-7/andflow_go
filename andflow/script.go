@@ -135,15 +135,22 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 		})
 	} else {
 		rts.Set("setTitle", func(call goja.FunctionCall) goja.Value {
-			tp := call.Argument(0)
+
 			value := call.Argument(1)
-			link:=session.GetFlow().GetLinkBySourceIdAndTargetId(preActionId,actionId)
-			if link!=nil{
-				link.Title = 
+			if value == nil || value == goja.Null() || goja.IsNull(value) {
+				return goja.Null()
 			}
-			 
+			title := value.String()
+
+			link := session.GetFlow().GetLinkBySourceIdAndTargetId(preActionId, actionId)
+			if link != nil {
+				link.Title = title
+			}
+
 			return goja.Null()
 		})
+
+		
 
 	}
 
