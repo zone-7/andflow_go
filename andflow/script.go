@@ -146,12 +146,8 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 			if link != nil {
 				link.Title = title
 			}
-
 			return goja.Null()
 		})
-
-		
-
 	}
 
 	//日志
