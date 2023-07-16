@@ -121,13 +121,23 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 		actionState := session.Controller.GetLastActionState(actionId)
 
 		rts.Set("setContent", func(call goja.FunctionCall) goja.Value {
-			tp := call.Argument(0)
-			value := call.Argument(1)
+			value := call.Argument(0)
+			tp := call.Argument(1)
+
 			if actionState != nil {
 				if actionState.Content == nil {
 					actionState.Content = &ActionContentModel{}
 				}
-				actionState.Content.ContentType = tp.String()
+
+				var content_type string
+				if tp != nil && !tp.Equals(goja.NaN()) && tp.Equals(goja.Null()) {
+					content_type = tp.String()
+				}
+				if len(content_type) == 0 {
+					content_type = "msg"
+				}
+
+				actionState.Content.ContentType = content_type
 				actionState.Content.Content = value.String()
 			}
 
