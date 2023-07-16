@@ -17,24 +17,24 @@ type FlowRunner interface {
 }
 
 type CommonFlowRunner struct {
-	ActionScriptFunc func(rts *goja.Runtime, s *Session, param *ActionParam, state *ActionStateModel)
-	LinkScriptFunc   func(rts *goja.Runtime, s *Session, param *LinkParam, state *LinkStateModel)
-	ActionErrorFunc  func(s *Session, param *ActionParam, state *ActionStateModel, err error)
-	LinkErrorFunc    func(s *Session, param *LinkParam, state *LinkStateModel, err error)
+	ActionScriptFunc  func(rts *goja.Runtime, s *Session, param *ActionParam, state *ActionStateModel)
+	LinkScriptFunc    func(rts *goja.Runtime, s *Session, param *LinkParam, state *LinkStateModel)
+	ActionFailureFunc func(s *Session, param *ActionParam, state *ActionStateModel, err error)
+	LinkFailureFunc   func(s *Session, param *LinkParam, state *LinkStateModel, err error)
 }
 
-func (r *CommonFlowRunner) SetActionScript(act func(rts *goja.Runtime, s *Session, param *ActionParam, state *ActionStateModel)) {
+func (r *CommonFlowRunner) SetActionScriptFunc(act func(rts *goja.Runtime, s *Session, param *ActionParam, state *ActionStateModel)) {
 	r.ActionScriptFunc = act
 }
-func (r *CommonFlowRunner) SetLinkScript(act func(rts *goja.Runtime, s *Session, param *LinkParam, state *LinkStateModel)) {
+func (r *CommonFlowRunner) SetLinkScriptFunc(act func(rts *goja.Runtime, s *Session, param *LinkParam, state *LinkStateModel)) {
 	r.LinkScriptFunc = act
 }
 
-func (r *CommonFlowRunner) SetActionError(e func(s *Session, param *ActionParam, state *ActionStateModel, err error)) {
-	r.ActionErrorFunc = e
+func (r *CommonFlowRunner) SetActionFailureFunc(e func(s *Session, param *ActionParam, state *ActionStateModel, err error)) {
+	r.ActionFailureFunc = e
 }
-func (r *CommonFlowRunner) SetLinkError(e func(s *Session, param *LinkParam, state *LinkStateModel, err error)) {
-	r.LinkErrorFunc = e
+func (r *CommonFlowRunner) SetLinkFailureFunc(e func(s *Session, param *LinkParam, state *LinkStateModel, err error)) {
+	r.LinkFailureFunc = e
 }
 
 func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam, state *LinkStateModel) (Result, error) {
@@ -162,13 +162,13 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 }
 
 func (r *CommonFlowRunner) OnActionFailure(s *Session, param *ActionParam, state *ActionStateModel, err error) {
-	if r.ActionErrorFunc != nil {
-		r.ActionErrorFunc(s, param, state, err)
+	if r.ActionFailureFunc != nil {
+		r.ActionFailureFunc(s, param, state, err)
 	}
 }
 func (r *CommonFlowRunner) OnLinkFailure(s *Session, param *LinkParam, state *LinkStateModel, err error) {
-	if r.LinkErrorFunc != nil {
-		r.LinkErrorFunc(s, param, state, err)
+	if r.LinkFailureFunc != nil {
+		r.LinkFailureFunc(s, param, state, err)
 	}
 
 }
