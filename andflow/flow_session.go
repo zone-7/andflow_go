@@ -2,6 +2,7 @@ package andflow
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -366,19 +367,20 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 	actionState := s.createActionState(param.ActionId, param.PreActionId)
 	var err error
 	var res Result = RESULT_SUCCESS
-	complete := true
-	canNext := true
+
 	if s.Runner != nil {
 		res, err = s.Runner.ExecuteAction(s, param, actionState)
-		if err != nil {
-			s.AddLog_action_error(actionState.ActionName, actionState.ActionTitle, fmt.Sprintf("执行节点错误：%v", err))
+		if err != nil || res == RESULT_FAILURE {
+			if err == nil {
+				err = errors.New("节点返回错误")
+			}
+
+			//错误回调
+			s.Runner.OnActionFailure(s, param, actionState, err)
+
+			s.AddLog_action_error(actionState.ActionName, actionState.ActionTitle, err.Error())
 		}
-		if res != RESULT_SUCCESS {
-			canNext = false
-		}
-		if res == RESULT_REJECT {
-			complete = false
-		}
+
 	}
 
 	actionState.State = int(res)
@@ -386,7 +388,7 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 		actionState.IsError = 1
 	}
 
-	if canNext {
+	if res == RESULT_SUCCESS {
 
 		flow := s.GetFlow()
 
@@ -413,7 +415,7 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 		}
 	}
 
-	if complete {
+	if res == RESULT_SUCCESS || res == RESULT_FAILURE {
 		s.Controller.DelRunningAction(param) //删除待执行节点中已经执行完成的节点
 
 		actionState.EndTime = time.Now()
@@ -493,19 +495,17 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 
 	var err error
 	var res Result = RESULT_SUCCESS
-	complete := true
-	toNext := true
+
 	if s.Runner != nil {
 		res, err = s.Runner.ExecuteLink(s, param, linkState)
-		if err != nil {
+		if res == RESULT_FAILURE || err != nil {
+			if err == nil {
+				err = errors.New("连接线返回错误")
+			}
+			//错误回调
+			s.Runner.OnLinkFailure(s, param, linkState, err)
 
 			s.AddLog_link_error(param.SourceId+"->"+param.TargetId, sourceAction.Title+"->"+targetAction.Title, fmt.Sprintf("执行连线错误：%v", err))
-		}
-		if res != RESULT_SUCCESS {
-			toNext = false
-		}
-		if res == RESULT_REJECT {
-			complete = false
 		}
 	}
 
@@ -515,7 +515,7 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 		linkState.IsError = 1
 	}
 
-	if toNext {
+	if res == RESULT_SUCCESS {
 
 		canNext := true
 		flow := s.GetFlow()
@@ -553,7 +553,7 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 
 	}
 
-	if complete {
+	if res == RESULT_SUCCESS || res == RESULT_FAILURE {
 		s.Controller.DelRunningLink(param) //移除待办路径中已经执行的路径
 		linkState.EndTime = time.Now()
 		linkState.Timeused = linkState.EndTime.Sub(linkState.BeginTime).Milliseconds()

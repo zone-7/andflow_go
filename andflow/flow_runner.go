@@ -1,6 +1,7 @@
 package andflow
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -11,19 +12,31 @@ import (
 type FlowRunner interface {
 	ExecuteLink(s *Session, param *LinkParam, state *LinkStateModel) (Result, error)       //返回三个状态 -1 不通过，1通过，0还没准备好执行
 	ExecuteAction(s *Session, param *ActionParam, state *ActionStateModel) (Result, error) //返回三个状态 -1 不通过，1通过，0还没准备好执行
+	OnLinkFailure(s *Session, param *LinkParam, state *LinkStateModel, err error)
+	OnActionFailure(s *Session, param *ActionParam, state *ActionStateModel, err error)
 }
 
 type CommonFlowRunner struct {
-	actionScriptFunc func(rts *goja.Runtime, s *Session, param *ActionParam, state *ActionStateModel)
-	linkScriptFunc   func(rts *goja.Runtime, s *Session, param *LinkParam, state *LinkStateModel)
+	ActionScriptFunc func(rts *goja.Runtime, s *Session, param *ActionParam, state *ActionStateModel)
+	LinkScriptFunc   func(rts *goja.Runtime, s *Session, param *LinkParam, state *LinkStateModel)
+	ActionErrorFunc  func(s *Session, param *ActionParam, state *ActionStateModel, err error)
+	LinkErrorFunc    func(s *Session, param *LinkParam, state *LinkStateModel, err error)
 }
 
 func (r *CommonFlowRunner) SetActionScript(act func(rts *goja.Runtime, s *Session, param *ActionParam, state *ActionStateModel)) {
-	r.actionScriptFunc = act
+	r.ActionScriptFunc = act
 }
 func (r *CommonFlowRunner) SetLinkScript(act func(rts *goja.Runtime, s *Session, param *LinkParam, state *LinkStateModel)) {
-	r.linkScriptFunc = act
+	r.LinkScriptFunc = act
 }
+
+func (r *CommonFlowRunner) SetActionError(e func(s *Session, param *ActionParam, state *ActionStateModel, err error)) {
+	r.ActionErrorFunc = e
+}
+func (r *CommonFlowRunner) SetLinkError(e func(s *Session, param *LinkParam, state *LinkStateModel, err error)) {
+	r.LinkErrorFunc = e
+}
+
 func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam, state *LinkStateModel) (Result, error) {
 	link := s.GetFlow().GetLinkBySourceIdAndTargetId(param.SourceId, param.TargetId)
 	sc := link.Filter
@@ -34,8 +47,8 @@ func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam, state *Link
 	rts := goja.New()
 	rts.Set("flow", s.GetFlow())
 	rts.Set("link", link)
-	if r.linkScriptFunc != nil {
-		r.linkScriptFunc(rts, s, param, state)
+	if r.LinkScriptFunc != nil {
+		r.LinkScriptFunc(rts, s, param, state)
 	}
 
 	SetCommonScriptFunc(rts, s, param.SourceId, param.TargetId, true)
@@ -67,8 +80,8 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 	rts.Set("flow", s.GetFlow())
 	rts.Set("action", action)
 
-	if r.actionScriptFunc != nil {
-		r.actionScriptFunc(rts, s, param, state)
+	if r.ActionScriptFunc != nil {
+		r.ActionScriptFunc(rts, s, param, state)
 	}
 
 	SetCommonScriptFunc(rts, s, param.PreActionId, param.ActionId, false)
@@ -79,8 +92,13 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 		script_filter := "function $filter(){\n" + action.Filter + "\n}\n $filter();\n"
 
 		val, err := rts.RunString(script_filter)
-		if err != nil {
+
+		if res == RESULT_FAILURE || err != nil {
+			if err == nil {
+				err = errors.New("执行过滤脚本返回错误")
+			}
 			log.Println(fmt.Sprintf("script exception：%v", err))
+
 			return RESULT_FAILURE, err
 		}
 
@@ -98,11 +116,12 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 		res, err = runner.Execute(s, param, state)
 
 		if err != nil || res == RESULT_FAILURE {
-			errmsg := "节点" + action.Name + "," + action.Title + "执行错误"
-			if err != nil {
-				errmsg = err.Error()
+
+			if err == nil {
+				err = errors.New("节点" + action.Name + "," + action.Title + "执行错误")
 			}
-			s.AddLog_action_error(action.Name, action.Title, errmsg)
+
+			s.AddLog_action_error(action.Name, action.Title, err.Error())
 			//执行异常处理脚本
 			if len(strings.Trim(action.Error, " ")) > 0 {
 				script_error := "function $exec(){\n" + action.Error + "\n}\n $exec();\n"
@@ -140,4 +159,16 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 	}
 
 	return res, nil
+}
+
+func (r *CommonFlowRunner) OnActionFailure(s *Session, param *ActionParam, state *ActionStateModel, err error) {
+	if r.ActionErrorFunc != nil {
+		r.ActionErrorFunc(s, param, state, err)
+	}
+}
+func (r *CommonFlowRunner) OnLinkFailure(s *Session, param *LinkParam, state *LinkStateModel, err error) {
+	if r.LinkErrorFunc != nil {
+		r.LinkErrorFunc(s, param, state, err)
+	}
+
 }
