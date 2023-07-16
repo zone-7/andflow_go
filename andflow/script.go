@@ -118,34 +118,30 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 	}
 
 	if !islink {
-		action := session.GetFlow().GetAction(actionId)
+		actionState := session.Controller.GetLastActionState(actionId)
+
 		rts.Set("setContent", func(call goja.FunctionCall) goja.Value {
 			tp := call.Argument(0)
 			value := call.Argument(1)
-
-			action.SetContent(tp.String(), value.String())
+			if actionState != nil {
+				if actionState.Content == nil {
+					actionState.Content = &ActionContentModel{}
+				}
+				actionState.Content.ContentType = tp.String()
+				actionState.Content.Content = value.String()
+			}
 
 			return goja.Null()
 		})
 		rts.Set("setTitle", func(call goja.FunctionCall) goja.Value {
 			value := call.Argument(0)
-			action.Title = value.String()
-
-			return goja.Null()
-		})
-	} else {
-		rts.Set("setTitle", func(call goja.FunctionCall) goja.Value {
-
-			value := call.Argument(1)
-			if value == nil || value == goja.Null() || goja.IsNull(value) {
-				return goja.Null()
+			if actionState != nil {
+				if actionState.Content == nil {
+					actionState.Content = &ActionContentModel{}
+				}
+				actionState.ActionTitle = value.String()
 			}
-			title := value.String()
 
-			link := session.GetFlow().GetLinkBySourceIdAndTargetId(preActionId, actionId)
-			if link != nil {
-				link.Title = title
-			}
 			return goja.Null()
 		})
 	}
