@@ -160,6 +160,7 @@ func (s *Session) watch() {
 			s.Stop()
 			s.AddLog_flow_info(s.GetFlow().Code, s.GetFlow().Name, "timeout")
 			log.Println("timeout, suspend")
+			s.Runner.OnTimeout(s)
 			return
 		default:
 			if s.Controller.GetCmd() == CMD_STOP {

@@ -14,6 +14,7 @@ type FlowRunner interface {
 	ExecuteAction(s *Session, param *ActionParam, state *ActionStateModel) (Result, error) //返回三个状态 -1 不通过，1通过，0还没准备好执行
 	OnLinkFailure(s *Session, param *LinkParam, state *LinkStateModel, err error)
 	OnActionFailure(s *Session, param *ActionParam, state *ActionStateModel, err error)
+	OnTimeout(s *Session)
 }
 
 type CommonFlowRunner struct {
@@ -21,6 +22,7 @@ type CommonFlowRunner struct {
 	LinkScriptFunc    func(rts *goja.Runtime, s *Session, param *LinkParam, state *LinkStateModel)
 	ActionFailureFunc func(s *Session, param *ActionParam, state *ActionStateModel, err error)
 	LinkFailureFunc   func(s *Session, param *LinkParam, state *LinkStateModel, err error)
+	TimeoutFunc       func(s *Session)
 }
 
 func (r *CommonFlowRunner) SetActionScriptFunc(act func(rts *goja.Runtime, s *Session, param *ActionParam, state *ActionStateModel)) {
@@ -35,6 +37,9 @@ func (r *CommonFlowRunner) SetActionFailureFunc(e func(s *Session, param *Action
 }
 func (r *CommonFlowRunner) SetLinkFailureFunc(e func(s *Session, param *LinkParam, state *LinkStateModel, err error)) {
 	r.LinkFailureFunc = e
+}
+func (r *CommonFlowRunner) SetTimeoutFunc(e func(s *Session)) {
+	r.TimeoutFunc = e
 }
 
 func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam, state *LinkStateModel) (Result, error) {
@@ -169,6 +174,13 @@ func (r *CommonFlowRunner) OnActionFailure(s *Session, param *ActionParam, state
 func (r *CommonFlowRunner) OnLinkFailure(s *Session, param *LinkParam, state *LinkStateModel, err error) {
 	if r.LinkFailureFunc != nil {
 		r.LinkFailureFunc(s, param, state, err)
+	}
+
+}
+
+func (r *CommonFlowRunner) OnTimeout(s *Session) {
+	if r.TimeoutFunc != nil {
+		r.TimeoutFunc(s)
 	}
 
 }
