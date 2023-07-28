@@ -97,7 +97,7 @@ type RuntimeModel struct {
 	Des            string              `bson:"des" json:"des"`                         //描述
 	BeginTime      time.Time           `bson:"begin_time" json:"begin_time"`           //开始时间
 	EndTime        time.Time           `bson:"end_time" json:"end_time"`               //完成时间
-	Timeused       int64               `bson:"timeused" json:"timeused"`               //耗时
+	Timeused       int64               `bson:"timeused" json:"timeused"`               //耗时（毫秒)
 	IsRunning      int                 `bson:"is_running" json:"is_running"`           //是否正在运行
 	IsError        int                 `bson:"is_error" json:"is_error"`               //是否异常
 	RunningLinks   []*LinkParam        `bson:"running_links" json:"running_links"`     //待执行连接线
@@ -111,7 +111,8 @@ type RuntimeModel struct {
 	Message        string              `bson:"message" json:"message"`                 //信息
 	CreateTime     time.Time           `bson:"create_time" json:"create_time"`         //创建时间
 	UpdateTime     time.Time           `bson:"update_time" json:"update_time"`         //修改时间
-	UserId         int64               `bson:"user_id" json:"user_id"`
+	UserId         string              `bson:"user_id" json:"user_id"`                 //用户ID
+	RequestId      string              `bson:"request_id" json:"request_id"`           //请求执行ID
 }
 
 func (a *ActionStateModel) SetData(name string, value interface{}) {
