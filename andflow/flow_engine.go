@@ -89,8 +89,8 @@ func ExecuteRuntime(runtime *RuntimeModel, timeout int64) *RuntimeModel {
 	runner := &CommonFlowRunner{}
 	router := &CommonFlowRouter{}
 	controller := &CommonRuntimeController{}
-	controller.Init(runtime.Id)
-	controller.SetRuntime(runtime)
+	controller.Init(runtime)
+	// controller.SetRuntime(runtime)
 
 	Execute(controller, router, runner, timeout)
 	runtime = controller.GetRuntime()
@@ -105,8 +105,7 @@ func ExecuteFlow(flow *FlowModel, param map[string]interface{}, timeout int64) *
 	runner := &CommonFlowRunner{}
 	router := &CommonFlowRouter{}
 	controller := &CommonRuntimeController{}
-	controller.Init(runtime.Id)
-	controller.SetRuntime(runtime)
+	controller.Init(runtime)
 	Execute(controller, router, runner, timeout)
 	runtime = controller.GetRuntime()
 	return runtime

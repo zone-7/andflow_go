@@ -39,8 +39,7 @@ const (
 )
 
 type RuntimeController interface {
-	Init(runtimeId string)
-	SetRuntime(runtime *RuntimeModel)
+	Init(runtime *RuntimeModel)
 	GetRuntime() *RuntimeModel
 	GetFlow() *FlowModel
 	SetCmd(c int)
@@ -91,16 +90,14 @@ type RuntimeController interface {
 
 type CommonRuntimeController struct {
 	Cmd          int
-	RuntimeId    string
 	Wg           sync.WaitGroup //同步控制
 	Runtime      *RuntimeModel
 	OnChangeFunc func(event string, runtime *RuntimeModel)
 	OnSaveFunc   func(runtime *RuntimeModel)
 }
 
-func (s *CommonRuntimeController) Init(runtimeId string) {
-
-	s.RuntimeId = runtimeId
+func (s *CommonRuntimeController) Init(runtime *RuntimeModel) {
+	s.Runtime = runtime
 	s.Wg = sync.WaitGroup{}
 }
 
@@ -126,10 +123,6 @@ func (s *CommonRuntimeController) AddLog(tp, tag, name, title, content string) {
 		return
 	}
 	s.Runtime.AddLog(tp, tag, name, title, content)
-}
-
-func (s *CommonRuntimeController) SetRuntime(runtime *RuntimeModel) {
-	s.Runtime = runtime
 }
 
 func (s *CommonRuntimeController) GetRuntime() *RuntimeModel {
