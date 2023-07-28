@@ -100,61 +100,13 @@ func GetScriptIntResult(val goja.Value) Result {
 	return RESULT_SUCCESS
 }
 
-//设置脚本函数
-func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string, actionId string, islink bool) {
-	tp := ""
-	title := ""
-	name := ""
-	if islink {
-		tp = "link"
-		name = preActionId + "->" + actionId
-		title = session.GetFlow().GetAction(preActionId).Title + "->" + session.GetFlow().GetAction(actionId).Title
+func SetCommonLinkScriptFunc(rts *goja.Runtime, session *Session, param *LinkParam, linkState *LinkStateModel) {
+	sourceId := param.SourceId
+	targetId := param.TargetId
+	link := session.GetFlow().GetLinkBySourceIdAndTargetId(sourceId, targetId)
 
-	} else {
-		tp = "action"
-		action := session.GetFlow().GetAction(actionId)
-		name = action.Name
-		title = action.Title
-	}
-
-	if !islink {
-		actionState := session.Controller.GetLastActionState(actionId)
-
-		rts.Set("setContent", func(call goja.FunctionCall) goja.Value {
-			value := call.Argument(0)
-			tp := call.Argument(1)
-
-			if actionState != nil {
-				if actionState.Content == nil {
-					actionState.Content = &ActionContentModel{}
-				}
-
-				var content_type string
-				if tp != nil && !tp.Equals(goja.NaN()) && tp.Equals(goja.Null()) {
-					content_type = tp.String()
-				}
-				if len(content_type) == 0 {
-					content_type = "msg"
-				}
-
-				actionState.Content.ContentType = content_type
-				actionState.Content.Content = value.String()
-			}
-
-			return goja.Null()
-		})
-		rts.Set("setTitle", func(call goja.FunctionCall) goja.Value {
-			value := call.Argument(0)
-			if actionState != nil {
-				if actionState.Content == nil {
-					actionState.Content = &ActionContentModel{}
-				}
-				actionState.ActionTitle = value.String()
-			}
-
-			return goja.Null()
-		})
-	}
+	name := sourceId + "->" + targetId
+	title := link.Title
 
 	//日志
 	rts.Set("log", func(call goja.FunctionCall) goja.Value {
@@ -181,14 +133,219 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 				}
 			}
 		}
-		if tp == "link" {
-			session.AddLog_link_info(name, title, val)
-		} else {
-			session.AddLog_action_info(name, title, val)
-		}
+		session.AddLog_link_info(name, title, val)
 
 		return value
 	})
+	rts.Set("setTitle", func(call goja.FunctionCall) goja.Value {
+		value := call.Argument(0)
+		if linkState != nil {
+
+			linkState.Title = value.String()
+		}
+
+		return goja.Null()
+	})
+
+	rts.Set("getPreActionData", func(call goja.FunctionCall) goja.Value {
+
+		key := call.Argument(0)
+
+		var value interface{}
+		var keyStr string
+		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
+			keyStr = key.String()
+			value = session.Controller.GetActionData(sourceId, keyStr)
+
+		}
+
+		if value == nil {
+			return goja.Null()
+		}
+
+		return rts.ToValue(value)
+	})
+
+	//通用
+	SetCommonScriptFunc(rts, session)
+}
+
+func SetCommonActionScriptFunc(rts *goja.Runtime, session *Session, param *ActionParam, actionState *ActionStateModel) {
+	actionId := param.ActionId
+	preActionId := param.PreActionId
+	action := session.GetFlow().GetAction(actionId)
+	name := action.Name
+	title := action.Title
+	//日志
+	rts.Set("log", func(call goja.FunctionCall) goja.Value {
+		value := call.Argument(0)
+
+		var val string
+		if !value.Equals(goja.Undefined()) && !value.Equals(goja.Null()) {
+			var bb bool
+			var str string
+
+			if value.ExportType() == reflect.TypeOf(bb) {
+				if value.Export().(bool) {
+					val = "true"
+				} else {
+					val = "false"
+				}
+
+			} else if value.ExportType() == reflect.TypeOf(str) {
+				val = value.String()
+			} else {
+				b, err := json.Marshal(str)
+				if err == nil {
+					val = string(b)
+				}
+			}
+		}
+
+		session.AddLog_action_info(name, title, val)
+
+		return value
+	})
+	rts.Set("setContent", func(call goja.FunctionCall) goja.Value {
+		value := call.Argument(0)
+		tp := call.Argument(1)
+
+		if actionState != nil {
+			if actionState.Content == nil {
+				actionState.Content = &ActionContentModel{}
+			}
+
+			var content_type string
+			if tp != nil && !tp.Equals(goja.NaN()) && tp.Equals(goja.Null()) {
+				content_type = tp.String()
+			}
+			if len(content_type) == 0 {
+				content_type = "msg"
+			}
+
+			actionState.Content.ContentType = content_type
+			actionState.Content.Content = value.String()
+		}
+
+		return goja.Null()
+	})
+
+	rts.Set("setTitle", func(call goja.FunctionCall) goja.Value {
+		value := call.Argument(0)
+		if actionState != nil {
+
+			actionState.ActionTitle = value.String()
+		}
+
+		return goja.Null()
+	})
+
+	//缓存数据
+	rts.Set("setActionData", func(call goja.FunctionCall) goja.Value {
+		if len(actionId) == 0 {
+			return goja.Null()
+		}
+
+		key := call.Argument(0)
+		val := call.Argument(1)
+
+		var keyStr string
+		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
+			keyStr = key.String()
+		}
+
+		if !val.Equals(goja.Undefined()) && !val.Equals(goja.Null()) {
+			obj := val.Export()
+			session.Controller.SetActionData(actionId, keyStr, obj)
+
+		} else {
+			session.Controller.SetActionData(actionId, keyStr, nil)
+
+		}
+
+		return val
+	})
+
+	rts.Set("getActionData", func(call goja.FunctionCall) goja.Value {
+		if len(actionId) == 0 {
+			return goja.Null()
+		}
+
+		key := call.Argument(0)
+
+		var value interface{}
+		var keyStr string
+		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
+			keyStr = key.String()
+			value = session.Controller.GetActionData(actionId, keyStr)
+
+		}
+
+		if value == nil {
+			return goja.Null()
+		}
+
+		return rts.ToValue(value)
+
+	})
+
+	rts.Set("getPreActionData", func(call goja.FunctionCall) goja.Value {
+		if len(preActionId) == 0 {
+			return goja.Null()
+		}
+
+		key := call.Argument(0)
+
+		var value interface{}
+		var keyStr string
+		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
+			keyStr = key.String()
+			value = session.Controller.GetActionData(preActionId, keyStr)
+
+		}
+
+		if value == nil {
+			return goja.Null()
+		}
+
+		return rts.ToValue(value)
+
+	})
+
+	rts.Set("getActionDatas", func(call goja.FunctionCall) goja.Value {
+		if len(actionId) == 0 {
+			return goja.Null()
+		}
+
+		value := session.Controller.GetActionDataMap(actionId)
+
+		if value == nil {
+			return goja.Null()
+		}
+
+		return rts.ToValue(value)
+
+	})
+	rts.Set("getPreActionDatas", func(call goja.FunctionCall) goja.Value {
+		if len(preActionId) == 0 {
+			return goja.Null()
+		}
+
+		value := session.Controller.GetActionDataMap(preActionId)
+
+		if value == nil {
+			return goja.Null()
+		}
+
+		return rts.ToValue(value)
+
+	})
+	//通用
+	SetCommonScriptFunc(rts, session)
+}
+
+//设置脚本函数
+func SetCommonScriptFunc(rts *goja.Runtime, session *Session) {
 
 	//打印
 	rts.Set("print", func(call goja.FunctionCall) goja.Value {
@@ -392,107 +549,6 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session, preActionId string
 		}
 
 		return datas
-	})
-
-	//缓存数据
-	rts.Set("setActionData", func(call goja.FunctionCall) goja.Value {
-		if len(actionId) == 0 {
-			return goja.Null()
-		}
-
-		key := call.Argument(0)
-		val := call.Argument(1)
-
-		var keyStr string
-		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
-			keyStr = key.String()
-		}
-
-		if !val.Equals(goja.Undefined()) && !val.Equals(goja.Null()) {
-			obj := val.Export()
-			session.Controller.SetActionData(actionId, keyStr, obj)
-
-		} else {
-			session.Controller.SetActionData(actionId, keyStr, nil)
-
-		}
-
-		return val
-	})
-
-	rts.Set("getActionData", func(call goja.FunctionCall) goja.Value {
-		if len(actionId) == 0 {
-			return goja.Null()
-		}
-
-		key := call.Argument(0)
-
-		var value interface{}
-		var keyStr string
-		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
-			keyStr = key.String()
-			value = session.Controller.GetActionData(actionId, keyStr)
-
-		}
-
-		if value == nil {
-			return goja.Null()
-		}
-
-		return rts.ToValue(value)
-
-	})
-
-	rts.Set("getPreActionData", func(call goja.FunctionCall) goja.Value {
-		if len(preActionId) == 0 {
-			return goja.Null()
-		}
-
-		key := call.Argument(0)
-
-		var value interface{}
-		var keyStr string
-		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
-			keyStr = key.String()
-			value = session.Controller.GetActionData(preActionId, keyStr)
-
-		}
-
-		if value == nil {
-			return goja.Null()
-		}
-
-		return rts.ToValue(value)
-
-	})
-
-	rts.Set("getActionDatas", func(call goja.FunctionCall) goja.Value {
-		if len(actionId) == 0 {
-			return goja.Null()
-		}
-
-		value := session.Controller.GetActionDataMap(actionId)
-
-		if value == nil {
-			return goja.Null()
-		}
-
-		return rts.ToValue(value)
-
-	})
-	rts.Set("getPreActionDatas", func(call goja.FunctionCall) goja.Value {
-		if len(preActionId) == 0 {
-			return goja.Null()
-		}
-
-		value := session.Controller.GetActionDataMap(preActionId)
-
-		if value == nil {
-			return goja.Null()
-		}
-
-		return rts.ToValue(value)
-
 	})
 
 	//JSON操作

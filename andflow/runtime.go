@@ -64,6 +64,7 @@ type LinkStateModel struct {
 	BeginTime      time.Time `bson:"begin_time" json:"begin_time"`             //开始时间
 	EndTime        time.Time `bson:"end_time" json:"end_time"`                 //完成时间
 	Timeused       int64     `bson:"timeused" json:"timeused"`                 //耗时
+	Title          string    `bson:"title" json:"title"`
 }
 
 //日志

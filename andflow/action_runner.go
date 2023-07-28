@@ -85,7 +85,7 @@ func (a *ScriptActionRunner) Execute(s *Session, param *ActionParam, state *Acti
 	rts.Set("flow", s.GetFlow())
 	rts.Set("action", action)
 
-	SetCommonScriptFunc(rts, s, param.PreActionId, param.ActionId, false)
+	SetCommonActionScriptFunc(rts, s, param, state)
 
 	script := "function $exec(){\n" + sc + "\n}\n $exec();\n"
 	val, err := rts.RunString(script)

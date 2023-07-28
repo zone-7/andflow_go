@@ -56,7 +56,7 @@ func (r *CommonFlowRunner) ExecuteLink(s *Session, param *LinkParam, state *Link
 		r.LinkScriptFunc(rts, s, param, state)
 	}
 
-	SetCommonScriptFunc(rts, s, param.SourceId, param.TargetId, true)
+	SetCommonLinkScriptFunc(rts, s, param, state)
 
 	script := "function $exec(){\n" + sc + "\n}\n $exec();\n"
 	val, err := rts.RunString(script)
@@ -89,7 +89,7 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 		r.ActionScriptFunc(rts, s, param, state)
 	}
 
-	SetCommonScriptFunc(rts, s, param.PreActionId, param.ActionId, false)
+	SetCommonActionScriptFunc(rts, s, param, state)
 
 	//1.执行过滤脚本
 	if len(strings.Trim(action.Filter, " ")) > 0 {
