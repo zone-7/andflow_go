@@ -165,7 +165,6 @@ func SetCommonLinkScriptFunc(rts *goja.Runtime, session *Session, param *LinkPar
 
 		return rts.ToValue(value)
 	})
-
 	//通用
 	SetCommonScriptFunc(rts, session)
 }
@@ -216,15 +215,20 @@ func SetCommonActionScriptFunc(rts *goja.Runtime, session *Session, param *Actio
 			}
 
 			var content_type string
-			if tp != nil && !tp.Equals(goja.NaN()) && tp.Equals(goja.Null()) {
+			if tp != nil && !tp.Equals(goja.NaN()) && !tp.Equals(goja.Null()) {
 				content_type = tp.String()
 			}
-			if len(content_type) == 0 {
+			if len(content_type) == 0 || content_type == "undefined" || content_type == "null" {
 				content_type = "msg"
 			}
-
+			content := ""
+			if value == nil || value.Equals(goja.NaN()) || value.Equals(goja.Null()) {
+				content = ""
+			} else {
+				content = value.String()
+			}
 			actionState.Content.ContentType = content_type
-			actionState.Content.Content = value.String()
+			actionState.Content.Content = content
 		}
 
 		return goja.Null()
@@ -234,7 +238,25 @@ func SetCommonActionScriptFunc(rts *goja.Runtime, session *Session, param *Actio
 		value := call.Argument(0)
 		if actionState != nil {
 
-			actionState.ActionTitle = value.String()
+			title := ""
+			if value == nil || value.Equals(goja.NaN()) || value.Equals(goja.Null()) {
+				title = ""
+			} else {
+				title = value.String()
+			}
+			actionState.ActionTitle = title
+		}
+
+		return goja.Null()
+	})
+	rts.Set("setIcon", func(call goja.FunctionCall) goja.Value {
+		value := call.Argument(0)
+		if actionState != nil {
+			if value != nil && !value.Equals(goja.NaN()) && !value.Equals(goja.Null()) {
+				actionState.ActionIcon = value.String()
+
+			}
+
 		}
 
 		return goja.Null()
