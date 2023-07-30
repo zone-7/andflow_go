@@ -213,6 +213,7 @@ func SetCommonActionScriptFunc(rts *goja.Runtime, session *Session, param *Actio
 			if actionState.Content == nil {
 				actionState.Content = &ActionContentModel{}
 			}
+			actionState.Content.ActionId = actionId
 
 			var content_type string
 			if tp != nil && !tp.Equals(goja.NaN()) && !tp.Equals(goja.Null()) {
