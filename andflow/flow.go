@@ -3,6 +3,7 @@ package andflow
 type ActionModel struct {
 	Id         string            `bson:"id" json:"id"`                   //ID
 	Name       string            `bson:"name" json:"name"`               //名称
+	Tp         string            `bson:"tp" json:"tp"`                   //类型
 	Title      string            `bson:"title" json:"title"`             //标题
 	Icon       string            `bson:"icon" json:"icon"`               //图标
 	Des        string            `bson:"des" json:"des"`                 //描述
@@ -193,7 +194,7 @@ func (t *FlowModel) GetActionIdsInGroup(groupId string) []string {
 
 }
 
-//获取作为起点的节点
+// 获取作为起点的节点
 func (t *FlowModel) GetStartActionIds() []string {
 
 	actions_start := make([]string, 0)
@@ -208,7 +209,7 @@ func (t *FlowModel) GetStartActionIds() []string {
 	return actions_start
 }
 
-//获取组内的起点节点
+// 获取组内的起点节点
 func (t *FlowModel) GetStartActionIdsInGroup(groupId string) []string {
 
 	actions_start := make([]string, 0)
