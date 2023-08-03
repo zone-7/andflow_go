@@ -1,32 +1,31 @@
 package andflow
 
 type ActionModel struct {
-	Id         string            `bson:"id" json:"id"`                   //ID
-	Name       string            `bson:"name" json:"name"`               //名称
-	Title      string            `bson:"title" json:"title"`             //标题
-	Icon       string            `bson:"icon" json:"icon"`               //图标
-	Des        string            `bson:"des" json:"des"`                 //描述
-	Keywords   string            `bson:"keywords" json:"keywords"`       //关键词
-	Left       string            `bson:"left" json:"left"`               //位置X
-	Top        string            `bson:"top" json:"top"`                 //位置Y
-	Width      string            `bson:"width" json:"width"`             //宽度
-	Height     string            `bson:"height" json:"height"`           //高度
-	Theme      string            `bson:"theme" json:"theme"`             //样式
-	BodyWidth  string            `bson:"body_width" json:"body_width"`   //内容宽度
-	BodyHeight string            `bson:"body_height" json:"body_height"` //内容高度
-	Params     map[string]string `bson:"params" json:"params"`           //参数
-	Collect    string            `bson:"collect" json:"collect"`         //true：所有路线到达节点后才执行；false：任意一个路径到达都执行
-	Once       string            `bson:"once" json:"once"`               //是否只执行一次： true，false
-	Filter     string            `bson:"filter" json:"filter"`           //执行过滤脚本
-	Script     string            `bson:"script" json:"script"`           //执行内容脚本
-	Error      string            `bson:"error" json:"error"`             //执行异常处理脚本
-	Content    map[string]string `bson:"content" json:"content"`         //内容
-
-	BorderColor     string `bson:"border_color" json:"border_color"`
-	BodyColor       string `bson:"body_color" json:"body_color"`
-	BodyTextColor   string `bson:"body_text_color" json:"body_text_color"`
-	HeaderColor     string `bson:"header_color" json:"header_color"`
-	HeaderTextColor string `bson:"header_text_color" json:"header_text_color"`
+	Id              string            `bson:"id" json:"id"`                   //ID
+	Name            string            `bson:"name" json:"name"`               //名称
+	Title           string            `bson:"title" json:"title"`             //标题
+	Icon            string            `bson:"icon" json:"icon"`               //图标
+	Des             string            `bson:"des" json:"des"`                 //描述
+	Keywords        string            `bson:"keywords" json:"keywords"`       //关键词
+	Left            string            `bson:"left" json:"left"`               //位置X
+	Top             string            `bson:"top" json:"top"`                 //位置Y
+	Width           string            `bson:"width" json:"width"`             //宽度
+	Height          string            `bson:"height" json:"height"`           //高度
+	Theme           string            `bson:"theme" json:"theme"`             //样式
+	BodyWidth       string            `bson:"body_width" json:"body_width"`   //内容宽度
+	BodyHeight      string            `bson:"body_height" json:"body_height"` //内容高度
+	Params          map[string]string `bson:"params" json:"params"`           //参数
+	Collect         string            `bson:"collect" json:"collect"`         //true：所有路线到达节点后才执行；false：任意一个路径到达都执行
+	Once            string            `bson:"once" json:"once"`               //是否只执行一次： true，false
+	Filter          string            `bson:"filter" json:"filter"`           //执行过滤脚本
+	Script          string            `bson:"script" json:"script"`           //执行内容脚本
+	Error           string            `bson:"error" json:"error"`             //执行异常处理脚本
+	Content         map[string]string `bson:"content" json:"content"`         //内容
+	BorderColor     string            `bson:"border_color" json:"border_color"`
+	BodyColor       string            `bson:"body_color" json:"body_color"`
+	BodyTextColor   string            `bson:"body_text_color" json:"body_text_color"`
+	HeaderColor     string            `bson:"header_color" json:"header_color"`
+	HeaderTextColor string            `bson:"header_text_color" json:"header_text_color"`
 }
 
 func (m *ActionModel) GetParam(name string) string {
