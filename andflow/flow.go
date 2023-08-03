@@ -3,7 +3,6 @@ package andflow
 type ActionModel struct {
 	Id         string            `bson:"id" json:"id"`                   //ID
 	Name       string            `bson:"name" json:"name"`               //名称
-	Tp         string            `bson:"tp" json:"tp"`                   //类型
 	Title      string            `bson:"title" json:"title"`             //标题
 	Icon       string            `bson:"icon" json:"icon"`               //图标
 	Des        string            `bson:"des" json:"des"`                 //描述
@@ -22,6 +21,12 @@ type ActionModel struct {
 	Script     string            `bson:"script" json:"script"`           //执行内容脚本
 	Error      string            `bson:"error" json:"error"`             //执行异常处理脚本
 	Content    map[string]string `bson:"content" json:"content"`         //内容
+
+	BorderColor     string `bson:"border_color" json:"border_color"`
+	BodyColor       string `bson:"body_color" json:"body_color"`
+	BodyTextColor   string `bson:"body_text_color" json:"body_text_color"`
+	HeaderColor     string `bson:"header_color" json:"header_color"`
+	HeaderTextColor string `bson:"header_text_color" json:"header_text_color"`
 }
 
 func (m *ActionModel) GetParam(name string) string {
@@ -65,18 +70,68 @@ type LinkModel struct {
 type GroupModel struct {
 	Id      string   `bson:"id" json:"id"`           //组ID
 	Title   string   `bson:"title" json:"title"`     //标题
+	Theme   string   `bson:"theme" json:"theme"`     //样式
 	Des     string   `bson:"des" json:"des"`         //描述
 	Members []string `bson:"members" json:"members"` //成员ID
 	Left    string   `bson:"left" json:"left"`       //坐标X
 	Top     string   `bson:"top" json:"top"`         //坐标Y
 	Width   string   `bson:"width" json:"width"`     //宽度
 	Height  string   `bson:"height" json:"height"`   //高度
+
+	BorderColor string `bson:"border_color" json:"border_color"`
+
+	BodyColor     string `bson:"body_color" json:"body_color"`
+	BodyTextColor string `bson:"body_text_color" json:"body_text_color"`
+
+	HeaderColor     string `bson:"header_color" json:"header_color"`
+	HeaderTextColor string `bson:"header_text_color" json:"header_text_color"`
+}
+
+type ListModel struct {
+	Id     string   `bson:"id" json:"id"`         //组ID
+	Title  string   `bson:"title" json:"title"`   //标题
+	Theme  string   `bson:"theme" json:"theme"`   //样式
+	Des    string   `bson:"des" json:"des"`       //描述
+	Items  []string `bson:"items" json:"items"`   //成员ID
+	Left   string   `bson:"left" json:"left"`     //坐标X
+	Top    string   `bson:"top" json:"top"`       //坐标Y
+	Width  string   `bson:"width" json:"width"`   //宽度
+	Height string   `bson:"height" json:"height"` //高度
+
+	BorderColor string `bson:"border_color" json:"border_color"`
+
+	BodyColor     string `bson:"body_color" json:"body_color"`
+	BodyTextColor string `bson:"body_text_color" json:"body_text_color"`
+
+	HeaderColor     string `bson:"header_color" json:"header_color"`
+	HeaderTextColor string `bson:"header_text_color" json:"header_text_color"`
+
+	ItemColor     string `bson:"item_color" json:"item_color"`
+	ItemTextColor string `bson:"item_text_color" json:"item_text_color"`
+}
+
+type TipModel struct {
+	Id              string `bson:"id" json:"id"`           //组ID
+	Title           string `bson:"title" json:"title"`     //标题
+	Theme           string `bson:"theme" json:"theme"`     //样式
+	Des             string `bson:"des" json:"des"`         //描述
+	Content         string `bson:"content" json:"content"` //内容
+	Left            string `bson:"left" json:"left"`       //坐标X
+	Top             string `bson:"top" json:"top"`         //坐标Y
+	Width           string `bson:"width" json:"width"`     //宽度
+	Height          string `bson:"height" json:"height"`   //高度
+	BorderColor     string `bson:"border_color" json:"border_color"`
+	BodyColor       string `bson:"body_color" json:"body_color"`
+	BodyTextColor   string `bson:"body_text_color" json:"body_text_color"`
+	HeaderColor     string `bson:"header_color" json:"header_color"`
+	HeaderTextColor string `bson:"header_text_color" json:"header_text_color"`
 }
 
 type FlowParamModel struct {
 	Name  string `bson:"name" json:"name"`
 	Value string `bson:"value" json:"value"`
 }
+
 type FlowDictModel struct {
 	Name  string `bson:"name" json:"name"`
 	Label string `bson:"label" json:"label"`
@@ -101,6 +156,8 @@ type FlowModel struct {
 	Actions             []*ActionModel    `bson:"actions" json:"actions"`                               //节点列表
 	Links               []*LinkModel      `bson:"links" json:"links"`                                   //连线列表
 	Groups              []*GroupModel     `bson:"groups" json:"groups"`                                 //组
+	Lists               []*ListModel      `bson:"lists" json:"lists"`                                   //LIST
+	Tips                []*TipModel       `bson:"tips" json:"tips"`                                     //TIP
 
 }
 
