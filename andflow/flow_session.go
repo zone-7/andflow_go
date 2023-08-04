@@ -72,6 +72,9 @@ func (s *Session) GetRuntime() *RuntimeModel {
 	return runtime
 }
 
+func (s *Session) GetParamMap() map[string]interface{} {
+	return s.Controller.GetParamMap()
+}
 func (s *Session) GetParam(key string) interface{} {
 	return s.Controller.GetParam(key)
 }
@@ -79,6 +82,9 @@ func (s *Session) SetParam(key string, val interface{}) {
 	s.Controller.SetParam(key, val)
 }
 
+func (s *Session) GetDataMap() map[string]interface{} {
+	return s.Controller.GetDataMap()
+}
 func (s *Session) GetData(key string) interface{} {
 	return s.Controller.GetData(key)
 }
@@ -303,7 +309,7 @@ func (s *Session) stopChannel() {
 
 }
 
-//节点处理
+// 节点处理
 func (s *Session) runProcessAction(actionId string, w *sync.WaitGroup) {
 
 	c := s.getActionChan(actionId)
@@ -426,7 +432,7 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 
 }
 
-//连接线处理
+// 连接线处理
 func (s *Session) runProcessLink(sourceId, targetId string, w *sync.WaitGroup) {
 	c := s.getLinkChan(sourceId, targetId)
 	if c == nil {
