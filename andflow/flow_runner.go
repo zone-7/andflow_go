@@ -94,9 +94,9 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 	//1.执行过滤脚本
 	if len(strings.Trim(action.ScriptBefore, " ")) > 0 {
 
-		script_filter := "function $filter(){\n" + action.ScriptBefore + "\n}\n $filter();\n"
+		script_before := "function $filter(){\n" + action.ScriptBefore + "\n}\n $filter();\n"
 
-		val, err := rts.RunString(script_filter)
+		val, err := rts.RunString(script_before)
 
 		if res == RESULT_FAILURE || err != nil {
 			if err == nil {
@@ -147,9 +147,9 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 	//3.执行事后脚本
 	if len(strings.Trim(action.ScriptAfter, " ")) > 0 {
 
-		script_filter := "function $exec(){\n" + action.ScriptAfter + "\n}\n $exec();\n"
+		script_after := "function $exec(){\n" + action.ScriptAfter + "\n}\n $exec();\n"
 
-		val, err := rts.RunString(script_filter)
+		val, err := rts.RunString(script_after)
 		if err != nil {
 
 			log.Println(fmt.Sprintf("script exception：%v", err))
