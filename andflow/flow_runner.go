@@ -92,9 +92,9 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 	SetCommonActionScriptFunc(rts, s, param, state)
 
 	//1.执行过滤脚本
-	if len(strings.Trim(action.Filter, " ")) > 0 {
+	if len(strings.Trim(action.ScriptBefore, " ")) > 0 {
 
-		script_filter := "function $filter(){\n" + action.Filter + "\n}\n $filter();\n"
+		script_filter := "function $filter(){\n" + action.ScriptBefore + "\n}\n $filter();\n"
 
 		val, err := rts.RunString(script_filter)
 
@@ -128,8 +128,8 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 
 			s.AddLog_action_error(action.Name, action.Title, err.Error())
 			//执行异常处理脚本
-			if len(strings.Trim(action.Error, " ")) > 0 {
-				script_error := "function $exec(){\n" + action.Error + "\n}\n $exec();\n"
+			if len(strings.Trim(action.ScriptError, " ")) > 0 {
+				script_error := "function $exec(){\n" + action.ScriptError + "\n}\n $exec();\n"
 				_, err_err := rts.RunString(script_error)
 				if err_err != nil {
 					log.Println(fmt.Sprintf("script exception：%v", err_err))
@@ -145,9 +145,9 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 	}
 
 	//3.执行事后脚本
-	if len(strings.Trim(action.Script, " ")) > 0 {
+	if len(strings.Trim(action.ScriptAfter, " ")) > 0 {
 
-		script_filter := "function $exec(){\n" + action.Script + "\n}\n $exec();\n"
+		script_filter := "function $exec(){\n" + action.ScriptAfter + "\n}\n $exec();\n"
 
 		val, err := rts.RunString(script_filter)
 		if err != nil {

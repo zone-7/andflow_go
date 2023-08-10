@@ -53,7 +53,7 @@ func (a *ScriptActionRunner) Execute(s *Session, param *ActionParam, state *Acti
 
 	action := s.GetFlow().GetAction(param.ActionId)
 
-	sc := action.Script
+	sc := action.ScriptAfter
 	if len(strings.Trim(sc, " ")) == 0 {
 		return 1, nil
 	}
