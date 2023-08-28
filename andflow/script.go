@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os/exec"
 	"reflect"
@@ -155,7 +154,7 @@ func SetCommonLinkScriptFunc(rts *goja.Runtime, session *Session, param *LinkPar
 		var keyStr string
 		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
 			keyStr = key.String()
-			value = session.Controller.GetActionData(sourceId, keyStr)
+			value = session.Operation.GetActionData(sourceId, keyStr)
 
 		}
 
@@ -279,10 +278,10 @@ func SetCommonActionScriptFunc(rts *goja.Runtime, session *Session, param *Actio
 
 		if !val.Equals(goja.Undefined()) && !val.Equals(goja.Null()) {
 			obj := val.Export()
-			session.Controller.SetActionData(actionId, keyStr, obj)
+			session.Operation.SetActionData(actionId, keyStr, obj)
 
 		} else {
-			session.Controller.SetActionData(actionId, keyStr, nil)
+			session.Operation.SetActionData(actionId, keyStr, nil)
 
 		}
 
@@ -300,7 +299,7 @@ func SetCommonActionScriptFunc(rts *goja.Runtime, session *Session, param *Actio
 		var keyStr string
 		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
 			keyStr = key.String()
-			value = session.Controller.GetActionData(actionId, keyStr)
+			value = session.Operation.GetActionData(actionId, keyStr)
 
 		}
 
@@ -323,7 +322,7 @@ func SetCommonActionScriptFunc(rts *goja.Runtime, session *Session, param *Actio
 		var keyStr string
 		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
 			keyStr = key.String()
-			value = session.Controller.GetActionData(preActionId, keyStr)
+			value = session.Operation.GetActionData(preActionId, keyStr)
 
 		}
 
@@ -340,7 +339,7 @@ func SetCommonActionScriptFunc(rts *goja.Runtime, session *Session, param *Actio
 			return goja.Null()
 		}
 
-		value := session.Controller.GetActionDataMap(actionId)
+		value := session.Operation.GetActionDataMap(actionId)
 
 		if value == nil {
 			return goja.Null()
@@ -354,7 +353,7 @@ func SetCommonActionScriptFunc(rts *goja.Runtime, session *Session, param *Actio
 			return goja.Null()
 		}
 
-		value := session.Controller.GetActionDataMap(preActionId)
+		value := session.Operation.GetActionDataMap(preActionId)
 
 		if value == nil {
 			return goja.Null()
@@ -367,7 +366,7 @@ func SetCommonActionScriptFunc(rts *goja.Runtime, session *Session, param *Actio
 	SetCommonScriptFunc(rts, session)
 }
 
-//设置脚本函数
+// 设置脚本函数
 func SetCommonScriptFunc(rts *goja.Runtime, session *Session) {
 
 	//打印
@@ -458,9 +457,9 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session) {
 
 		if !val.Equals(goja.Undefined()) && !val.Equals(goja.Null()) {
 			obj := val.Export()
-			session.Controller.SetParam(keyStr, obj)
+			session.Operation.SetParam(keyStr, obj)
 		} else {
-			session.Controller.SetParam(keyStr, nil)
+			session.Operation.SetParam(keyStr, nil)
 
 		}
 
@@ -474,7 +473,7 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session) {
 		var keyStr string
 		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
 			keyStr = key.String()
-			value = session.Controller.GetParam(keyStr)
+			value = session.Operation.GetParam(keyStr)
 
 		}
 		if value == nil {
@@ -497,9 +496,9 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session) {
 
 		if !val.Equals(goja.Undefined()) && !val.Equals(goja.Null()) {
 			obj := val.Export()
-			session.Controller.SetData(keyStr, obj)
+			session.Operation.SetData(keyStr, obj)
 		} else {
-			session.Controller.SetData(keyStr, nil)
+			session.Operation.SetData(keyStr, nil)
 
 		}
 
@@ -513,7 +512,7 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session) {
 		var keyStr string
 		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
 			keyStr = key.String()
-			value = session.Controller.GetData(keyStr)
+			value = session.Operation.GetData(keyStr)
 
 		}
 		if value == nil {
@@ -526,7 +525,7 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session) {
 
 	rts.Set("getDatas", func(call goja.FunctionCall) goja.Value {
 
-		value := session.Controller.GetDataMap()
+		value := session.Operation.GetDataMap()
 		if value == nil {
 			return goja.Null()
 		}
@@ -542,27 +541,27 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session) {
 			case map[string]string:
 				for k, v := range obj.(map[string]string) {
 
-					session.Controller.SetData(k, v)
+					session.Operation.SetData(k, v)
 				}
 			case map[string]interface{}:
 				for k, v := range obj.(map[string]interface{}) {
 
-					session.Controller.SetData(k, v)
+					session.Operation.SetData(k, v)
 				}
 			case map[string]map[string]interface{}:
 				for k, v := range obj.(map[string]map[string]interface{}) {
 
-					session.Controller.SetData(k, v)
+					session.Operation.SetData(k, v)
 				}
 			case map[string][]map[string]interface{}:
 				for k, v := range obj.(map[string][]map[string]interface{}) {
 
-					session.Controller.SetData(k, v)
+					session.Operation.SetData(k, v)
 				}
 			case map[string][]interface{}:
 				for k, v := range obj.(map[string][]interface{}) {
 
-					session.Controller.SetData(k, v)
+					session.Operation.SetData(k, v)
 				}
 			default:
 				return goja.Null()
@@ -796,7 +795,7 @@ func cmd(command string, timeout int64) (string, error) {
 		}
 
 		var opBytes []byte
-		if opBytes, err = ioutil.ReadAll(stdout); err != nil { // 读取输出结果
+		if opBytes, err = io.ReadAll(stdout); err != nil { // 读取输出结果
 			return "", err
 		}
 

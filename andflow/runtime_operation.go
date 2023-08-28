@@ -33,7 +33,7 @@ const (
 	EVENT_PARAM_SET = "param_set"
 	EVENT_DATA_SET  = "data_set"
 
-	//controller CMD 控制指令
+	//operation CMD 控制指令
 	CMD_STOP  = 1 //停止
 	CMD_START = 0 //执行,默认
 )

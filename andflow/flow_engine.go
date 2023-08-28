@@ -69,14 +69,14 @@ func GetSession(runtimeId string) *Session {
 	return runnings[runtimeId]
 }
 
-func Execute(controller RuntimeOperation, router FlowRouter, runner FlowRunner, timeout int64) {
+func Execute(operation RuntimeOperation, router FlowRouter, runner FlowRunner, timeout int64) {
 
 	ctx := context.Background()
 	if timeout > 0 {
 		ctx, _ = context.WithTimeout(ctx, time.Millisecond*time.Duration(timeout))
 	}
 
-	session := CreateSession(ctx, controller, router, runner)
+	session := CreateSession(ctx, operation, router, runner)
 
 	runnings[session.Id] = session
 	defer delete(runnings, session.Id)
@@ -90,7 +90,7 @@ func ExecuteRuntime(runtime *RuntimeModel, timeout int64) *RuntimeModel {
 	router := &CommonFlowRouter{}
 	operation := &CommonRuntimeOperation{}
 	operation.Init(runtime)
-	// controller.SetRuntime(runtime)
+	// operation.SetRuntime(runtime)
 
 	Execute(operation, router, runner, timeout)
 	runtime = operation.GetRuntime()
