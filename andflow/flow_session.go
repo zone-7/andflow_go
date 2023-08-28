@@ -272,7 +272,6 @@ func (s *Session) Execute() {
 
 func (s *Session) Stop() {
 	s.Operation.SetCmd(CMD_STOP)
-	log.Println("stop")
 }
 
 func (s *Session) waitComplete() {

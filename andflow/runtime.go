@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-//节点执行参数
+// 节点执行参数
 type ActionParam struct {
 	RuntimeId   string `json:"runtime_id"`
 	ActionId    string `json:"action_id"`     //当前节点ID
@@ -15,29 +15,29 @@ type ActionParam struct {
 	Cmd int `json:"cmd"` //指令  1:停止,2.3.4..
 }
 
-//连接线执行参数
+// 连接线执行参数
 type LinkParam struct {
 	RuntimeId string `json:"runtime_id"`
 	SourceId  string `json:"source_id"` //源ID
 	TargetId  string `json:"target_id"` //目的ID
 	// Timeout   int64  `json:"timeout"`
-	Cmd int `json:"stop"` //指令  1:停止,2.3.4..
+	Cmd int `json:"cmd"` //指令  1:停止,2.3.4..
 }
 
-//节点内容
+// 节点内容
 type ActionContentModel struct {
 	ActionId    string `bson:"action_id" json:"action_id"`       //节点ID
 	ContentType string `bson:"content_type" json:"content_type"` //内容类型
 	Content     string `bson:"content" json:"content"`           //内容信息
 }
 
-//节点数据
+// 节点数据
 type ActionDataModel struct {
 	Name  string      `bson:"name" json:"name"`   //数据名称
 	Value interface{} `bson:"value" json:"value"` //数据值
 }
 
-//节点状态
+// 节点状态
 type ActionStateModel struct {
 	ActionId      string              `bson:"action_id" json:"action_id"`             //节点ID
 	ActionName    string              `bson:"action_name" json:"action_name"`         //节点名称
@@ -55,7 +55,7 @@ type ActionStateModel struct {
 	Timeused      int64               `bson:"timeused" json:"timeused"`               //耗时
 }
 
-//连接线状态
+// 连接线状态
 type LinkStateModel struct {
 	SourceActionId string    `bson:"source_action_id" json:"source_action_id"` //源ID
 	TargetActionId string    `bson:"target_action_id" json:"target_action_id"` //目的ID
@@ -67,7 +67,7 @@ type LinkStateModel struct {
 	Title          string    `bson:"title" json:"title"`
 }
 
-//日志
+// 日志
 type LogModel struct {
 	Tp      string    `bson:"tp" json:"tp"`           //类型
 	Id      string    `bson:"id" json:"id"`           //id
@@ -78,20 +78,20 @@ type LogModel struct {
 	Content string    `bson:"content" json:"content"` //内容
 }
 
-//参数类型信息
+// 参数类型信息
 type ParamInfo struct {
 	TypeName          string `bson:"type_name" json:"type_name"`                   //类型
 	Size              int    `bson:"size" json:"size"`                             //大小
 	ExpireMillisecond int64  `bson:"expire_millisecond" json:"expire_millisecond"` //超时
 }
 
-//运行时数据
+// 运行时数据
 type RuntimeDataModel struct {
 	Name  string      `bson:"name" json:"name"`   //名称
 	Value interface{} `bson:"value" json:"value"` //值
 }
 
-//运行时
+// 运行时
 type RuntimeModel struct {
 	Id             string              `bson:"_id" json:"id"`                          //ID
 	Flow           *FlowModel          `bson:"flow" json:"flow"`                       //流程
