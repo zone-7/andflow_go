@@ -21,7 +21,7 @@ func ParseFlow(content string) (*FlowModel, error) {
 	return &flowModel, nil
 }
 
-//创建运行时
+// 创建运行时
 func CreateRuntime(flow *FlowModel, param map[string]interface{}) *RuntimeModel {
 	runtime := RuntimeModel{}
 	uid, _ := uuid.NewV4()
@@ -69,7 +69,7 @@ func GetSession(runtimeId string) *Session {
 	return runnings[runtimeId]
 }
 
-func Execute(controller RuntimeController, router FlowRouter, runner FlowRunner, timeout int64) {
+func Execute(controller RuntimeOperation, router FlowRouter, runner FlowRunner, timeout int64) {
 
 	ctx := context.Background()
 	if timeout > 0 {
@@ -88,12 +88,12 @@ func Execute(controller RuntimeController, router FlowRouter, runner FlowRunner,
 func ExecuteRuntime(runtime *RuntimeModel, timeout int64) *RuntimeModel {
 	runner := &CommonFlowRunner{}
 	router := &CommonFlowRouter{}
-	controller := &CommonRuntimeController{}
-	controller.Init(runtime)
+	operation := &CommonRuntimeOperation{}
+	operation.Init(runtime)
 	// controller.SetRuntime(runtime)
 
-	Execute(controller, router, runner, timeout)
-	runtime = controller.GetRuntime()
+	Execute(operation, router, runner, timeout)
+	runtime = operation.GetRuntime()
 
 	return runtime
 
@@ -104,10 +104,10 @@ func ExecuteFlow(flow *FlowModel, param map[string]interface{}, timeout int64) *
 
 	runner := &CommonFlowRunner{}
 	router := &CommonFlowRouter{}
-	controller := &CommonRuntimeController{}
-	controller.Init(runtime)
-	Execute(controller, router, runner, timeout)
-	runtime = controller.GetRuntime()
+	operation := &CommonRuntimeOperation{}
+	operation.Init(runtime)
+	Execute(operation, router, runner, timeout)
+	runtime = operation.GetRuntime()
 	return runtime
 
 }

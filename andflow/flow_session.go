@@ -16,7 +16,7 @@ type Session struct {
 	Id string
 
 	Ctx           context.Context
-	Controller    RuntimeController
+	Controller    RuntimeOperation
 	Router        FlowRouter
 	Runner        FlowRunner
 	ActionChanMap sync.Map //[string]chan *ActionParam
@@ -177,7 +177,7 @@ func (s *Session) watch() {
 	}
 }
 
-func CreateSession(context context.Context, controller RuntimeController, router FlowRouter, runner FlowRunner) *Session {
+func CreateSession(context context.Context, controller RuntimeOperation, router FlowRouter, runner FlowRunner) *Session {
 	session := &Session{}
 	// uid, _ := uuid.NewV4()
 	// id := strings.ReplaceAll(uid.String(), "-", "")
