@@ -469,12 +469,14 @@ func (r *RuntimeModel) DelRunningAction(param *ActionParam) {
 	if r.RunningActions == nil {
 		r.RunningActions = make([]*ActionParam, 0)
 	}
+
 	for index, p := range r.RunningActions {
-		if p.ActionId == param.ActionId && p.PreActionId == p.PreActionId {
+		if p.ActionId == param.ActionId && p.PreActionId == param.PreActionId {
 			r.RunningActions = append(r.RunningActions[:index], r.RunningActions[index+1:]...)
 			return
 		}
 	}
+
 }
 
 func (r *RuntimeModel) ToJson() string {
