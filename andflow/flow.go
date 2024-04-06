@@ -52,6 +52,7 @@ func (m *ActionModel) GetContent() (string, string) {
 }
 
 type LinkModel struct {
+	Name           string `bson:"name" json:"name"`                       //自定义名称
 	Title          string `bson:"title" json:"title"`                     //标题
 	Keywords       string `bson:"keywords" json:"keywords"`               //关键词
 	SourceId       string `bson:"source_id" json:"source_id"`             //源ID
