@@ -1,5 +1,19 @@
 package andflow
 
+const (
+	// 流程节点样式
+	THEME_DEFAULT = "flow_theme_default" //默认样式
+	THEME_ICON    = "flow_theme_icon"    //图标
+	THEME_ZONE    = "flow_theme_zone"    //右标题
+	THEME_BOX     = "flow_theme_box"     //方框
+
+	//连接线样式 Flowchart Straight Bezier StateMachine
+	Link_TYPE_FLOWCHART    = "Flowchart"
+	LINK_TYPE_STRAIGHT     = "Straight"
+	LINK_TYPE_BEZIER       = "Bezier"
+	LINK_TYPE_STATEMACHINE = "StateMachine"
+)
+
 type ActionModel struct {
 	Id              string            `bson:"id" json:"id"`                       //ID
 	Name            string            `bson:"name" json:"name"`                   //名称
@@ -285,4 +299,25 @@ func (t *FlowModel) GetStartActionIdsInGroup(groupId string) []string {
 	}
 
 	return actions_start
+}
+
+func CreateFlowModel(code string, name string) *FlowModel {
+	model := &FlowModel{}
+	model.Actions = make([]*ActionModel, 0)
+	model.Groups = make([]*GroupModel, 0)
+	model.Lists = make([]*ListModel, 0)
+	model.Tips = make([]*TipModel, 0)
+	model.Links = make([]*LinkModel, 0)
+	model.Dict = make([]*FlowDictModel, 0)
+	model.Params = make([]*FlowParamModel, 0)
+	model.ShowActionBody = "true"
+	model.ShowActionContent = "true"
+	model.ShowActionState = "true"
+	model.Theme = THEME_DEFAULT
+	model.LinkType = Link_TYPE_FLOWCHART
+
+	model.Code = code
+	model.Name = name
+
+	return model
 }
