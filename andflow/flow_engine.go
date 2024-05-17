@@ -69,7 +69,7 @@ func GetSession(runtimeId string) *Session {
 	return runnings[runtimeId]
 }
 
-func Execute(operation RuntimeOperation, router FlowRouter, runner FlowRunner, timeout int64) {
+func Execute(operation RuntimeOperation, router FlowRouter, runner FlowRunner, timeout int64) *Session {
 
 	ctx := context.Background()
 	if timeout > 0 {
@@ -83,31 +83,33 @@ func Execute(operation RuntimeOperation, router FlowRouter, runner FlowRunner, t
 
 	session.Execute()
 
+	return session
+
 }
 
-func ExecuteRuntime(runtime *RuntimeModel, timeout int64) *RuntimeModel {
+func ExecuteRuntime(runtime *RuntimeModel, timeout int64) (*Session, *RuntimeModel) {
 	runner := &CommonFlowRunner{}
 	router := &CommonFlowRouter{}
 	operation := &CommonRuntimeOperation{}
 	operation.Init(runtime)
 	// operation.SetRuntime(runtime)
 
-	Execute(operation, router, runner, timeout)
+	session := Execute(operation, router, runner, timeout)
 	runtime = operation.GetRuntime()
 
-	return runtime
+	return session, runtime
 
 }
 
-func ExecuteFlow(flow *FlowModel, param map[string]interface{}, timeout int64) *RuntimeModel {
+func ExecuteFlow(flow *FlowModel, param map[string]interface{}, timeout int64) (*Session, *RuntimeModel) {
 	runtime := CreateRuntime(flow, param)
 
 	runner := &CommonFlowRunner{}
 	router := &CommonFlowRouter{}
 	operation := &CommonRuntimeOperation{}
 	operation.Init(runtime)
-	Execute(operation, router, runner, timeout)
+	session := Execute(operation, router, runner, timeout)
 	runtime = operation.GetRuntime()
-	return runtime
+	return session, runtime
 
 }

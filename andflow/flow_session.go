@@ -583,12 +583,6 @@ func (s *Session) ExecuteLink(param *LinkParam) {
 
 }
 
-func (s *Session) ExecuteFlow(flow *FlowModel, param map[string]interface{}, timeout int64) *RuntimeModel {
-	runtime := ExecuteFlow(flow, param, timeout)
-
-	return runtime
-}
-
 func arrayIndexOf(array []string, val string) (index int) {
 
 	for i := 0; i < len(array); i++ {
