@@ -14,15 +14,22 @@ type FlowRunner interface {
 	ExecuteAction(s *Session, param *ActionParam, state *ActionStateModel) (Result, error) //返回三个状态 -1 不通过，1通过，0还没准备好执行
 	OnLinkFailure(s *Session, param *LinkParam, state *LinkStateModel, err error)
 	OnActionFailure(s *Session, param *ActionParam, state *ActionStateModel, err error)
+
+	OnLinkExecuted(s *Session, param *LinkParam, state *LinkStateModel, res Result, err error)
+	OnActionExecuted(s *Session, param *ActionParam, state *ActionStateModel, res Result, err error)
+
 	OnTimeout(s *Session)
 }
 
 type CommonFlowRunner struct {
-	ActionScriptFunc  func(rts *goja.Runtime, s *Session, param *ActionParam, state *ActionStateModel)
-	LinkScriptFunc    func(rts *goja.Runtime, s *Session, param *LinkParam, state *LinkStateModel)
-	ActionFailureFunc func(s *Session, param *ActionParam, state *ActionStateModel, err error)
-	LinkFailureFunc   func(s *Session, param *LinkParam, state *LinkStateModel, err error)
-	TimeoutFunc       func(s *Session)
+	ActionScriptFunc   func(rts *goja.Runtime, s *Session, param *ActionParam, state *ActionStateModel)
+	LinkScriptFunc     func(rts *goja.Runtime, s *Session, param *LinkParam, state *LinkStateModel)
+	ActionFailureFunc  func(s *Session, param *ActionParam, state *ActionStateModel, err error)
+	LinkFailureFunc    func(s *Session, param *LinkParam, state *LinkStateModel, err error)
+	ActionExecutedFunc func(s *Session, param *ActionParam, state *ActionStateModel, res Result, err error)
+	LinkExecutedFunc   func(s *Session, param *LinkParam, state *LinkStateModel, res Result, err error)
+
+	TimeoutFunc func(s *Session)
 }
 
 func (r *CommonFlowRunner) SetActionScriptFunc(act func(rts *goja.Runtime, s *Session, param *ActionParam, state *ActionStateModel)) {
@@ -38,6 +45,14 @@ func (r *CommonFlowRunner) SetActionFailureFunc(e func(s *Session, param *Action
 func (r *CommonFlowRunner) SetLinkFailureFunc(e func(s *Session, param *LinkParam, state *LinkStateModel, err error)) {
 	r.LinkFailureFunc = e
 }
+
+func (r *CommonFlowRunner) SetActionExecutedFunc(e func(s *Session, param *ActionParam, state *ActionStateModel, res Result, err error)) {
+	r.ActionExecutedFunc = e
+}
+func (r *CommonFlowRunner) SetLinkExecutedFunc(e func(s *Session, param *LinkParam, state *LinkStateModel, res Result, err error)) {
+	r.LinkExecutedFunc = e
+}
+
 func (r *CommonFlowRunner) SetTimeoutFunc(e func(s *Session)) {
 	r.TimeoutFunc = e
 }
@@ -175,7 +190,18 @@ func (r *CommonFlowRunner) OnLinkFailure(s *Session, param *LinkParam, state *Li
 	if r.LinkFailureFunc != nil {
 		r.LinkFailureFunc(s, param, state, err)
 	}
+}
 
+func (r *CommonFlowRunner) OnLinkExecuted(s *Session, param *LinkParam, state *LinkStateModel, res Result, err error) {
+	if r.LinkExecutedFunc != nil {
+		r.LinkExecutedFunc(s, param, state, res, err)
+	}
+}
+
+func (r *CommonFlowRunner) OnActionExecuted(s *Session, param *ActionParam, state *ActionStateModel, res Result, err error) {
+	if r.ActionExecutedFunc != nil {
+		r.ActionExecutedFunc(s, param, state, res, err)
+	}
 }
 
 func (r *CommonFlowRunner) OnTimeout(s *Session) {

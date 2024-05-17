@@ -345,6 +345,7 @@ func (s *Session) stopProcessAction(actionId string) {
 }
 func (s *Session) ToAction(param *ActionParam) {
 	if s.Router != nil {
+		// 添加正在执行的节点记录
 		s.Operation.AddRunningAction(param)
 
 		if s.Operation.GetCmd() == CMD_STOP {
@@ -370,9 +371,13 @@ func (s *Session) PushAction(param *ActionParam) bool {
 func (s *Session) ExecuteAction(param *ActionParam) {
 	defer s.Operation.WaitDone() //确认节点执行完成
 
-	actionState := s.createActionState(param.ActionId, param.PreActionId)
 	var err error
 	var res Result = RESULT_SUCCESS
+	actionState := s.createActionState(param.ActionId, param.PreActionId)
+
+	defer func() {
+		s.Runner.OnActionExecuted(s, param, actionState, res, err)
+	}()
 
 	if s.Runner != nil {
 		res, err = s.Runner.ExecuteAction(s, param, actionState)
@@ -389,11 +394,14 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 
 	}
 
+	// 记录状态
 	actionState.State = int(res)
+	// 记录是否失败标记
 	if res == RESULT_FAILURE {
 		actionState.IsError = 1
 	}
 
+	// 只有执行成功才能进行后续节点
 	if res == RESULT_SUCCESS {
 
 		flow := s.GetFlow()
@@ -421,9 +429,12 @@ func (s *Session) ExecuteAction(param *ActionParam) {
 		}
 	}
 
+	// 成功或者失败都记录
 	if res == RESULT_SUCCESS || res == RESULT_FAILURE {
-		s.Operation.DelRunningAction(param) //删除待执行节点中已经执行完成的节点
+		//删除正在执行的节点记录
+		s.Operation.DelRunningAction(param)
 
+		// 添加节点状态
 		actionState.EndTime = time.Now()
 		actionState.Timeused = actionState.EndTime.Sub(actionState.BeginTime).Milliseconds()
 		s.Operation.AddActionState(actionState)
@@ -494,13 +505,16 @@ func (s *Session) PushLink(param *LinkParam) bool {
 
 func (s *Session) ExecuteLink(param *LinkParam) {
 	defer s.Operation.WaitDone()
-
-	linkState := s.createLinkState(param.SourceId, param.TargetId)
-	sourceAction := s.GetFlow().GetAction(param.SourceId)
-	targetAction := s.GetFlow().GetAction(param.TargetId)
-
 	var err error
 	var res Result = RESULT_SUCCESS
+	linkState := s.createLinkState(param.SourceId, param.TargetId)
+
+	defer func() {
+		s.Runner.OnLinkExecuted(s, param, linkState, res, err)
+	}()
+
+	sourceAction := s.GetFlow().GetAction(param.SourceId)
+	targetAction := s.GetFlow().GetAction(param.TargetId)
 
 	if s.Runner != nil {
 		res, err = s.Runner.ExecuteLink(s, param, linkState)
