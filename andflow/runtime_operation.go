@@ -49,6 +49,8 @@ type RuntimeOperation interface {
 	Wait()
 	Save()
 	AddLog(tp, tag, name, title, content string)
+	SetRequestId(id string)
+	GetRequestId() string
 	SetBegin()
 	SetEnd()
 	SetState(state int)
@@ -133,6 +135,13 @@ func (s *CommonRuntimeOperation) GetFlow() *FlowModel {
 		return nil
 	}
 	return s.Runtime.Flow
+}
+
+func (s *CommonRuntimeOperation) SetRequestId(id string) {
+	s.Runtime.RequestId = id
+}
+func (s *CommonRuntimeOperation) GetRequestId() string {
+	return s.Runtime.RequestId
 }
 
 func (s *CommonRuntimeOperation) SetBegin() {
