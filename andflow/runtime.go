@@ -114,6 +114,7 @@ type RuntimeModel struct {
 	UpdateTime     time.Time           `bson:"update_time" json:"update_time"`         //修改时间
 	UserId         string              `bson:"user_id" json:"user_id"`                 //用户ID
 	RequestId      string              `bson:"request_id" json:"request_id"`           //请求执行ID
+	GroupId        string              `bson:"group_id" json:"group_id"`               //所属部门、组
 }
 
 func (a *ActionStateModel) SetData(name string, value interface{}) {
