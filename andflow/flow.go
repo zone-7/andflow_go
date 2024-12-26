@@ -14,6 +14,10 @@ const (
 	LINK_TYPE_STATEMACHINE = "StateMachine"
 )
 
+type ActionContent struct {
+	ContentType string `bson:"content_type" json:"content_type"` //类型
+	Content     string `bson:"content" json:"content"`           //内容文本
+}
 type ActionModel struct {
 	Id              string            `bson:"id" json:"id"`                       //ID
 	Name            string            `bson:"name" json:"name"`                   //名称
@@ -28,13 +32,15 @@ type ActionModel struct {
 	Theme           string            `bson:"theme" json:"theme"`                 //样式
 	BodyWidth       string            `bson:"body_width" json:"body_width"`       //内容宽度
 	BodyHeight      string            `bson:"body_height" json:"body_height"`     //内容高度
-	Params          map[string]string `bson:"params" json:"params"`               //参数
+	Params          map[string]string `bson:"params" json:"params"`               //运行配置参数
 	Collect         string            `bson:"collect" json:"collect"`             //true：所有路线到达节点后才执行；false：任意一个路径到达都执行
-	Once            string            `bson:"once" json:"once"`                   //是否只执行一次： true，false
+	Once            string            `bson:"once" json:"once"`                   //是否在整个过程只执行一次： true，false
+	IteratorList    string            `bson:"iterator_list" json:"iterator_list"` //迭代列表参数名，根据列表轮询执行
+	IteratorItem    string            `bson:"iterator_item" json:"iterator_item"` //迭代元素参数名
 	ScriptBefore    string            `bson:"script_before" json:"script_before"` //执行过滤脚本
 	ScriptAfter     string            `bson:"script_after" json:"script_after"`   //执行内容脚本
 	ScriptError     string            `bson:"script_error" json:"script_error"`   //执行异常处理脚本
-	Content         map[string]string `bson:"content" json:"content"`             //内容
+	Content         *ActionContent    `bson:"content" json:"content"`             //显示内容
 	BorderColor     string            `bson:"border_color" json:"border_color"`
 	BodyColor       string            `bson:"body_color" json:"body_color"`
 	BodyTextColor   string            `bson:"body_text_color" json:"body_text_color"`
@@ -56,13 +62,16 @@ func (m *ActionModel) SetParam(name string, value string) {
 	m.Params[name] = value
 }
 func (m *ActionModel) SetContent(content_type string, content string) {
-	m.Content = map[string]string{"content_type": content_type, "content": content}
+
+	m.Content = &ActionContent{ContentType: content_type, Content: content}
+
 }
+
 func (m *ActionModel) GetContent() (string, string) {
 	if m.Content == nil {
 		return "", ""
 	}
-	return m.Content["content_type"], m.Content["content"]
+	return m.Content.ContentType, m.Content.Content
 }
 
 type LinkModel struct {

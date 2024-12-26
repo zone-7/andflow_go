@@ -131,8 +131,8 @@ func (s *Session) createActionState(actionId string, preActionId string) *Action
 	content := &ActionContentModel{}
 
 	if action.Content != nil {
-		content_str := action.Content["content"]
-		content_type := action.Content["content_type"]
+		content_str := action.Content.Content
+		content_type := action.Content.ContentType
 		content.ContentType = content_type
 		content.Content = content_str
 	}

@@ -1,6 +1,7 @@
 package andflow
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -130,33 +131,90 @@ func (r *CommonFlowRunner) ExecuteAction(s *Session, param *ActionParam, state *
 
 	}
 
-	//2.执行节点执行器
-	runner := GetActionRunner(name)
-	if runner != nil {
-		res, err = runner.Execute(s, param, state)
+	//获取迭代器，用于循环执行
+	var iteratorList []interface{}
 
-		if err != nil || res == RESULT_FAILURE {
+	if len(action.IteratorList) > 0 {
+		//先找参数
+		iteratorListParam := s.GetParam(action.IteratorList)
 
-			if err == nil {
-				err = errors.New("节点" + action.Name + "," + action.Title + "执行错误")
-			}
+		if iteratorListParam != nil {
 
-			s.AddLog_action_error(action.Name, action.Title, err.Error())
-			//执行异常处理脚本
-			if len(strings.Trim(action.ScriptError, " ")) > 0 {
-				script_error := "function $exec(){\n" + action.ScriptError + "\n}\n $exec();\n"
-				_, err_err := rts.RunString(script_error)
-				if err_err != nil {
-					log.Println(fmt.Sprintf("script exception：%v", err_err))
+			switch iteratorListParam.(type) {
+			case []interface{}:
+				iteratorList = iteratorListParam.([]interface{})
+			case string:
+				err = json.Unmarshal([]byte(iteratorListParam.(string)), &iteratorList)
+				if err != nil {
+					iteratorList = append(iteratorList, iteratorListParam.(string))
+				}
+
+			case map[string]interface{}:
+
+				for _, v := range iteratorListParam.(map[string]interface{}) {
+					iteratorList = append(iteratorList, fmt.Sprintf("%v", v))
 				}
 			}
 
-			return RESULT_FAILURE, err
+		} else {
+			//找不到参数就直接从字符串转化
+
+			iteratorListStr, err := ReplaceTemplate(action.IteratorList, "iterator_list", s.GetParamMap())
+			if err != nil {
+				iteratorListStr = action.IteratorList
+			}
+			err = json.Unmarshal([]byte(iteratorListStr), &iteratorList)
+			if err != nil {
+				iteratorList = append(iteratorList, iteratorListParam.(string))
+			}
 		}
 
-		if res != RESULT_SUCCESS {
-			return res, nil
+	}
+
+	if len(iteratorList) == 0 {
+		iteratorList = append(iteratorList, "0")
+	}
+
+	//2.执行节点执行器
+	runner := GetActionRunner(name)
+	if runner != nil {
+
+		//迭代执行
+		for _, item := range iteratorList {
+
+			if len(action.IteratorItem) > 0 {
+				s.SetParam(action.IteratorItem, item)
+			}
+
+			res, err = runner.Execute(s, param, state)
+
+			//如果异常 或者执行失败
+			if err != nil || res == RESULT_FAILURE {
+
+				if err == nil {
+					err = errors.New("节点" + action.Name + "," + action.Title + "执行错误")
+				}
+
+				s.AddLog_action_error(action.Name, action.Title, err.Error())
+
+				//执行异常处理脚本
+				if len(strings.Trim(action.ScriptError, " ")) > 0 {
+					script_error := "function $exec(){\n" + action.ScriptError + "\n}\n $exec();\n"
+					_, err_err := rts.RunString(script_error)
+					if err_err != nil {
+						log.Println(fmt.Sprintf("script exception：%v", err_err))
+					}
+				}
+
+				return RESULT_FAILURE, err
+			}
+
+			if res != RESULT_SUCCESS {
+				return res, nil
+			}
+
 		}
+
 	}
 
 	//3.执行事后脚本

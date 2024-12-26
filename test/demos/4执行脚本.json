@@ -50,6 +50,8 @@
 			},
 			"theme": "action_theme_default",
 			"once": "false",
+			"iterator_list": "[1,2,3,4]",
+			"iterator_item": "abc",
 			"collect": "false",
 			"script": "var name = getParam(\"name\");print(\"hello \"+name);\n\nif(name==\"zgq\"){\nreturn 1;\n}else{\nreturn 0;\n}"
 		}
