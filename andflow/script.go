@@ -496,9 +496,9 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session) {
 
 		if !val.Equals(goja.Undefined()) && !val.Equals(goja.Null()) {
 			obj := val.Export()
-			session.Operation.SetData(keyStr, obj)
+			session.Operation.SetParam(keyStr, obj)
 		} else {
-			session.Operation.SetData(keyStr, nil)
+			session.Operation.SetParam(keyStr, nil)
 
 		}
 
@@ -512,7 +512,7 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session) {
 		var keyStr string
 		if !key.Equals(goja.Undefined()) && !key.Equals(goja.Null()) {
 			keyStr = key.String()
-			value = session.Operation.GetData(keyStr)
+			value = session.Operation.GetParam(keyStr)
 
 		}
 		if value == nil {
@@ -525,7 +525,7 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session) {
 
 	rts.Set("getDatas", func(call goja.FunctionCall) goja.Value {
 
-		value := session.Operation.GetDataMap()
+		value := session.Operation.GetParamMap()
 		if value == nil {
 			return goja.Null()
 		}
@@ -541,27 +541,27 @@ func SetCommonScriptFunc(rts *goja.Runtime, session *Session) {
 			case map[string]string:
 				for k, v := range obj.(map[string]string) {
 
-					session.Operation.SetData(k, v)
+					session.Operation.SetParam(k, v)
 				}
 			case map[string]interface{}:
 				for k, v := range obj.(map[string]interface{}) {
 
-					session.Operation.SetData(k, v)
+					session.Operation.SetParam(k, v)
 				}
 			case map[string]map[string]interface{}:
 				for k, v := range obj.(map[string]map[string]interface{}) {
 
-					session.Operation.SetData(k, v)
+					session.Operation.SetParam(k, v)
 				}
 			case map[string][]map[string]interface{}:
 				for k, v := range obj.(map[string][]map[string]interface{}) {
 
-					session.Operation.SetData(k, v)
+					session.Operation.SetParam(k, v)
 				}
 			case map[string][]interface{}:
 				for k, v := range obj.(map[string][]interface{}) {
 
-					session.Operation.SetData(k, v)
+					session.Operation.SetParam(k, v)
 				}
 			default:
 				return goja.Null()

@@ -52,7 +52,9 @@
 			"theme": "action_theme_default",
 			"once": "false",
 			"collect": "false",
-			"filter":"return 1",
+			"iterator_list": "[1,2,3,4]",
+			"iterator_item": "abc",
+			"filter": "return 1",
 			"script": "var res = cmd(\"ping 127.0.0.1\");\nprint(res);\n\nsetData(\"cmd\",res);"
 		}
 	],

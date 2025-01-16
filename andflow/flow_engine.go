@@ -48,8 +48,8 @@ func CreateRuntime(flow *FlowModel, param map[string]interface{}) *RuntimeModel 
 	}
 
 	//初始化数据
-	if runtime.Data == nil {
-		runtime.Data = make([]*RuntimeDataModel, 0)
+	if runtime.Param == nil {
+		runtime.Param = make([]*RuntimeParamModel, 0)
 	}
 	//初始化参数
 	if param != nil {

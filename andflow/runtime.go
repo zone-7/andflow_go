@@ -86,35 +86,34 @@ type ParamInfo struct {
 }
 
 // 运行时数据
-type RuntimeDataModel struct {
+type RuntimeParamModel struct {
 	Name  string      `bson:"name" json:"name"`   //名称
 	Value interface{} `bson:"value" json:"value"` //值
 }
 
 // 运行时
 type RuntimeModel struct {
-	Id             string              `bson:"_id" json:"id"`                          //ID
-	Flow           *FlowModel          `bson:"flow" json:"flow"`                       //流程
-	Des            string              `bson:"des" json:"des"`                         //描述
-	BeginTime      time.Time           `bson:"begin_time" json:"begin_time"`           //开始时间
-	EndTime        time.Time           `bson:"end_time" json:"end_time"`               //完成时间
-	Timeused       int64               `bson:"timeused" json:"timeused"`               //耗时（毫秒)
-	IsRunning      int                 `bson:"is_running" json:"is_running"`           //是否正在运行
-	IsError        int                 `bson:"is_error" json:"is_error"`               //是否异常
-	RunningLinks   []*LinkParam        `bson:"running_links" json:"running_links"`     //待执行连接线
-	RunningActions []*ActionParam      `bson:"running_actions" json:"running_actions"` //待执行节点
-	FlowState      int                 `bson:"flow_state" json:"flow_state"`           //流程执行状态
-	ActionStates   []*ActionStateModel `bson:"action_states" json:"action_states"`     //节点状态
-	LinkStates     []*LinkStateModel   `bson:"link_states" json:"link_states"`         //连接线状态
-	Logs           []*LogModel         `bson:"logs" json:"logs"`                       //日志
-	Param          []*RuntimeDataModel `bson:"param" json:"param"`                     //参数
-	Data           []*RuntimeDataModel `bson:"data" json:"data"`                       //数据
-	Message        string              `bson:"message" json:"message"`                 //信息
-	CreateTime     time.Time           `bson:"create_time" json:"create_time"`         //创建时间
-	UpdateTime     time.Time           `bson:"update_time" json:"update_time"`         //修改时间
-	UserId         string              `bson:"user_id" json:"user_id"`                 //用户ID
-	RequestId      string              `bson:"request_id" json:"request_id"`           //请求执行ID
-	GroupId        string              `bson:"group_id" json:"group_id"`               //所属部门、组
+	Id             string               `bson:"_id" json:"id"`                          //ID
+	Flow           *FlowModel           `bson:"flow" json:"flow"`                       //流程
+	Des            string               `bson:"des" json:"des"`                         //描述
+	BeginTime      time.Time            `bson:"begin_time" json:"begin_time"`           //开始时间
+	EndTime        time.Time            `bson:"end_time" json:"end_time"`               //完成时间
+	Timeused       int64                `bson:"timeused" json:"timeused"`               //耗时（毫秒)
+	IsRunning      int                  `bson:"is_running" json:"is_running"`           //是否正在运行
+	IsError        int                  `bson:"is_error" json:"is_error"`               //是否异常
+	RunningLinks   []*LinkParam         `bson:"running_links" json:"running_links"`     //待执行连接线
+	RunningActions []*ActionParam       `bson:"running_actions" json:"running_actions"` //待执行节点
+	FlowState      int                  `bson:"flow_state" json:"flow_state"`           //流程执行状态
+	ActionStates   []*ActionStateModel  `bson:"action_states" json:"action_states"`     //节点状态
+	LinkStates     []*LinkStateModel    `bson:"link_states" json:"link_states"`         //连接线状态
+	Logs           []*LogModel          `bson:"logs" json:"logs"`                       //日志
+	Param          []*RuntimeParamModel `bson:"param" json:"param"`                     //参数
+	Message        string               `bson:"message" json:"message"`                 //信息
+	CreateTime     time.Time            `bson:"create_time" json:"create_time"`         //创建时间
+	UpdateTime     time.Time            `bson:"update_time" json:"update_time"`         //修改时间
+	UserId         string               `bson:"user_id" json:"user_id"`                 //用户ID
+	RequestId      string               `bson:"request_id" json:"request_id"`           //请求执行ID
+	GroupId        string               `bson:"group_id" json:"group_id"`               //所属部门、组
 }
 
 func (a *ActionStateModel) SetData(name string, value interface{}) {
@@ -226,68 +225,6 @@ func (a *RuntimeModel) GetLastLinkState(sourceId string, targetId string) *LinkS
 	return nil
 }
 
-func (a *RuntimeModel) SetData(name string, value interface{}) {
-	if a.Data == nil {
-		a.Data = make([]*RuntimeDataModel, 0)
-	}
-	exists := false
-	for _, d := range a.Data {
-		if d.Name == name {
-			d.Value = value
-			exists = true
-		}
-	}
-	if !exists {
-		a.Data = append(a.Data, &RuntimeDataModel{Name: name, Value: value})
-	}
-}
-
-func (a *RuntimeModel) GetData(name string) interface{} {
-	if a.Data == nil {
-		return nil
-	}
-
-	for _, d := range a.Data {
-		if d.Name == name {
-			return d.Value
-		}
-	}
-	return nil
-}
-
-func (a *RuntimeModel) DelData(name string) {
-	if a.Data == nil {
-		return
-	}
-	index := -1
-	for i, d := range a.Data {
-		if d.Name == name {
-			index = i
-		}
-	}
-	if index >= 0 {
-		a.Data = append(a.Data[0:index], a.Data[index+1:]...)
-	}
-}
-
-func (a *RuntimeModel) GetDataMap() map[string]interface{} {
-	res := make(map[string]interface{})
-	if a.Data == nil {
-		return res
-	}
-
-	for _, d := range a.Data {
-		res[d.Name] = d.Value
-	}
-	return res
-}
-func (a *RuntimeModel) SetDataMap(data map[string]interface{}) {
-
-	for k, v := range data {
-		a.SetData(k, v)
-	}
-}
-
 func (a *RuntimeModel) GetParamMap() map[string]interface{} {
 	res := make(map[string]interface{})
 	if a.Param == nil {
@@ -302,7 +239,7 @@ func (a *RuntimeModel) GetParamMap() map[string]interface{} {
 
 func (a *RuntimeModel) SetParam(key string, value interface{}) {
 	if a.Param == nil {
-		a.Param = make([]*RuntimeDataModel, 0)
+		a.Param = make([]*RuntimeParamModel, 0)
 	}
 	exists := false
 	for _, d := range a.Param {
@@ -312,7 +249,7 @@ func (a *RuntimeModel) SetParam(key string, value interface{}) {
 		}
 	}
 	if !exists {
-		a.Param = append(a.Param, &RuntimeDataModel{Name: key, Value: value})
+		a.Param = append(a.Param, &RuntimeParamModel{Name: key, Value: value})
 	}
 }
 

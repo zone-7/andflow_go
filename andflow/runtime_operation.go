@@ -75,9 +75,6 @@ type RuntimeOperation interface {
 	SetParam(key string, val interface{})
 	GetParam(key string) interface{}
 	GetParamMap() map[string]interface{}
-	SetData(key string, val interface{})
-	GetData(key string) interface{}
-	GetDataMap() map[string]interface{}
 
 	SetActionData(actionId string, name string, val interface{})
 	GetActionData(actionId string, name string) interface{}
@@ -331,27 +328,6 @@ func (s *CommonRuntimeOperation) GetParamMap() map[string]interface{} {
 		return nil
 	}
 	return s.Runtime.GetParamMap()
-}
-func (s *CommonRuntimeOperation) SetData(key string, val interface{}) {
-	if s.Runtime == nil {
-		return
-	}
-	s.Runtime.SetData(key, val)
-	if s.OnChangeFunc != nil {
-		s.OnChangeFunc(EVENT_DATA_SET, s.Runtime)
-	}
-}
-func (s *CommonRuntimeOperation) GetData(key string) interface{} {
-	if s.Runtime == nil {
-		return nil
-	}
-	return s.Runtime.GetData(key)
-}
-func (s *CommonRuntimeOperation) GetDataMap() map[string]interface{} {
-	if s.Runtime == nil {
-		return nil
-	}
-	return s.Runtime.GetDataMap()
 }
 
 func (s *CommonRuntimeOperation) SetActionData(actionId string, name string, val interface{}) {

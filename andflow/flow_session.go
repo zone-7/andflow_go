@@ -82,16 +82,6 @@ func (s *Session) SetParam(key string, val interface{}) {
 	s.Operation.SetParam(key, val)
 }
 
-func (s *Session) GetDataMap() map[string]interface{} {
-	return s.Operation.GetDataMap()
-}
-func (s *Session) GetData(key string) interface{} {
-	return s.Operation.GetData(key)
-}
-func (s *Session) SetData(key string, val interface{}) {
-	s.Operation.SetData(key, val)
-}
-
 func (s *Session) AddLog_flow_error(name, title, content string) {
 	s.Operation.AddLog("error", "flow", name, title, content)
 }
