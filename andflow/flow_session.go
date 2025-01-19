@@ -12,6 +12,7 @@ import (
 
 var chan_len = 100
 
+// 流程会话
 type Session struct {
 	Id string
 

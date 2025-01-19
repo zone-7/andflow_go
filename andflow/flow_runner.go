@@ -13,12 +13,11 @@ import (
 type FlowRunner interface {
 	ExecuteLink(s *Session, param *LinkParam, state *LinkStateModel) (Result, error)       //返回三个状态 -1 不通过，1通过，0还没准备好执行
 	ExecuteAction(s *Session, param *ActionParam, state *ActionStateModel) (Result, error) //返回三个状态 -1 不通过，1通过，0还没准备好执行
+
 	OnLinkFailure(s *Session, param *LinkParam, state *LinkStateModel, err error)
 	OnActionFailure(s *Session, param *ActionParam, state *ActionStateModel, err error)
-
 	OnLinkExecuted(s *Session, param *LinkParam, state *LinkStateModel, res Result, err error)
 	OnActionExecuted(s *Session, param *ActionParam, state *ActionStateModel, res Result, err error)
-
 	OnTimeout(s *Session)
 }
 

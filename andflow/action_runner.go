@@ -16,7 +16,15 @@ const (
 	RESULT_FAILURE Result = -1 //执行失败
 )
 
+type Prop struct {
+	Name     string `json:"name" yaml:"name"`
+	Default  string `json:"default" yaml:"default"`
+	Label    string `json:"label" yaml:"label"`
+	Required bool   `json:"required" yaml:"required"`
+}
+
 type ActionRunner interface {
+	Properties() []Prop
 	Execute(s *Session, param *ActionParam, state *ActionStateModel) (Result, error)
 }
 
@@ -38,6 +46,10 @@ func GetActionRunner(name string) ActionRunner {
 	return runner
 }
 
+func GetActionRunners() map[string]ActionRunner {
+	return actionRunnerMap
+}
+
 type ScriptActionRunner struct {
 	funcs map[string]func(s *Session, param *ActionParam, args ...interface{}) interface{}
 }
@@ -47,6 +59,10 @@ func (a *ScriptActionRunner) SetActionFunc(name string, act func(s *Session, par
 		a.funcs = make(map[string]func(s *Session, param *ActionParam, args ...interface{}) interface{})
 	}
 	a.funcs[name] = act
+}
+
+func (a *ScriptActionRunner) Properties() []Prop {
+	return []Prop{}
 }
 
 func (a *ScriptActionRunner) Execute(s *Session, param *ActionParam, state *ActionStateModel) (Result, error) {
